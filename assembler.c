@@ -1,13 +1,23 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include <stdint.h>
 #define MAX_LINE_LENGTH	300
+
+char tokens[4][20];
+
+int current_line = 1;
+
+char *input_buf;
 
 int fill_line_buffer(char * input_buf, FILE *ifptr);
 
-int write_machine_code(char *input_buf, FILE *ofptr);
+int write_machine_code(char *input_buf);
 
+int get_instruction(int num_tokens, uint8_t *instructions);
 
+void write_line(uint8_t * instruction, char * input_buf, FILE * ofptr);
 
 int main (int argc, char * args [])
 {
@@ -33,20 +43,28 @@ int main (int argc, char * args [])
 	}
 
 	// Successfully opened input file
-	printf("successfully opened input file\n");
+	//printf("successfully opened input file\n");
 
 	ofptr = fopen(output_file, "w");	//	Create output file
 
 	//	Loop to read through file line-by-line
-	char * input_buf = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));	//	Input buffer (for each line in text file)
-	char curr_char;
+	input_buf = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));	//	Input buffer (for each line in text file)
+	int num_tokens;
+	uint8_t instruction[2];
 	while (fill_line_buffer(input_buf, ifptr))
 	{
-		printf("writing machine code\n");
-		write_machine_code(input_buf, ofptr);	//	Convert Assembly language line to machine language and write to output file
+		instruction[0] = instruction[1] = 0;
+		//printf("writing machine code\n");
+		num_tokens = write_machine_code(input_buf);	//	Convert Assembly language line to machine language and write to output file
+		//printf("Number of tokens: %d\n", num_tokens);
+		
+		if (get_instruction(num_tokens, instruction))
+			write_line(instruction, input_buf, ofptr);
+
+		current_line++;
 	}
 
-	printf("exited loop\n");
+	//printf("exited loop\n");
 
 	free(input_file);
 	free(output_file);
@@ -58,6 +76,147 @@ int main (int argc, char * args [])
 	return 0;
 
 
+}
+
+void write_line(uint8_t * instruction, char * input_buf, FILE * ofptr) {
+
+	char comment[2] = "//";
+	char *current_char = input_buf;
+
+	while (isspace(*current_char))
+		current_char++;
+	if (*current_char == '/')
+		comment[0] = '\0';
+
+	fprintf(ofptr, "0x%02x,  0x%02x,  %s %s\n", instruction[0], instruction[1], comment, input_buf);
+}
+
+int get_register(char * register_token)
+{
+	if (!strcmp(register_token, "R0"))
+		return 0;
+
+	if (!strcmp(register_token, "R1"))
+		return 1;
+
+	if (!strcmp(register_token, "R2"))
+		return 2;
+	
+	if (!strcmp(register_token, "R3"))
+		return 3;
+
+	return -1;
+}
+
+int get_immediate(char * immediate_token)
+{
+	if (immediate_token[0] == '#')
+	{
+		return atoi(&(immediate_token[1]));
+	}
+	
+	fprintf(stderr, "Error on line %d: invalid immediate\n%s\n", current_line, input_buf);
+
+	exit(1);
+}
+
+
+int get_ALU(int num_tokens, uint8_t * instruction, int ALU_type, int opcode) {
+	// If ALU_type == 0 --> ALU register, ALU_type == 1 --> ALU immediate
+	instruction[0] = (get_register(tokens[1]) << 6) | ( (ALU_type == 0) ? 2 : 6);
+
+	if (!ALU_type)
+	{
+		// ALU register
+		instruction[1] = (get_register(tokens[3]) << 6) | (get_register(tokens[2]) << 4) | opcode; 
+	}
+
+	return 1;
+}
+
+int get_OUT(int num_tokens, uint8_t * instruction) {
+	int low_bit = 1;	// By default write to low bit
+	int is_data = 0;	// By default assume to print data
+
+	if (num_tokens >= 3)
+	{
+		switch(tolower(tokens[2][0]))
+		{
+			case 'l':
+				low_bit = 1;
+				break;
+			case 'h':
+				low_bit = 0;
+				break;
+		}
+	} 
+	if (num_tokens >= 4)
+	{
+		switch(tolower(tokens[3][0]))
+		{
+			case 'i':
+				is_data = 0;
+				break;
+			case 'd':
+				is_data = 1;
+				break;
+		}
+	}
+
+	instruction[0] = (is_data << 5) | (low_bit << 4) | 8;
+	instruction[1] = get_register(tokens[1]) << 4;
+
+	return 1;
+}
+
+int get_LDR(int num_tokens, uint8_t * instruction) {
+	if (num_tokens == 1 || num_tokens == 2)
+		return 0;	// Error - too few parameters for LDR
+	instruction[0] = (get_register(tokens[1]) << 6) | 3;
+	instruction[1] = get_immediate(tokens[2]);
+
+	return 1;
+}
+
+int get_instruction(int num_tokens, uint8_t * instruction) {
+	if (!num_tokens)
+		return 0;
+	
+	switch (num_tokens)
+	{
+		case 1:	// NOP, BRK
+			fprintf(stderr, "Error: Unknown instruction \"%s\" in line %d:\n%s\n", tokens[0], current_line, input_buf);
+			break;
+		case 2:	// OUT
+			if (!strcmp(tokens[0], "OUT"))
+				return get_OUT(num_tokens, instruction);
+			
+			fprintf(stderr, "Error: Unknown instruction \"%s\" in line %d:\n%s\n", tokens[0], current_line, input_buf);
+			break;
+		case 3:	// ALU Immediate
+			if (!strcmp(tokens[0], "OUT"))
+				return get_OUT(num_tokens, instruction);
+			if (!strcmp(tokens[0], "LDR"))
+				return get_LDR(num_tokens, instruction);
+
+			
+			fprintf(stderr, "Error: Unknown instruction \"%s\" in line %d:\n%s\n", tokens[0], current_line, input_buf);
+			break;
+		case 4:	// ALU Registers
+			if (!strcmp(tokens[0], "ADD"))
+				return get_ALU(num_tokens, instruction , 0 , 6);
+			if (!strcmp(tokens[0], "OUT"))
+				return get_OUT(num_tokens, instruction);
+
+			fprintf(stderr, "Error: Unknown instruction \"%s\" in line %d:\n%s\n", tokens[0], current_line, input_buf);
+			break;
+		default:
+			fprintf(stderr, "Error: Unexpected number of tokens in line %d:\n%s\n", current_line, input_buf);
+	}
+
+	//printf("Instruction: %#x, %#x\n", instruction[0], instruction[1]);
+
+	return 0;
 }
 
 int fill_line_buffer(char *input_buf, FILE *ifptr)
@@ -82,16 +241,78 @@ int fill_line_buffer(char *input_buf, FILE *ifptr)
 	{
 		input_buf[i - 1] = '\0';
 	}
-	printf("Current line contents: %s |\n", input_buf);
+	//printf("Current line contents: %s\n", input_buf);
 
 
 	return (curr_char != EOF);
 }
 
 
+int get_comment(char *input_buf) {
+	char * current_char = input_buf;
+	while (*current_char != '\0')
+	{
+		if (*current_char == '/')
+		{
+			if (*(current_char + 1) == '/')
+			{
+				break;
+			}
+		}
+
+		current_char++;
+	}
+	return current_char - input_buf;
+}
 
 
-int write_machine_code(char *input_buf, FILE *ofptr)
+int write_machine_code(char *input_buf)
 {
-	return 0;
+	int comment_index = get_comment(input_buf), i;
+
+	int curr_token = 0;
+	int curr_char = 0;
+
+	int white_space = 1;
+
+	//printf("Current line: %s\n", input_buf);
+
+	for (i = 0; i < comment_index; i++) 
+	{
+		if (isspace(input_buf[i]) || input_buf[i] == ',')
+		{
+			if (!white_space)
+			{
+				tokens[curr_token][curr_char] = '\0';
+				curr_token++;
+				curr_char = 0;
+			}
+			if (curr_token >= 4)
+			{
+				break;
+			}
+			white_space = 1;
+			continue;
+		}
+		white_space = 0;
+				
+		tokens[curr_token][curr_char] = input_buf[i];
+
+		curr_char++;
+	}
+
+
+	if (!white_space)
+	{
+		tokens[curr_token][curr_char] = '\0';
+		curr_token++;
+	}
+
+	for (i = 0; i < curr_token; i++)
+	{
+		//printf("Token:\t%s\n", tokens[i]);
+
+	}
+
+	return curr_token;
 }

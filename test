@@ -1,0 +1,3 @@
+// Test file here
+ADD R1, R2, R3
+OUT R2
