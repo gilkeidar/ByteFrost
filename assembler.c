@@ -170,11 +170,59 @@ int get_OUT(int num_tokens, uint8_t * instruction) {
 }
 
 int get_LDR(int num_tokens, uint8_t * instruction) {
-	if (num_tokens == 1 || num_tokens == 2)
+	if (num_tokens != 3)
+	{
+		fprintf(stderr, "Error: Incorrect number of parameters for %s instruction in line %d\n%s\n", tokens[0], current_line, input_buf);
 		return 0;	// Error - too few parameters for LDR
+	}
 	instruction[0] = (get_register(tokens[1]) << 6) | 3;
 	instruction[1] = get_immediate(tokens[2]);
 
+	return 1;
+}
+
+int get_branch(int num_tokens, uint8_t * instruction) {
+	if (num_tokens != 2)
+	{
+		fprintf(stderr, "Error: Incorrect number of parameters for %s instruction in line %d\n%s\n", tokens[0], current_line, input_buf);
+		return 0;	// Error - incorrect number of parameters for branch	
+	}
+
+	int branch_type;
+	if (!strcmp(tokens[0], "JMP"))
+		branch_type = 0;
+	else if (!strcmp(tokens[0], "BIN"))
+		branch_type = 1;
+	else if (!strcmp(tokens[0], "BIC"))
+		branch_type = 2;
+	else if (!strcmp(tokens[0], "BEQ"))
+		branch_type = 3;
+	else if (!strcmp(tokens[0], "BPL"))
+		branch_type = 5;
+	else if (!strcmp(tokens[0], "BNC"))
+		branch_type = 6;
+	else if (!strcmp(tokens[0], "BNE"))
+		branch_type = 7;
+	else
+		branch_type = 4;	// Never branch (NOP)
+	
+	instruction[0] = (branch_type << 5) | 5;
+	instruction[1] = get_immediate(tokens[1]) - 1;	// Subtract 1 from immediate since in text editors, first line is line 1, but would be 0 in machine lang
+
+	return 1;
+
+}
+
+int get_BRK(int num_tokens, uint8_t * instruction) {
+	if (num_tokens != 1)
+	{
+		fprintf(stderr, "Error: Incorrect number of parameters for %s instruction in line %d\n%s\n", tokens[0], current_line, input_buf);
+		return 0;
+	}
+
+	instruction[0] = 1;
+	instruction[1] = 0;
+	
 	return 1;
 }
 
@@ -185,12 +233,18 @@ int get_instruction(int num_tokens, uint8_t * instruction) {
 	switch (num_tokens)
 	{
 		case 1:	// NOP, BRK
+			if (!strcmp(tokens[0], "BRK"))
+				return get_BRK(num_tokens, instruction);
 			fprintf(stderr, "Error: Unknown instruction \"%s\" in line %d:\n%s\n", tokens[0], current_line, input_buf);
 			break;
 		case 2:	// OUT
 			if (!strcmp(tokens[0], "OUT"))
 				return get_OUT(num_tokens, instruction);
-			
+			if (!strcmp(tokens[0], "JMP") || !strcmp(tokens[0], "BIN") 
+				|| !strcmp(tokens[0], "BIC") || !strcmp(tokens[0], "BEQ")
+				|| !strcmp(tokens[0], "BPL") || !strcmp(tokens[0], "BPL")
+				|| !strcmp(tokens[0], "BNC") || !strcmp(tokens[0], "BNE"))
+				return get_branch(num_tokens, instruction); 
 			fprintf(stderr, "Error: Unknown instruction \"%s\" in line %d:\n%s\n", tokens[0], current_line, input_buf);
 			break;
 		case 3:	// ALU Immediate
