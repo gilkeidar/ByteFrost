@@ -5,6 +5,7 @@
 #define NUM_INSTRUCTIONS    5
 
 typedef enum param {
+    none, 
     instruction, 
     reg, 
     immediate,
@@ -64,8 +65,8 @@ Instruction assembly[] = {
         "BRK",
         0,
         {0x01, 0x00},
-        {},
-        {},
+        {none},
+        {0},
         basic_handler
     }
 };

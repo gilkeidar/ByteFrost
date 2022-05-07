@@ -238,7 +238,7 @@ int equal_sequences(param * first, param * second, int num_params) {
 
 int get_instruction(int num_tokens, uint8_t *instruction)
 {
-    param param_seq[num_tokens - 1];
+    param param_seq[MAX_TOKENS];
     if (get_param_seq(param_seq, num_tokens - 1))
         return 1;   // Error
 
