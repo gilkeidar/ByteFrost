@@ -20,7 +20,7 @@ int write_machine_code();
 
 int get_comment();
 
-void write_line(uint8_t * instruction, FILE * ofptr);
+void write_line(uint8_t * instruction, FILE * ofptr, int num_tokens);
 
 int get_instruction(int num_tokens, uint8_t *instruction);
 
@@ -55,6 +55,7 @@ int main (int argc, char * args [])
 	//	Loop to read through file line-by-line
 	input_buf = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));	//	Input buffer (for each line in text file)
 	int num_tokens;
+	int line_counter = 0;
 	uint8_t instruction[2];
 	while (fill_line_buffer(ifptr))
 	{
@@ -62,9 +63,16 @@ int main (int argc, char * args [])
 		//printf("writing machine code\n");
 		num_tokens = write_machine_code();	//	Convert Assembly language line to machine language and write to output file
 		//printf("Number of tokens: %d\n", num_tokens);
-		
+		line_counter++;
 		if (!get_instruction(num_tokens, instruction))
-			write_line(instruction, ofptr);
+		{
+			write_line(instruction, ofptr, num_tokens);
+		}
+		else
+		{
+			printf("\nError in line %d:  >>>> %s\n\n", line_counter, input_buf);
+ 			exit(0);
+		}
 
 		current_line++;
 	}
@@ -82,21 +90,21 @@ int main (int argc, char * args [])
 }
 
 
-void write_line(uint8_t * instruction, FILE * ofptr) {
+void write_line(uint8_t * instruction, FILE * ofptr, int num_tokens) {
 
-	char comment[2] = "//";
-	char *current_char = input_buf;
-	int has_comment = 0;
+	// char comment[2] = "//";
+	// char *current_char = input_buf;
+	// int has_comment = 0;
 
-	while (isspace(*current_char))
-		current_char++;
-	if (*current_char == '/')
-		has_comment = 1;
+	// while (isspace(*current_char))
+	// 	current_char++;
+	// if (*current_char == '/')
+	// 	has_comment = 1;
 
-	if (has_comment)
+	if (num_tokens==0)
 		fprintf(ofptr, "%s\n",input_buf);
 	else
-		fprintf(ofptr, "0x%02x,  0x%02x,  %s %s\n", instruction[0], instruction[1], comment, input_buf);
+		fprintf(ofptr, "0x%02x,  0x%02x, // %s\n", instruction[0], instruction[1], input_buf);
 
 }
 
@@ -239,8 +247,14 @@ int equal_sequences(param * first, param * second, int num_params) {
 int get_instruction(int num_tokens, uint8_t *instruction)
 {
     param param_seq[MAX_TOKENS];
+	int instruction_found=-1;
+	
+	if(num_tokens==0) return 0;
+
     if (get_param_seq(param_seq, num_tokens - 1))
         return 1;   // Error
+
+
 
     /*for (int j = 0; j < num_tokens - 1; j++)
         printf("%d ", param_seq[j]);
@@ -253,7 +267,7 @@ int get_instruction(int num_tokens, uint8_t *instruction)
         // First, search by number of parameters
         if (assembly[i].num_params == (num_tokens - 1))
         {
-            //printf("Matched number of params!\n");
+            // printf("%s: Matched number of params!\n", assembly[i].name);
             // Second, search by name
             if (!strcmp(assembly[i].name, tokens[0]))
             {
@@ -264,12 +278,14 @@ int get_instruction(int num_tokens, uint8_t *instruction)
                     //printf("found instruction %s!\n", assembly[i].name);
                     // Run handler
                     assembly[i].handler(&(assembly[i]), instruction);
+					instruction_found=0;
+					return 0;
                 }
             }
         }
     }
-
-    return 0;   // (no errors)
+	
+    return instruction_found;    
     
 }
 
@@ -350,7 +366,7 @@ int basic_handler(Instruction * this, uint8_t * instruction)
     int i;
     for (i = 0; i < this->num_params; i++)
     {
-        //printf("instr: 0x%04x\n", instr);
+       // printf("instr: 0x%04x\n", instr);
         //printf("param_value: %d\n", param_value(tokens[i + 1], this->param_seq[i]));
         instr |= param_value(tokens[i + 1], this->param_seq[i]) << (this->param_position[i]);
         

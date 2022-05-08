@@ -46,7 +46,7 @@ Instruction assembly[] = {
         basic_handler
     },
     {
-        "OUT",  // Using basic display
+        "OUT",  // OUT Rx, h/l
         2,
         {0x08, 0x00},
         {reg, out_hl},
