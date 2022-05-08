@@ -312,7 +312,12 @@ int get_immediate(char * immediate_token)
 {
 	if (immediate_token[0] == '#')
 	{
-		return atoi(&(immediate_token[1]));
+		if(immediate_token[1]=='0' && immediate_token[2]=='x')
+		{
+             return strtol(&(immediate_token[3]), NULL, 16);
+		}
+		else
+		   return atoi(&(immediate_token[1]));
 	}
 	
 	fprintf(stderr, "Error on line %d: invalid immediate\n%s\n", current_line, input_buf);
