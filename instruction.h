@@ -2,7 +2,7 @@
 #define MAX_LINE_LENGTH	    300
 #define MAX_TOKENS          4
 #define MAX_TOKEN_LENGTH    20
-#define NUM_INSTRUCTIONS    5
+#define NUM_INSTRUCTIONS    (sizeof(assembly)/sizeof(Instruction))
 
 typedef enum param {
     none, 
@@ -41,6 +41,14 @@ Instruction assembly[] = {
         "ADD",
         3,
         {0x02, 0x06},
+        {reg, reg, reg},
+        {6, 12, 14},
+        basic_handler
+    },
+    {
+        "SUB",
+        3,
+        {0x02, 0x07},
         {reg, reg, reg},
         {6, 12, 14},
         basic_handler

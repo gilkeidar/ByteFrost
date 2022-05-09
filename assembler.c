@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-
 #include "instruction.h"
 
 
@@ -20,7 +19,7 @@ int write_machine_code();
 
 int get_comment();
 
-void write_line(uint8_t * instruction, FILE * ofptr, int num_tokens);
+void write_line(uint8_t * instruction, FILE * ofptr, int num_tokens, int binary_flag);
 
 int get_instruction(int num_tokens, uint8_t *instruction);
 
@@ -32,25 +31,70 @@ int main (int argc, char * args [])
 		return 1;
 	}
 
-	char *input_file = (char *)malloc((strlen(args[1]) + 1) * sizeof(char));
-	strcpy(input_file, args[1]);
-	char *output_file = (char *)malloc((strlen(input_file) + 1) + 2 * sizeof(char));
+	// Handle flags
+	int binary_flag = 0;	// If invoked, compile to binary file (instead of string array format)
+	int i;
+	int found_input = 0;
+	char *input_file;
+	for (i = 1; i < argc; i++)
+	{
+		if (args[i][0] == '-')
+		{
+			// Beginning of flag
+			if (args[i][1] == '\0')
+			{
+				fprintf(stderr, "Error - empty flag argument.\n");
+				exit(1);
+			}
+			switch (args[i][1])
+			{
+				case 'b':
+					binary_flag = 1;
+					break;
+				default:
+					fprintf(stderr, "Error: Unknown flag %s\n", args[i]);
+			}
+		}
+		else if (!found_input)
+		{
+			input_file = (char *)malloc((strlen(args[i]) + 1) * sizeof(char));
+			strcpy(input_file, args[1]);
+			found_input = 1;
+		} 
+	}
+
+	if (!found_input)
+	{
+		fprintf(stderr, "Error - no input file given.\n");
+		exit(1);
+	}
+
+	char *output_file = (char *)malloc((strlen(input_file) + 1) + 4 * sizeof(char));
 	strcpy(output_file, input_file);
-	output_file = strcat(output_file, ".a");
+
+	if (!binary_flag)
+		output_file = strcat(output_file, ".a");
+	else
+		output_file = strcat(output_file, ".bin");
 
 	FILE *ifptr = fopen(input_file, "r");	//	Attempt to open given file
 	FILE *ofptr;
 
 	if (ifptr == NULL)
 	{
-		printf("Error: file %s does not exist\n", input_file);
+		fprintf(stderr, "Error: file %s does not exist\n", input_file);
 		return 2;
 	}
 
 	// Successfully opened input file
 	//printf("successfully opened input file\n");
 
-	ofptr = fopen(output_file, "w");	//	Create output file
+	if (binary_flag)
+	{
+		ofptr = fopen(output_file, "wb");	
+	}
+	else 
+		ofptr = fopen(output_file, "w");	//	Create output file
 
 	//	Loop to read through file line-by-line
 	input_buf = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));	//	Input buffer (for each line in text file)
@@ -66,11 +110,11 @@ int main (int argc, char * args [])
 		line_counter++;
 		if (!get_instruction(num_tokens, instruction))
 		{
-			write_line(instruction, ofptr, num_tokens);
+			write_line(instruction, ofptr, num_tokens, binary_flag);
 		}
 		else
 		{
-			printf("\nError in line %d:  >>>> %s\n\n", line_counter, input_buf);
+			fprintf(stderr, "\nError in line %d:  >>>> %s\n\n", line_counter, input_buf);
  			exit(0);
 		}
 
@@ -90,7 +134,7 @@ int main (int argc, char * args [])
 }
 
 
-void write_line(uint8_t * instruction, FILE * ofptr, int num_tokens) {
+void write_line(uint8_t * instruction, FILE * ofptr, int num_tokens, int binary_flag) {
 
 	// char comment[2] = "//";
 	// char *current_char = input_buf;
@@ -101,9 +145,25 @@ void write_line(uint8_t * instruction, FILE * ofptr, int num_tokens) {
 	// if (*current_char == '/')
 	// 	has_comment = 1;
 
-	if (num_tokens==0)
+	if (num_tokens==0 && !binary_flag)
 		fprintf(ofptr, "%s\n",input_buf);
-	else
+	else if (num_tokens != 0 && binary_flag)
+	{
+		int i;
+		for (i = 0; i < 2; i++)
+			fwrite(instruction + i, 1, 1, ofptr);
+		/*int i, j;
+		for (i = 0; i < 2; i++)
+		{
+			for (j = 0; j < 8; j++)
+			{
+				//fprintf(ofptr, "%d", instruction[i] & 1);
+				//instruction[i] = instruction[i] >> 1;
+				//fwrite(&(instruction[i] >> j), )
+			}
+		}*/
+	}
+	else if (!binary_flag)
 		fprintf(ofptr, "0x%02x,  0x%02x, // %s\n", instruction[0], instruction[1], input_buf);
 
 }
