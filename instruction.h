@@ -29,12 +29,55 @@ int abs_branch_handler(Instruction *, uint8_t *);
 
 
 Instruction assembly[] = {
-        {
-        "LDR",
+    // 0000: NOP
+    {
+        "NOP",
+        0,
+        {0x00, 0x00},
+        {none},
+        {0},
+        basic_handler
+    },
+    // 0001: BRK
+    {
+        "BRK",
+        0,
+        {0x01, 0x00},
+        {none},
+        {0},
+        basic_handler
+    },
+    // 0002: ALU (registers)
+    {
+        "OR",
+        3,
+        {0x02, 0x00},
+        {reg, reg, reg},
+        {6, 12, 14},
+        basic_handler
+    },
+    {
+        "AND",
+        3,
+        {0x02, 0x02},
+        {reg, reg, reg},
+        {6, 12, 14},
+        basic_handler
+    },
+    {
+        "XOR",
+        3,
+        {0x02, 0x04},
+        {reg, reg, reg},
+        {6, 12, 14},
+        basic_handler
+    },
+    {
+        "NOT",
         2,
-        {0x03, 0x00},
-        {reg, immediate},
-        {6, 8},
+        {0x02, 0x05},
+        {reg, reg},
+        {6, 14},    // second reg goes to Rs2
         basic_handler
     },
     {
@@ -54,6 +97,71 @@ Instruction assembly[] = {
         basic_handler
     },
     {
+        "ASL",
+        2,
+        {0x02, 0x08},
+        {reg, reg},
+        {6, 12},
+        basic_handler
+    },
+    {
+        "ROL",
+        2,
+        {0x02, 0x09},
+        {reg, reg},
+        {6, 12},
+        basic_handler
+    },
+    {
+        "LSR",
+        2,
+        {0x02, 0x0a},
+        {reg, reg},
+        {6, 12},
+        basic_handler
+    },
+    {
+        "ASR",
+        2,
+        {0x02, 0x0b},
+        {reg, reg},
+        {6, 12},
+        basic_handler
+    },
+    {
+        "ROR",
+        2,
+        {0x02, 0x0c},
+        {reg, reg},
+        {6, 12},    // Rotates A
+        basic_handler
+    },
+    {
+        "ADC",
+        3,
+        {0x02, 0x0e},
+        {reg, reg, reg},
+        {6, 12, 14},
+        basic_handler
+    },
+    {
+        "SBC",
+        3,
+        {0x02, 0x0f},
+        {reg, reg, reg},
+        {6, 12, 14},
+        basic_handler
+    },
+    // Register
+    {
+        "LDR",
+        2,
+        {0x03, 0x00},
+        {reg, immediate},
+        {6, 8},
+        basic_handler
+    },
+    {
         "OUT",               // "OUT Rx, h/l"
         2,
         {0x08, 0x00},
@@ -68,13 +176,5 @@ Instruction assembly[] = {
         {immediate},
         {8},
         abs_branch_handler
-    },
-    {
-        "BRK",
-        0,
-        {0x01, 0x00},
-        {none},
-        {0},
-        basic_handler
     }
 };
