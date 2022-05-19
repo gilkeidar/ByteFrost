@@ -9,7 +9,7 @@ typedef enum param {
     instruction, 
     reg, 
     immediate,
-    out_hl,
+    out_ai,
     out_id
 } param;
 
@@ -152,6 +152,65 @@ Instruction assembly[] = {
         {6, 12, 14},
         basic_handler
     },
+    // ALU Short OpCode 6
+    {
+        "OR",
+        2,
+        {0x06, 0x00},
+        {reg, immediate},
+        {6, 12},
+        basic_handler
+    },
+    {
+        "AND",
+        2,
+        {0x06, 0x02},
+        {reg, immediate},
+        {6, 12},
+        basic_handler
+    },
+    {
+        "XOR",
+        2,
+        {0x06, 0x04},
+        {reg, immediate},
+        {6, 12},
+        basic_handler
+    },
+    
+    {
+        "ADD",
+        2,
+        {0x06, 0x06},
+        {reg, immediate},
+        {6, 12},
+        basic_handler
+    },
+    {
+        "SUB",
+        2,
+        {0x06, 0x07},
+        {reg, immediate},
+        {6, 12},
+        basic_handler
+    },
+    {
+        "ADC",
+        2,
+        {0x06, 0x0e},
+        {reg, immediate},
+        {6, 12},
+        basic_handler
+    },
+    {
+        "SBC",
+        2,
+        {0x06, 0x0f},
+        {reg, immediate},
+        {6, 12},
+        basic_handler
+    },
+
     // Register
     {
         "LDR",
@@ -161,13 +220,98 @@ Instruction assembly[] = {
         {6, 8},
         basic_handler
     },
+    // SRAM
+    {           // Load from address to regioster: LMA Rx, #Addr
+        "LMA",
+        2,
+        {0x09, 0x00},
+        {reg, immediate},
+        {6, 8},
+        basic_handler
+  
+    },
+    {           // Store from Register to address: SMA Rx, #Addr
+        "SMA",
+        2,
+        {0x0A, 0x00},
+        {reg, immediate},
+        {6, 8},
+        basic_handler
+  
+    },
+    {           // Load from Address in Rs to Rd: LMR Rd, Rs
+        "LMR",
+        2,
+        {0x0B, 0x00},
+        {reg, reg},
+        {6, 12},
+        basic_handler
+    },
+    {           // Store from Rd to address in Rs: SMR Rd, Rs
+        "SMR",
+        2,
+        {0x0C, 0x00},
+        {reg, reg},
+        {6, 12},
+        basic_handler
+    },
+
     {
-        "OUT",               // "OUT Rx, h/l"
+        "OUT",               // "OUT Rx, a/i"
         2,
         {0x08, 0x00},
-        {reg, out_hl},
-        {12, 4},
+        {reg, out_ai},
+        {12, 5},
         basic_handler
+    },
+    // Absolute branch  BNE #addr
+    {
+        "JMP", 
+        1,
+        {0x05, 0x00},
+        {immediate},
+        {8},
+        abs_branch_handler
+    },
+   {
+        "BMI", 
+        1,
+        {0x25, 0x00},
+        {immediate},
+        {8},
+        abs_branch_handler
+    },
+    {
+        "BSC", 
+        1,
+        {0x45, 0x00},
+        {immediate},
+        {8},
+        abs_branch_handler
+    },
+   {
+        "BEQ", 
+        1,
+        {0x65, 0x00},
+        {immediate},
+        {8},
+        abs_branch_handler
+    },
+    {
+        "BPL", 
+        1,
+        {0xA5, 0x00},
+        {immediate},
+        {8},
+        abs_branch_handler
+    },
+   {
+        "BCC", 
+        1,
+        {0xC5, 0x00},
+        {immediate},
+        {8},
+        abs_branch_handler
     },
     {
         "BNE", 
@@ -176,5 +320,7 @@ Instruction assembly[] = {
         {immediate},
         {8},
         abs_branch_handler
-    }
+    },
+  
+
 };

@@ -100,21 +100,23 @@ int main (int argc, char * args [])
 	input_buf = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));	//	Input buffer (for each line in text file)
 	int num_tokens;
 	int line_counter = 0;
+	int error;
 	uint8_t instruction[2];
 	while (fill_line_buffer(ifptr))
+	//while (fgets(input_buf, MAX_LINE_LENGTH, ifptr) != NULL)
 	{
 		instruction[0] = instruction[1] = 0;
 		//printf("writing machine code\n");
 		num_tokens = write_machine_code();	//	Convert Assembly language line to machine language and write to output file
 		//printf("Number of tokens: %d\n", num_tokens);
 		line_counter++;
-		if (!get_instruction(num_tokens, instruction))
+		if (!(error = get_instruction(num_tokens, instruction)))
 		{
 			write_line(instruction, ofptr, num_tokens, binary_flag);
 		}
 		else
 		{
-			fprintf(stderr, "\nError in line %d:  >>>> %s\n\n", line_counter, input_buf);
+			fprintf(stderr, "\nError %d in line %d: Tokens %d >>>> %s\n\n", error, line_counter, num_tokens, input_buf);
  			exit(0);
 		}
 
@@ -146,7 +148,9 @@ void write_line(uint8_t * instruction, FILE * ofptr, int num_tokens, int binary_
 	// 	has_comment = 1;
 
 	if (num_tokens==0 && !binary_flag)
+	{
 		fprintf(ofptr, "%s\n",input_buf);
+	}
 	else if (num_tokens != 0 && binary_flag)
 	{
 		int i;
@@ -164,7 +168,11 @@ void write_line(uint8_t * instruction, FILE * ofptr, int num_tokens, int binary_
 		}*/
 	}
 	else if (!binary_flag)
+	{
 		fprintf(ofptr, "0x%02x,  0x%02x, // %s\n", instruction[0], instruction[1], input_buf);
+		//printf("0x%02x,  0x%02x, // %s\n", instruction[0], instruction[1], input_buf);
+	}
+		
 
 }
 
@@ -178,7 +186,7 @@ int fill_line_buffer(FILE *ifptr)
 	{
 		input_buf[i] = curr_char;
 		
-		if (curr_char == '\n')	//	If new line, end input buffer string
+		if (curr_char == '\n' || curr_char == 13 || curr_char == 10)	//	If new line, end input buffer string
 		{
 			input_buf[i] = '\0';
 			break;
@@ -186,11 +194,11 @@ int fill_line_buffer(FILE *ifptr)
 		i++;
 	}
 
-	if (curr_char != '\n')	//	If line is longer than buffer, cut it off (must be a comment since no assembly instruction is this long)
+	if (curr_char != '\n' && curr_char != 13 && curr_char != 10)	//	If line is longer than buffer, cut it off (must be a comment since no assembly instruction is this long)
 	{
 		input_buf[i - 1] = '\0';
 	}
-	//printf("Current line contents: %s\n", input_buf);
+	//printf("Current line contents: %sbanana\n", input_buf);
 
 	return (curr_char != EOF);
 }
@@ -277,9 +285,9 @@ int get_param_seq(param *param_seq, int num_params)
             case '#':
                 param_seq[i] = immediate;
                 break;
-            case 'h':
-            case 'l':
-                param_seq[i] = out_hl;
+            case 'a':
+            case 'i':
+                param_seq[i] = out_ai;
                 break;
             default:
                 param_seq[i] = instruction;
@@ -314,11 +322,9 @@ int get_instruction(int num_tokens, uint8_t *instruction)
     if (get_param_seq(param_seq, num_tokens - 1))
         return 1;   // Error
 
-
-
-    /*for (int j = 0; j < num_tokens - 1; j++)
+    for (int j = 0; j < num_tokens - 1; j++)
         printf("%d ", param_seq[j]);
-    printf("\n");*/
+    printf("\n");
     //  Search for current instruction in instruction array
     int i;
     for (i = 0; i < NUM_INSTRUCTIONS; i++)
@@ -341,6 +347,8 @@ int get_instruction(int num_tokens, uint8_t *instruction)
 					instruction_found=0;
 					return 0;
                 }
+				printf("Name and num param match but equal_sequences failed!\n");
+
             }
         }
     }
@@ -385,13 +393,13 @@ int get_immediate(char * immediate_token)
 	exit(1);
 }
 
-int get_out_hl(char * token)
+int get_out_ai(char * token)
 {
     switch (tolower(token[0]))
     {
-        case 'h':
+        case 'i':
             return 1;
-        case 'l':
+        case 'a':
             return 0;
         default:
             return 0;
@@ -406,8 +414,8 @@ int param_value(char * token, param type)
             return get_register(token);
         case immediate:
             return get_immediate(token);
-        case out_hl:
-            return get_out_hl(token);
+        case out_ai:
+            return get_out_ai(token);
     }
 }
 
