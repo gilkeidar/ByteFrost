@@ -229,30 +229,37 @@ int write_machine_code()
 
 	//printf("Current line: %s\n", input_buf);
 
+	//printf("Comment index: %d\n", comment_index);
+
 	for (i = 0; i < comment_index; i++) 
 	{
+		//printf("Current char: %c\n", input_buf[i]);
 		if (isspace(input_buf[i]) || input_buf[i] == ',')
 		{
+			//if (!white_space && !isspace(input_buf[i + 1]) && !(input_buf[i+ 1] == ',') && !(input_buf[i + 1] == '\0'))
 			if (!white_space)
 			{
 				tokens[curr_token][curr_char] = '\0';
 				curr_token++;
 				curr_char = 0;
 			}
-			if (curr_token >= 4)
+			white_space = 1;
+			if (curr_token >= MAX_TOKENS)
 			{
 				break;
 			}
-			white_space = 1;
 			continue;
 		}
-		white_space = 0;
+		else {
+			white_space = 0;
+		}
 		tokens[curr_token][curr_char] = input_buf[i];
 		curr_char++;
 	}
 
 	if (!white_space)
 	{
+		//printf("Got here\n");
 		tokens[curr_token][curr_char] = '\0';
 		curr_token++;
 	}
@@ -322,9 +329,9 @@ int get_instruction(int num_tokens, uint8_t *instruction)
     if (get_param_seq(param_seq, num_tokens - 1))
         return 1;   // Error
 
-    for (int j = 0; j < num_tokens - 1; j++)
-        printf("%d ", param_seq[j]);
-    printf("\n");
+    // for (int j = 0; j < num_tokens - 1; j++)
+    //    printf("%d ", param_seq[j]);
+    //  printf("\n");
     //  Search for current instruction in instruction array
     int i;
     for (i = 0; i < NUM_INSTRUCTIONS; i++)
