@@ -16,5 +16,5 @@ BRK
 NOP 
 LDR R2 #0x07   
 AND R2, R2, R1   // If R1 is multiple of 8
-BNE #8           // If address is not multiply, keep printing 
+BNE #10           // If address is not multiply, keep printing 
 JMP #3           // Start a new line
