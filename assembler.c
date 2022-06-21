@@ -354,7 +354,7 @@ int get_instruction(int num_tokens, uint8_t *instruction)
 					instruction_found=0;
 					return 0;
                 }
-				printf("Name and num param match but equal_sequences failed!\n");
+				// printf("Name and num param match but equal_sequences failed!\n");
 
             }
         }

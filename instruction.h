@@ -187,11 +187,27 @@ Instruction assembly[] = {
         basic_handler
     },
     {
+        "INC",
+        1,
+        {0x06, 0x16},
+        {reg},
+        {6},
+        basic_handler
+    },
+    {
         "SUB",
         2,
         {0x06, 0x07},
         {reg, immediate},
         {6, 12},
+        basic_handler
+    },
+    {
+        "DEC",
+        1,
+        {0x06, 0x17},
+        {reg},
+        {6},
         basic_handler
     },
     {
@@ -264,6 +280,14 @@ Instruction assembly[] = {
         {12, 5},
         basic_handler
     },
+    {
+        "OUT",               // "OUT #N, a/i"
+        2,
+        {0x0D, 0x00},
+        {immediate, out_ai},
+        {8, 5},
+        basic_handler
+    },
     // Absolute branch  BNE #addr
     {
         "JMP", 
@@ -282,7 +306,7 @@ Instruction assembly[] = {
         abs_branch_handler
     },
     {
-        "BSC", 
+        "BCS", 
         1,
         {0x45, 0x00},
         {immediate},
