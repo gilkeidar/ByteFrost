@@ -5,13 +5,11 @@
 #include "instruction.h"
 
 
-char tokens[MAX_TOKENS][MAX_TOKEN_LENGTH];
+char tokens[MAX_TOKENS][MAX_TOKEN_LENGTH];	// Assembly code split into tokens
 
-int current_line = 1;
+int current_line = 1;						// Current line of assembly file
 
-char *input_buf;
-
-//Instruction instructions[] = {}
+char *input_buf;							// Input buffer (stores current line)
 
 int fill_line_buffer(FILE *ifptr);
 
@@ -23,11 +21,16 @@ void write_line(uint8_t * instruction, FILE * ofptr, int num_tokens, int binary_
 
 int get_instruction(int num_tokens, uint8_t *instruction);
 
+int verify_file_extension(char *filename, char *extension);
+
+char * get_output_file(char *input_file, int binary_flag);
+
 int main (int argc, char * args [])
 {
+	// If no input parameters, print usage text
 	if (argc == 1)
 	{
-		printf("Usage: ./assembler [assembly file name]\n");
+		printf("Usage: ./assembler assembly_file [-b]\n");
 		return 1;
 	}
 
@@ -41,11 +44,14 @@ int main (int argc, char * args [])
 		if (args[i][0] == '-')
 		{
 			// Beginning of flag
+
+			// If no flag specified (i.e. just saw '-'), error
 			if (args[i][1] == '\0')
 			{
 				fprintf(stderr, "Error - empty flag argument.\n");
 				exit(1);
 			}
+			// Otherwise, handle flag
 			switch (args[i][1])
 			{
 				case 'b':
@@ -69,13 +75,26 @@ int main (int argc, char * args [])
 		exit(1);
 	}
 
-	char *output_file = (char *)malloc((strlen(input_file) + 1) + 4 * sizeof(char));
+	// Found input file and handled flag
+
+	// Check that input file has correct .asm ending
+	if (!verify_file_extension(input_file, "asm"))
+	{
+		// Error - wrong file extension
+		fprintf(stderr, "Error: Incorrect file extension (input files must be .asm files)\n");
+		free(input_file);
+		exit(1);
+	}
+
+	char *output_file = get_output_file(input_file, binary_flag);
+
+	/*char *output_file = (char *)malloc((strlen(input_file) + 1) + 4 * sizeof(char));
 	strcpy(output_file, input_file);
 
 	if (!binary_flag)
 		output_file = strcat(output_file, ".a");
 	else
-		output_file = strcat(output_file, ".bin");
+		output_file = strcat(output_file, ".bin");*/
 
 	FILE *ifptr = fopen(input_file, "r");	//	Attempt to open given file
 	FILE *ofptr;
@@ -133,6 +152,68 @@ int main (int argc, char * args [])
 	fclose(ofptr);
 
 	return 0;
+}
+
+char * get_output_file(char *input_file, int binary_flag)
+{
+	int length = 0;
+	int extensionLength;
+	char *current_char = input_file;
+	char *extension;
+	int i;
+
+	if (binary_flag)	// Use binary extension
+		extension = ".bin";
+	else				// Use machine-language extension
+		extension = ".mlg";
+
+	extensionLength = strlen(extension);
+
+	// Count and skip over everything before the period
+	while (*current_char != '.' && *current_char != '\0')
+	{
+		current_char++;
+		length++;
+	}
+
+	// Allocate output file name
+	char * output = (char *)malloc((length + extensionLength + 1) * sizeof(char));
+
+	// Copy file name
+	for (i = 0; i < length; i++)
+	{
+		output[i] = input_file[i];
+	}
+
+	// Copy extension
+	strcpy(output + length, extension);
+
+	// Add 0 sentinel
+	output[length + extensionLength] = '\0';
+
+	//printf("output file name: %s\n", output);
+
+	return output;
+}
+
+int verify_file_extension(char *filename, char *extension)
+{
+	//printf("Verifying extension...\n");
+	//printf("filename: %s\n", filename);
+	// Skip until arive at '.' or end of filename
+	while (*filename != '.' && *filename != '\0')
+		filename++;
+	filename++;		// Skip '.'
+	//printf("filename: %s\n", filename);
+	
+	if (*filename == '\0')	// No file extension found
+		return 0;
+	
+	// Found file extension, compare to given extension
+	if (!strcmp(filename, extension))	// Extension matches given extension
+		return 1;
+
+	return 0;							// Extensions don't match
 }
 
 
