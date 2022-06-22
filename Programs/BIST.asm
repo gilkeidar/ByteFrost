@@ -20,7 +20,7 @@ ASL R2, R2    // (Unlike ROL, ASL does not take the carry in back)
 OUT R2, I     //            (0xD0)   
 LDR R3, #0xD0 
 SUB R3, R3, R2           (carry is set)   
-BEQ #01       // RELATIVE JUMP
+BEQ +2        // RELATIVE JUMP
 BRK           // Test 1 failed
 ADD R3, #0x01 // (reset carry)
 OUT #0x10, A     // Newline
@@ -47,11 +47,11 @@ OUT R2, I     //           (0xA0)
 OUT #0x20, A  // Print ' '  
 ROL R2, R2    // C+A0 -> 41 + C 
 OUT R2, I     //           (0x41)
-BCS #01       // RELATIVE JUMP
+BCS +2        // RELATIVE JUMP
 BRK           // Test 2 failed: Carry was not set
 LDR R3, #0x41 
 SUB R3, R3, R2
-BEQ #01       // RELATIVE JUMP
+BEQ +02       // RELATIVE JUMP
 BRK           // Test 2 failed: Result is not 0x41    
 OUT #0x10, A  // Newline
     
@@ -72,11 +72,11 @@ OUT #0x20, A  // Print ' '
 LSR R2, R2    // 43 -> 21 + Carry
 OUT R2, I     //           (0x21)
 OUT #0x20, A  // Print ' ' 
-BCS #01       // Relative
+BCS +02       // Relative
 BRK           // Test 3 failed: Carry was not set
 LDR R3, #0x21 
 SUB R3, R3, R2
-BEQ #01       // relative
+BEQ +02       // relative
 BRK           // Test 3 failed: Result is not 0x21    
 OUT #0x10, A  // Newline
 
@@ -96,11 +96,11 @@ OUT R2, I     //           (0xC3)
 OUT #0x20, A  // Print ' '  
 ASR R2, R2    // C3 -> E1 + Carry
 OUT R2, I     //           (0xE1)
-BCS #01       // Relative
+BCS +02       // Relative
 BRK           // Test 4 failed: Carry was not set
 LDR R3, #0xE1 
 SUB R3, R3, R2
-BEQ #01       // Relative
+BEQ +02       // Relative
 BRK           // Test 4 failed: Result is not 0xE1    
 OUT #0x10, A  // Newline
 
@@ -121,17 +121,17 @@ OUT #0x10, A  // Newline
     OUT R3, I    //  (0x01)
     OUT #0x20, A // Print ' '  
     
-    BCS #01      // Relative
+    BCS +02      // Relative
     BRK          // Test 5 failed: Carry was not set
     LDR R2, #0x12
     LDR R1, #0x6D
     ADC R3, R2, R1  // 0x80 = 0x12 + 0x6D + Carry  
     OUT R3, I    //       (0x80)
-    BCC #01      // Relative
+    BCC +02      // Relative
     BRK          // Test 5 failed: Carry was  set
     LDR R2, #0x80
     SUB R3, R3, R2
-    BEQ #01      // Relative
+    BEQ +02      // Relative
     BRK          // Test 5 failed: Result is not 0x80    
     OUT #0x10, A  // Newline
 
@@ -151,17 +151,17 @@ OUT #0x10, A  // Newline
     SUB R3, R2, R1    // 65 - AB =  0x + Carry
     OUT R3, I         // (0xBA) (No carry, means borrow)
     OUT #0x20, A // Print ' '  
-    BCC #01      // Relative
+    BCC +02      // Relative
     BRK          // Test 6 failed: Carry was set
     LDR R2, #0xA7
     LDR R1, #0x34
     SBC R3, R1, R2    // R2 - R1 + Cin = A7 - 34 + Cin = 72 + Cout
     OUT R3, I         //  (0x72)
-    BCS #01           // Relative
+    BCS +02           // Relative
     BRK               // Test 6 failed: Carry was not set
     LDR R2, #0x72
     SUB R3, R3, R2
-    BEQ #01      // Relative
+    BEQ +02      // Relative
     BRK          // Test 6 failed: Result is not 0x72       
     OUT #0x10, A  // Newline
 
@@ -192,11 +192,11 @@ OUT #0x10, A  // Newline
     OUT #0x20, A // Print ' ' 
     ROR R2, R2   // C3 -> 61 + Carry 
     OUT R2, I    // (0x61) 
-    BCS #01      // RELATIVE JUMP
+    BCS +02      // RELATIVE JUMP
     BRK          // Test 7 failed: Carry was not set
     LDR R3, #0x61 
     SUB R3, R3, R2
-    BEQ #01      // RELATIVE JUMP
+    BEQ +02      // RELATIVE JUMP
     BRK          // Test 7 failed: Result is not 0x61    
     OUT #0x10, A  // Newline
 
@@ -228,7 +228,7 @@ OUT #0x10, A  // Newline
     OUT #0x20, A  // Print ' ' 
     SUB R1, R1, R3
     OUT R1, I     // (0x00)
-    BEQ #01       // RELATIVE JUMP
+    BEQ +02       // RELATIVE JUMP
     BRK           // Test 8 failed: Result is not 0x00    
     OUT #0x10, A  // Newline
 
@@ -252,7 +252,7 @@ OUT #0x10, A  // Newline
     OUT #0x20, A // Print ' ' 
     INC R2
     DEC R1
-    BNE #0xFA     // back to :Store 
+    BNE -0x05     // back to :Store 
     OUT #0x10, A // C9: Newline
 
     LDR R1, #0x05
@@ -266,9 +266,9 @@ OUT #0x10, A  // Newline
     OUT #0x20, A  // Print ' ' 
     DEC R2
     DEC R1
-    BNE #0xF8     // back to Load 
+    BNE -0x07     // back to Load 
     SUB R3, #05   // R3 = R3 - #5
-    BEQ #01       // RELATIVE JUMP
+    BEQ +02       // RELATIVE JUMP
     BRK           // Test 9 failed: R3 != #5
     OUT #0x10, A  // Newline
 
