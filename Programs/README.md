@@ -6,4 +6,5 @@ Here is a list of included programs.
 
 ## Assembly Programs
 
+* `BIST.asm` - Built-In Self Test (tests hardware operations such as the ALU, RAM, register file, and display) - written by Ron Keidar
 * `memdump.asm` - (fill program information here) - written by Ron Keidar
