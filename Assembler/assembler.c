@@ -86,6 +86,7 @@ int main (int argc, char * args [])
 		exit(1);
 	}
 
+	// Get output file nname
 	char *output_file = get_output_file(input_file, binary_flag);
 
 	/*char *output_file = (char *)malloc((strlen(input_file) + 1) + 4 * sizeof(char));
@@ -96,10 +97,10 @@ int main (int argc, char * args [])
 	else
 		output_file = strcat(output_file, ".bin");*/
 
-	FILE *ifptr = fopen(input_file, "r");	//	Attempt to open given file
+	FILE *ifptr = fopen(input_file, "r");	// Attempt to open given file
 	FILE *ofptr;
 
-	if (ifptr == NULL)
+	if (ifptr == NULL)	// Failed opening input file
 	{
 		fprintf(stderr, "Error: file %s does not exist\n", input_file);
 		return 2;
@@ -108,6 +109,7 @@ int main (int argc, char * args [])
 	// Successfully opened input file
 	//printf("successfully opened input file\n");
 
+	// Check binary flag (if binary, need to write bit-by-bit)
 	if (binary_flag)
 	{
 		ofptr = fopen(output_file, "wb");	
@@ -377,6 +379,10 @@ int get_param_seq(param *param_seq, int num_params)
             case 'i':
                 param_seq[i] = out_ai;
                 break;
+			case '+':
+			case '-':
+				param_seq[i] = branch_amt;
+				break;
             default:
                 param_seq[i] = instruction;
                 break;
@@ -472,8 +478,8 @@ int get_immediate(char * immediate_token)
 		{
              return strtol(&(immediate_token[3]), NULL, 16);
 		}
-		else
-		   return atoi(&(immediate_token[1]));
+
+		return atoi(&(immediate_token[1]));
 	}
 	
 	fprintf(stderr, "Error on line %d: invalid immediate\n%s\n", current_line, input_buf);
@@ -494,6 +500,29 @@ int get_out_ai(char * token)
     }
 }
 
+int get_branch_amt(char *token)
+{
+	char value;
+	if (token[0] == '+' || token[0] == '-')
+	{
+		if (token[1] == '0' && token[2] == 'x')
+		{
+			value = strtol(&(token[3]), NULL, 16);
+		}
+		else
+			value = atoi(&(token[1]));
+		
+		if (token[0] == '-')
+			value = -value;
+		
+		return value;
+	}
+
+	fprintf(stderr, "Error on line %d: invalid branch amount\n%s\n", current_line, input_buf);
+
+	exit(1);
+}
+
 int param_value(char * token, param type)
 {
     switch (type)
@@ -504,6 +533,8 @@ int param_value(char * token, param type)
             return get_immediate(token);
         case out_ai:
             return get_out_ai(token);
+		case branch_amt:
+			return get_branch_amt(token);
     }
 }
 
@@ -563,4 +594,31 @@ int abs_branch_handler(Instruction * this, uint8_t * instruction)
     set_instruction(instr, instruction);
 
     return 0;
+}
+
+int rel_branch_handler(Instruction * this, uint8_t * instruction)
+{
+	// Get skeleton
+	uint16_t instr = (this->skeleton[1] << 8) | this->skeleton[0];
+
+	int i;
+	for (i = 0; i < this->num_params; i++)
+	{
+		char value = param_value(tokens[i + 1], this->param_seq[i]);
+		//printf("value: %d\n", value);
+			// Subtract 1 from the immediate for the relative branch handle (i.e. JMP +0 will stay on this line,
+					// but this needs to cancel the PC increase so it will actually do JMP -1 to stay in place)
+		value--;
+		//printf("value: %d\n", value);
+
+		/*if (value < 0)
+			value = 256 + value;*/
+
+		//printf("value: %x\n", value);
+		instr |= value << (this->param_position[i]);
+	}
+
+	set_instruction(instr, instruction);
+
+	return 0;
 }

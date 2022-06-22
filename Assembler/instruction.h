@@ -10,7 +10,8 @@ typedef enum param {
     reg, 
     immediate,
     out_ai,
-    out_id
+    out_id,
+    branch_amt
 } param;
 
 typedef struct Instruction
@@ -26,6 +27,7 @@ typedef struct Instruction
 /*  Handlers    */
 int basic_handler(Instruction *, uint8_t *);
 int abs_branch_handler(Instruction *, uint8_t *);
+int rel_branch_handler(Instruction *, uint8_t *);
 
 
 Instruction assembly[] = {
@@ -152,6 +154,87 @@ Instruction assembly[] = {
         {6, 12, 14},
         basic_handler
     },
+    
+
+    // Register
+
+    // LDR Opcode 3
+    {
+        "LDR",
+        2,
+        {0x03, 0x00},
+        {reg, immediate},
+        {6, 8},
+        basic_handler
+    },
+    // MOV Opcode 4
+    {
+        "MOV",
+        2,
+        {0x04, 0x00},
+        {reg, reg},
+        {6, 12},
+        basic_handler
+    },
+
+    // Absolute branch  BNE #addr Opcode 5
+    {
+        "JMP", 
+        1,
+        {0x05, 0x00},
+        {immediate},
+        {8},
+        abs_branch_handler
+    },
+   {
+        "BMI", 
+        1,
+        {0x25, 0x00},
+        {immediate},
+        {8},
+        abs_branch_handler
+    },
+    {
+        "BCS", 
+        1,
+        {0x45, 0x00},
+        {immediate},
+        {8},
+        abs_branch_handler
+    },
+   {
+        "BEQ", 
+        1,
+        {0x65, 0x00},
+        {immediate},
+        {8},
+        abs_branch_handler
+    },
+    {
+        "BPL", 
+        1,
+        {0xA5, 0x00},
+        {immediate},
+        {8},
+        abs_branch_handler
+    },
+   {
+        "BCC", 
+        1,
+        {0xC5, 0x00},
+        {immediate},
+        {8},
+        abs_branch_handler
+    },
+    {
+        "BNE", 
+        1,
+        {0xe5, 0x00},
+        {immediate},
+        {8},
+        abs_branch_handler
+    },
+
     // ALU Short OpCode 6
     {
         "OR",
@@ -227,15 +310,64 @@ Instruction assembly[] = {
         basic_handler
     },
 
-    // Register
+    // Branch Relative Opcode 7
     {
-        "LDR",
-        2,
-        {0x03, 0x00},
-        {reg, immediate},
-        {6, 8},
-        basic_handler
+        "JMP",
+        1,
+        {0x07, 0x00},
+        {branch_amt},
+        {8},
+        rel_branch_handler
     },
+    {
+        "BMI",
+        1,
+        {0x27, 0x00},
+        {branch_amt},
+        {8},
+        rel_branch_handler
+    },
+    {
+        "BCS",
+        1,
+        {0x47, 0x00},
+        {branch_amt},
+        {8},
+        rel_branch_handler
+    },
+    {
+        "BEQ",
+        1,
+        {0x67, 0x00},
+        {branch_amt},
+        {8},
+        rel_branch_handler
+    },
+    {
+        "BPL",
+        1,
+        {0xA7, 0x00},
+        {branch_amt},
+        {8},
+        rel_branch_handler
+    },
+    {
+        "BCC",
+        1,
+        {0xC7, 0x00},
+        {branch_amt},
+        {8},
+        rel_branch_handler
+    },
+    {
+        "BNE",
+        1,
+        {0xe7, 0x00},
+        {branch_amt},
+        {8},
+        rel_branch_handler
+    },
+
     // SRAM
     {           // Load from address to regioster: LMA Rx, #Addr
         "LMA",
@@ -288,63 +420,7 @@ Instruction assembly[] = {
         {8, 5},
         basic_handler
     },
-    // Absolute branch  BNE #addr
-    {
-        "JMP", 
-        1,
-        {0x05, 0x00},
-        {immediate},
-        {8},
-        abs_branch_handler
-    },
-   {
-        "BMI", 
-        1,
-        {0x25, 0x00},
-        {immediate},
-        {8},
-        abs_branch_handler
-    },
-    {
-        "BCS", 
-        1,
-        {0x45, 0x00},
-        {immediate},
-        {8},
-        abs_branch_handler
-    },
-   {
-        "BEQ", 
-        1,
-        {0x65, 0x00},
-        {immediate},
-        {8},
-        abs_branch_handler
-    },
-    {
-        "BPL", 
-        1,
-        {0xA5, 0x00},
-        {immediate},
-        {8},
-        abs_branch_handler
-    },
-   {
-        "BCC", 
-        1,
-        {0xC5, 0x00},
-        {immediate},
-        {8},
-        abs_branch_handler
-    },
-    {
-        "BNE", 
-        1,
-        {0xe5, 0x00},
-        {immediate},
-        {8},
-        abs_branch_handler
-    },
+    
   
 
 };
