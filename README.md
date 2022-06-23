@@ -8,7 +8,7 @@ In this Github repository are software tools for using the ByteFrost computer:
 Assembler program that converts Assembly code to ByteFrost machine language.
 
 ## Documentation
-Documentation for the ByteFrost computer. Includes hardware documentation (i.e. schematics) and software documentation (instruction set specifications, control signal lists, each instruction's micro-code and structure, and assembly syntax)
+Documentation for the ByteFrost computer. Includes hardware documentation (i.e. schematics) and software documentation (instruction set specifications, control signal lists, each instruction's micro-code and structure, and assembly syntax). For more documentation, see the [wiki](https://github.com/gilkeidar/ByteFrost/wiki)
 
 ## Programs
 Programs written in ByteFrost assembly that can be compiled using the assembler and run on the ByteFrost computer.
