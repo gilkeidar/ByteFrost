@@ -14,4 +14,4 @@ Arduino code for the ByteFrost's display card (an Arduino Nano) for a 2004A LCD 
 Documentation for the ByteFrost computer. Includes hardware documentation (i.e. schematics) and software documentation (instruction set specifications, control signal lists, each instruction's micro-code and structure, and assembly syntax). For more documentation, see the [wiki](https://github.com/gilkeidar/ByteFrost/wiki).
 
 ## Programs
-Programs written in ByteFrost assembly that can be compiled using the assembler and run on the ByteFrost computer.
+Programs written in ByteFrost assembly that can be compiled using the assembler and run on the ByteFrost computer. Each program comes with the assembly code (`.asm` file), machine language compilation (`.mlg` file), and a binary file (`.bin` file).
