@@ -1,0 +1,562 @@
+//////////////////////////////////
+
+// Test 1: Shift Left (8: ASL)  //
+
+//////////////////////////////////
+
+0x2d,  0x01, // OUT #01, I   // Print 01                  
+
+0x0d,  0x20, // OUT #0x20, A // Print ' '  
+
+0x0d,  0x41, // OUT #0x41, A // Print 'A'    
+
+0x0d,  0x53, // OUT #0x53, A // Print 'S'
+
+0x0d,  0x4c, // OUT #0x4C, A // Print 'L'    
+
+0x0d,  0x3a, // OUT #0x3A, A // Print ':'   
+
+     
+
+0x83,  0x5a, // LDR R2, #0x5A
+
+0x82,  0x28, // ASL R2, R2 
+
+0x28,  0x20, // OUT R2, I     //            (0xB4)
+
+0x0d,  0x20, // OUT #0x20, A  // Print ' '    
+
+
+
+0x82,  0x28, // ASL R2, R2 
+
+0x28,  0x20, // OUT R2, I     //            (0x68) + Carry
+
+0x0d,  0x20, // OUT #0x20, A  // Print ' '    
+
+0x82,  0x28, // ASL R2, R2    // (Unlike ROL, ASL does not take the carry in back)
+
+0x28,  0x20, // OUT R2, I     //            (0xD0)   
+
+0xc3,  0xd0, // LDR R3, #0xD0 
+
+0xc2,  0xb7, // SUB R3, R3, R2           (carry is set)   
+
+0x67,  0x01, // BEQ +2        // RELATIVE JUMP
+
+0x01,  0x00, // BRK           // Test 1 failed
+
+0xc6,  0x16, // ADD R3, #0x01 // (reset carry)
+
+0x0d,  0x10, // OUT #0x10, A     // Newline
+
+
+
+//////////////////////////////////
+
+// Test 2: Rotate Left (9: ROL) //
+
+//////////////////////////////////
+
+0x2d,  0x02, // OUT #02, I   // Print 02                  
+
+0x0d,  0x20, // OUT #0x20, A // Print ' '  
+
+0x0d,  0x52, // OUT #0x52, A // Print 'R'    
+
+0x0d,  0x4f, // OUT #0x4F, A // Print 'O'
+
+0x0d,  0x4c, // OUT #0x4C, A // Print 'L'    
+
+0x0d,  0x3a, // OUT #0x3A, A // Print ':'   
+
+
+
+0x83,  0x34, // LDR R2, #0x34
+
+0x82,  0x29, // ROL R2, R2    // 34 -> 68 
+
+0x28,  0x20, // OUT R2, I     //           (0x68)
+
+0x0d,  0x20, // OUT #0x20, A  // Print ' '  
+
+0x82,  0x29, // ROL R2, R2    // 68 -> D0 
+
+0x28,  0x20, // OUT R2, I     //           (0xD0)
+
+0x0d,  0x20, // OUT #0x20, A  // Print ' '  
+
+0x82,  0x29, // ROL R2, R2    // D0 -> A0 + C 
+
+0x28,  0x20, // OUT R2, I     //           (0xA0)
+
+0x0d,  0x20, // OUT #0x20, A  // Print ' '  
+
+0x82,  0x29, // ROL R2, R2    // C+A0 -> 41 + C 
+
+0x28,  0x20, // OUT R2, I     //           (0x41)
+
+0x47,  0x01, // BCS +2        // RELATIVE JUMP
+
+0x01,  0x00, // BRK           // Test 2 failed: Carry was not set
+
+0xc3,  0x41, // LDR R3, #0x41 
+
+0xc2,  0xb7, // SUB R3, R3, R2
+
+0x67,  0x01, // BEQ +02       // RELATIVE JUMP
+
+0x01,  0x00, // BRK           // Test 2 failed: Result is not 0x41    
+
+0x0d,  0x10, // OUT #0x10, A  // Newline
+
+    
+
+///////////////////////////////////////////
+
+// Test 3: Logic Shift Right  (A: LSR)   //
+
+///////////////////////////////////////////
+
+0x2d,  0x03, // OUT #03, I   // Print 03                  
+
+0x0d,  0x20, // OUT #0x20, A // Print ' '  
+
+0x0d,  0x4c, // OUT #0x4C, A // Print 'L'  
+
+0x0d,  0x53, // OUT #0x53, A // Print 'S'
+
+0x0d,  0x52, // OUT #0x52, A // Print 'R'    
+
+0x0d,  0x3a, // OUT #0x3A, A // Print ':'   
+
+  
+
+0x83,  0x87, // LDR R2, #0x87
+
+0x82,  0x2a, // LSR R2, R2    // 87 -> 43 + Carry
+
+0x28,  0x20, // OUT R2, I     //           (0x43)
+
+0x0d,  0x20, // OUT #0x20, A  // Print ' ' 
+
+0x82,  0x2a, // LSR R2, R2    // 43 -> 21 + Carry
+
+0x28,  0x20, // OUT R2, I     //           (0x21)
+
+0x0d,  0x20, // OUT #0x20, A  // Print ' ' 
+
+0x47,  0x01, // BCS +02       // Relative
+
+0x01,  0x00, // BRK           // Test 3 failed: Carry was not set
+
+0xc3,  0x21, // LDR R3, #0x21 
+
+0xc2,  0xb7, // SUB R3, R3, R2
+
+0x67,  0x01, // BEQ +02       // relative
+
+0x01,  0x00, // BRK           // Test 3 failed: Result is not 0x21    
+
+0x0d,  0x10, // OUT #0x10, A  // Newline
+
+
+
+//////////////////////////////////////////////
+
+// Test 4: Arithmetic Shift Right  (B: ASR) //
+
+//////////////////////////////////////////////
+
+0x2d,  0x04, // OUT #04, I   // Print 04                  
+
+0x0d,  0x20, // OUT #0x20, A // Print ' '  
+
+0x0d,  0x41, // OUT #0x41, A // Print 'A'   
+
+0x0d,  0x53, // OUT #0x53, A // Print 'S'
+
+0x0d,  0x52, // OUT #0x52, A // Print 'R'    
+
+0x0d,  0x3a, // OUT #0x3A, A // Print ':'   
+
+
+
+0x83,  0x87, // LDR R2, #0x87
+
+0x82,  0x2b, // ASR R2, R2    // 87 -> C3 + Carry
+
+0x28,  0x20, // OUT R2, I     //           (0xC3)
+
+0x0d,  0x20, // OUT #0x20, A  // Print ' '  
+
+0x82,  0x2b, // ASR R2, R2    // C3 -> E1 + Carry
+
+0x28,  0x20, // OUT R2, I     //           (0xE1)
+
+0x47,  0x01, // BCS +02       // Relative
+
+0x01,  0x00, // BRK           // Test 4 failed: Carry was not set
+
+0xc3,  0xe1, // LDR R3, #0xE1 
+
+0xc2,  0xb7, // SUB R3, R3, R2
+
+0x67,  0x01, // BEQ +02       // Relative
+
+0x01,  0x00, // BRK           // Test 4 failed: Result is not 0xE1    
+
+0x0d,  0x10, // OUT #0x10, A  // Newline
+
+
+
+//////////////////////////////////////////////
+
+// Test 5: Add 0x1234 + 0x6DCD =  0x8001    //
+
+//////////////////////////////////////////////
+
+ 
+
+0x2d,  0x05, //     OUT #05, I   // Print 05                  
+
+0x0d,  0x20, //     OUT #0x20, A // Print ' '  
+
+0x0d,  0x41, //     OUT #0x41, A // Print 'A'   
+
+0x0d,  0x44, //     OUT #0x44, A // Print 'D'
+
+0x0d,  0x44, //     OUT #0x44, A // Print 'D'    
+
+0x0d,  0x3a, //     OUT #0x3A, A // Print ':'   
+
+
+
+0x83,  0x34, //     LDR R2, #0x34
+
+0x43,  0xcd, //     LDR R1, #0xCD
+
+0xc2,  0x66, //     ADD R3, R2, R1    // 34 + CD =  0x01 + Carry
+
+0x28,  0x30, //     OUT R3, I    //  (0x01)
+
+0x0d,  0x20, //     OUT #0x20, A // Print ' '  
+
+    
+
+0x47,  0x01, //     BCS +02      // Relative
+
+0x01,  0x00, //     BRK          // Test 5 failed: Carry was not set
+
+0x83,  0x12, //     LDR R2, #0x12
+
+0x43,  0x6d, //     LDR R1, #0x6D
+
+0xc2,  0x6e, //     ADC R3, R2, R1  // 0x80 = 0x12 + 0x6D + Carry  
+
+0x28,  0x30, //     OUT R3, I    //       (0x80)
+
+0xc7,  0x01, //     BCC +02      // Relative
+
+0x01,  0x00, //     BRK          // Test 5 failed: Carry was  set
+
+0x83,  0x80, //     LDR R2, #0x80
+
+0xc2,  0xb7, //     SUB R3, R3, R2
+
+0x67,  0x01, //     BEQ +02      // Relative
+
+0x01,  0x00, //     BRK          // Test 5 failed: Result is not 0x80    
+
+0x0d,  0x10, //     OUT #0x10, A  // Newline
+
+
+
+//////////////////////////////////////////////
+
+// Test 6: Sub (0xA765 – 0x34AB) = 0x72BA   //  
+
+//////////////////////////////////////////////
+
+
+
+0x2d,  0x06, //     OUT #06, I   // Print 06                  
+
+0x0d,  0x20, //     OUT #0x20, A // Print ' '  
+
+0x0d,  0x53, //     OUT #0x53, A // Print 'S'
+
+0x0d,  0x55, //     OUT #0x55, A // Print 'U'
+
+0x0d,  0x42, //     OUT #0x42, A // Print 'B'    
+
+0x0d,  0x3a, //     OUT #0x3A, A // Print ':'   
+
+
+
+0x83,  0x65, //     LDR R2, #0x65
+
+0x43,  0xab, //     LDR R1, #0xAB
+
+0xc2,  0x67, //     SUB R3, R2, R1    // 65 - AB =  0x + Carry
+
+0x28,  0x30, //     OUT R3, I         // (0xBA) (No carry, means borrow)
+
+0x0d,  0x20, //     OUT #0x20, A // Print ' '  
+
+0xc7,  0x01, //     BCC +02      // Relative
+
+0x01,  0x00, //     BRK          // Test 6 failed: Carry was set
+
+0x83,  0xa7, //     LDR R2, #0xA7
+
+0x43,  0x34, //     LDR R1, #0x34
+
+0xc2,  0x9f, //     SBC R3, R1, R2    // R2 - R1 + Cin = A7 - 34 + Cin = 72 + Cout
+
+0x28,  0x30, //     OUT R3, I         //  (0x72)
+
+0x47,  0x01, //     BCS +02           // Relative
+
+0x01,  0x00, //     BRK               // Test 6 failed: Carry was not set
+
+0x83,  0x72, //     LDR R2, #0x72
+
+0xc2,  0xb7, //     SUB R3, R3, R2
+
+0x67,  0x01, //     BEQ +02      // Relative
+
+0x01,  0x00, //     BRK          // Test 6 failed: Result is not 0x72       
+
+0x0d,  0x10, //     OUT #0x10, A  // Newline
+
+
+
+////////////////////////////////////
+
+// Test 7: Rotate Right (C: ROR)  //
+
+////////////////////////////////////
+
+
+
+0x0d,  0x07, //     OUT #07, A   // Print 7                  
+
+0x0d,  0x20, //     OUT #0x20, A // Print ' '  
+
+0x0d,  0x52, //     OUT #0x52, A // Print 'R'    
+
+0x0d,  0x4f, //     OUT #0x4F, A // Print 'O'
+
+0x0d,  0x52, //     OUT #0x52, A // Print 'R'    
+
+0x0d,  0x3a, //     OUT #0x3A, A // Print ':'   
+
+
+
+0x83,  0x36, //     LDR R2, #0x36
+
+0x86,  0x06, //     ADD R2, #0 // Reset Carry
+
+0x82,  0x2c, //     ROR R2, R2 //    36 -> 1B 
+
+0x28,  0x20, //     OUT R2, I  //    (0x1B)
+
+0x0d,  0x20, //     OUT #0x20, A // Print ' ' 
+
+0x82,  0x2c, //     ROR R2, R2   // 1B -> 0D + Carry 
+
+0x28,  0x20, //     OUT R2, I    // (0x0D)
+
+0x0d,  0x20, //     OUT #0x20, A // Print ' ' 
+
+0x82,  0x2c, //     ROR R2, R2   // 0D -> 86 + Carry 
+
+0x28,  0x20, //     OUT R2, I    // (0x86)
+
+0x0d,  0x20, //     OUT #0x20, A // Print ' ' 
+
+0x82,  0x2c, //     ROR R2, R2   // 86 -> C3 
+
+0x28,  0x20, //     OUT R2, I    // (0xC3)
+
+0x0d,  0x20, //     OUT #0x20, A // Print ' ' 
+
+0x82,  0x2c, //     ROR R2, R2   // C3 -> 61 + Carry 
+
+0x28,  0x20, //     OUT R2, I    // (0x61) 
+
+0x47,  0x01, //     BCS +02      // RELATIVE JUMP
+
+0x01,  0x00, //     BRK          // Test 7 failed: Carry was not set
+
+0xc3,  0x61, //     LDR R3, #0x61 
+
+0xc2,  0xb7, //     SUB R3, R3, R2
+
+0x67,  0x01, //     BEQ +02      // RELATIVE JUMP
+
+0x01,  0x00, //     BRK          // Test 7 failed: Result is not 0x61    
+
+0x0d,  0x10, //     OUT #0x10, A  // Newline
+
+
+
+/////////////////////////////////////////////////////
+
+// Test 8: SRAM  Immediate Load/Store   LMA / SMA  //
+
+/////////////////////////////////////////////////////
+
+
+
+0x2d,  0x08, //     OUT #08, I   // Print 08                  
+
+0x0d,  0x20, //     OUT #0x20, A // Print ' '  
+
+0x0d,  0x78, //     OUT #0x78, A // Print 'x'
+
+0x0d,  0x4d, //     OUT #0x4D, A // Print 'M'
+
+0x0d,  0x41, //     OUT #0x41, A // Print 'A'    
+
+0x0d,  0x3a, //     OUT #0x3A, A // Print ':'   
+
+
+
+0x43,  0x11, //     LDR R1, #0x11
+
+0x4a,  0x10, //     SMA R1, #0x10 // Store 11 in address 10
+
+0x83,  0x22, //     LDR R2, #0x22
+
+0x8a,  0x20, //     SMA R2, #0x20 // Store 22 in address 20
+
+0xc3,  0x33, //     LDR R3, #0x33
+
+0xca,  0x30, //     SMA R3, #0x30 // Store 33 in address 30
+
+  
+
+0xc9,  0x20, //     LMA R3, #0x20 // Load value at address 20 into R3 (R3 = 22)
+
+0x89,  0x10, //     LMA R2, #0x10 // Load value at address 10 into R2 (R2 = 11)
+
+0x49,  0x30, //     LMA R1, #0x30 // Load value at address 30 into R1 (R1 = 33)
+
+0x28,  0x10, //     OUT R1, I     // (0x33)
+
+0x0d,  0x20, //     OUT #0x20, A  // Print ' ' 
+
+0x42,  0x97, //     SUB R1, R1, R2
+
+0x28,  0x10, //     OUT R1, I     // (0x22)
+
+0x0d,  0x20, //     OUT #0x20, A  // Print ' ' 
+
+0x42,  0xd7, //     SUB R1, R1, R3
+
+0x28,  0x10, //     OUT R1, I     // (0x00)
+
+0x67,  0x01, //     BEQ +02       // RELATIVE JUMP
+
+0x01,  0x00, //     BRK           // Test 8 failed: Result is not 0x00    
+
+0x0d,  0x10, //     OUT #0x10, A  // Newline
+
+
+
+/////////////////////////////////////////////////////
+
+// Test 9: SRAM  Register Load/Store   LMR / SMR   //
+
+/////////////////////////////////////////////////////
+
+
+
+0x2d,  0x09, //     OUT #09, I   // Print 09                  
+
+0x0d,  0x20, //     OUT #0x20, A // Print ' '  
+
+0x0d,  0x78, //     OUT #0x78, A // Print 'x'
+
+0x0d,  0x4d, //     OUT #0x4D, A // Print 'M'
+
+0x0d,  0x52, //     OUT #0x52, A // Print 'R'    
+
+0x0d,  0x3a, //     OUT #0x3A, A // Print ':'   
+
+
+
+0x43,  0x05, //     LDR R1, #0x05
+
+0x83,  0x20, //     LDR R2, #0x20
+
+
+
+    //:store
+
+0x4c,  0x20, //     SMR R1, R2   // Store 5 in address 20
+
+0x08,  0x10, //     OUT R1, A    // (20:0x05 , 21:0x04, 22:0x03, 23:0x02, 24:0x01) 
+
+0x0d,  0x20, //     OUT #0x20, A // Print ' ' 
+
+0x86,  0x16, //     INC R2
+
+0x46,  0x17, //     DEC R1
+
+0xe7,  0xfa, //     BNE -0x05     // back to :Store 
+
+0x0d,  0x10, //     OUT #0x10, A // C9: Newline
+
+
+
+0x43,  0x05, //     LDR R1, #0x05
+
+0x83,  0x24, //     LDR R2, #0x24
+
+
+
+    //:load
+
+0x28,  0x20, //     OUT R2, I     // (0x24, 0x23, 0x22, 0x21, 0x20)  
+
+0x0d,  0x3a, //     OUT #0x3A, A  // Print ':' 
+
+0xcb,  0x20, //     LMR R3, R2    // Load address[R2] to R3
+
+0x08,  0x30, //     OUT R3, A     // (1, 2, 3, 4, 5)  
+
+0x0d,  0x20, //     OUT #0x20, A  // Print ' ' 
+
+0x86,  0x17, //     DEC R2
+
+0x46,  0x17, //     DEC R1
+
+0xe7,  0xf8, //     BNE -0x07     // back to Load 
+
+0xc6,  0x57, //     SUB R3, #05   // R3 = R3 - #5
+
+0x67,  0x01, //     BEQ +02       // RELATIVE JUMP
+
+0x01,  0x00, //     BRK           // Test 9 failed: R3 != #5
+
+0x0d,  0x10, //     OUT #0x10, A  // Newline
+
+
+
+// End of BIST    
+
+0x0d,  0x50, //     OUT #0x50, A // Print 'P'    
+
+0x0d,  0x41, //     OUT #0x41, A // Print 'A'    
+
+0x0d,  0x53, //     OUT #0x53, A // Print 'S'    
+
+0x0d,  0x53, //     OUT #0x53, A // Print 'S'    
+
+  
+
+0x01,  0x00, //     BRK  // (end of BIST) 
+
