@@ -1,0 +1,20 @@
+0x03,  0x20, // LDR R0, #0x20   // how many bytes to dump
+0x43,  0x00, // LDR R1, #0      // Start address
+0x83,  0x10, // LDR R2, #0x10   // New line
+0x08,  0x20, // OUT R2, A
+0x83,  0x3a, // LDR R2, #0x3a   // ASCII ':'    
+0x28,  0x10, // OUT R1, I       // Print address
+0x08,  0x20, // OUT R2, A       // Print ':'
+0x83,  0x20, // LDR R2, #0x20   // ASCII ' '    
+0x08,  0x20, // OUT R2, A       // Print ' '
+0xcb,  0x10, // LMR R3, R1      // Load address [R1] to R3
+0x28,  0x30, // OUT R3, I
+0x46,  0x16, // ADD R1, #1
+0x06,  0x17, // SUB R0, #1
+0xe5,  0x0f, // BNE #16         // If there are still bytes to print
+0x01,  0x00, // BRK
+0x00,  0x00, // NOP 
+0x83,  0x07, // LDR R2 #0x07   
+0x82,  0x62, // AND R2, R2, R1  // If R1 is multiple of 8
+0xe5,  0x09, // BNE #10         // If address is not multiply, keep printing 
+0x05,  0x02, // JMP #3          // Start a new line
