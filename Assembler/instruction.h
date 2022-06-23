@@ -368,42 +368,7 @@ Instruction assembly[] = {
         rel_branch_handler
     },
 
-    // SRAM
-    {           // Load from address to regioster: LMA Rx, #Addr
-        "LMA",
-        2,
-        {0x09, 0x00},
-        {reg, immediate},
-        {6, 8},
-        basic_handler
-  
-    },
-    {           // Store from Register to address: SMA Rx, #Addr
-        "SMA",
-        2,
-        {0x0A, 0x00},
-        {reg, immediate},
-        {6, 8},
-        basic_handler
-  
-    },
-    {           // Load from Address in Rs to Rd: LMR Rd, Rs
-        "LMR",
-        2,
-        {0x0B, 0x00},
-        {reg, reg},
-        {6, 12},
-        basic_handler
-    },
-    {           // Store from Rd to address in Rs: SMR Rd, Rs
-        "SMR",
-        2,
-        {0x0C, 0x00},
-        {reg, reg},
-        {6, 12},
-        basic_handler
-    },
-
+    // OUT Opcode 8
     {
         "OUT",               // "OUT Rx, a/i"
         2,
@@ -412,15 +377,48 @@ Instruction assembly[] = {
         {12, 5},
         basic_handler
     },
+
+    // SRAM
+    {           // Load from address to register: LMA Rx, #Addr Opcode 9
+        "LMA",
+        2,
+        {0x09, 0x00},
+        {reg, immediate},
+        {6, 8},
+        basic_handler
+  
+    },
+    {           // Store from Register to address: SMA Rx, #Addr Opcode A
+        "SMA",
+        2,
+        {0x0A, 0x00},
+        {reg, immediate},
+        {6, 8},
+        basic_handler
+  
+    },
+    {           // Load from Address in Rs to Rd: LMR Rd, Rs Opcode B
+        "LMR",
+        2,
+        {0x0B, 0x00},
+        {reg, reg},
+        {6, 12},
+        basic_handler
+    },
+    {           // Store from Rd to address in Rs: SMR Rd, Rs Opcode C
+        "SMR",
+        2,
+        {0x0C, 0x00},
+        {reg, reg},
+        {6, 12},
+        basic_handler
+    },
     {
-        "OUT",               // "OUT #N, a/i"
+        "OUT",               // "OUT #N, a/i" Opcode D
         2,
         {0x0D, 0x00},
         {immediate, out_ai},
         {8, 5},
         basic_handler
     },
-    
-  
-
 };
