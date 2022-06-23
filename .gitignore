@@ -3,7 +3,7 @@
 a.out
 test.a
 two_loops.a
-assembler.exe
+assembler.obj
 Assembler/banana.asm
 Assembler/banana.mlg
 Programs/BIST.mlg
