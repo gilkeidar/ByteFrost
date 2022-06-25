@@ -148,14 +148,14 @@
 
 0x83,  0x65, //     LDR R2, #0x65
 0x43,  0xab, //     LDR R1, #0xAB
-0xc2,  0x67, //     SUB R3, R2, R1    // 65 - AB =  0x + Carry
+0xc2,  0x67, //     SUB R3, R2, R1    // 65 - AB =  0xBA + Carry
 0x28,  0x30, //     OUT R3, I         // (0xBA) (No carry, means borrow)
-0x0d,  0x20, //     OUT #0x20, A // Print ' '  
-0xc7,  0x01, //     BCC +02      // Relative
-0x01,  0x00, //     BRK          // Test 6 failed: Carry was set
+0x0d,  0x20, //     OUT #0x20, A      // Print ' '  
+0xc7,  0x01, //     BCC +02           // Relative
+0x01,  0x00, //     BRK               // Test 6 failed: Carry was set
 0x83,  0xa7, //     LDR R2, #0xA7
 0x43,  0x34, //     LDR R1, #0x34
-0xc2,  0x9f, //     SBC R3, R1, R2    // R2 - R1 + Cin = A7 - 34 + Cin = 72 + Cout
+0xc2,  0x6f, //     SBC R3, R2, R1    // R2 - R1 + Cin = A7 - 34 + Cin = 72 + Cout
 0x28,  0x30, //     OUT R3, I         //  (0x72)
 0x47,  0x01, //     BCS +02           // Relative
 0x01,  0x00, //     BRK               // Test 6 failed: Carry was not set

@@ -148,14 +148,14 @@ OUT #0x10, A  // Newline
 
     LDR R2, #0x65
     LDR R1, #0xAB
-    SUB R3, R2, R1    // 65 - AB =  0x + Carry
+    SUB R3, R2, R1    // 65 - AB =  0xBA + Carry
     OUT R3, I         // (0xBA) (No carry, means borrow)
-    OUT #0x20, A // Print ' '  
-    BCC +02      // Relative
-    BRK          // Test 6 failed: Carry was set
+    OUT #0x20, A      // Print ' '  
+    BCC +02           // Relative
+    BRK               // Test 6 failed: Carry was set
     LDR R2, #0xA7
     LDR R1, #0x34
-    SBC R3, R1, R2    // R2 - R1 + Cin = A7 - 34 + Cin = 72 + Cout
+    SBC R3, R2, R1    // R2 - R1 + Cin = A7 - 34 + Cin = 72 + Cout
     OUT R3, I         //  (0x72)
     BCS +02           // Relative
     BRK               // Test 6 failed: Carry was not set
