@@ -1,6 +1,7 @@
 // Setup
 LDR R0, #0	// row (R0) = 0
 SMR R0, R0	// board[0] = 0
+// for_loop_start
 MOV R1, R0	// i (R1) = row
 LMR R2, R0	// col (R2) = board[row]
 // start_loop
@@ -49,7 +50,7 @@ SMR R2, R0	// board[row] = board[row] + 1
 // loop_check:
 LDR R3, #8	// R3 = 8
 SUB R3, R0, R3	// R3 = row - 8
-BMI #5		// if row < 8, branch to start_loop
+BMI #3		// if row < 8, branch to for_loop_start
 // Print Solution (setup)
 LDR R2, #0	// R2 = 0
 LDR R1, #65	// R1 = 'A'
