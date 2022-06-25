@@ -10,39 +10,40 @@ BMI #21 	// if i >= 0, continue (branch to valid if i < 0)
 // Horizontal check
 LMR R3, R1	// R3 = board[i]
 SUB R3, R3, R2	// R3 = board[i] - col
-BEQ #25		// if board[i] == col, branch to not_valid
+BEQ #26		// if board[i] == col, branch to not_valid
 // Diagonal check 1
 LMR R3, R1	// R3 = board[i]
 SUB R3, R3, R2	// R3 = board[i] - col
 SUB R3, R3, R0	// R3 = board[i] - col - row
 ADD R3, R3, R1	// R3 = board[i] - col - row + i
-BEQ #25		// if board[i] == col + (row - i), branch to not_valid
+BEQ #26		// if board[i] == col + (row - i), branch to not_valid
 // Diagonal check 2
 LMR R3, R1	// R3 = board[i]
 SUB R3, R3, R2	// R3 = board[i] - col
 ADD R3, R3, R0	// R3 = board[i] - col + row
 SUB R3, R3, R1	// R3 = board[i] - col + row - i
-BEQ #25		// if board[i] == col - (row - i), branch to not_valid
+BEQ #26		// if board[i] == col - (row - i), branch to not_valid
 JMP #5		// Goto start_loop
 // valid:
+OUT R0, A   // Print row
 INC R0		// row+=
 LDR R2, #0	// R2 = 0
 SMR R2, R0	// board[row] = 0
-JMP #42		// Goto loop_check
+JMP #43		// Goto loop_check
 // not_valid:
 LMR R2, R0	// R2 = board[row]
 INC R2		// R2 = board[row] + 1
 SMR R2, R0	// board[row] = board[row] + 1
 LDR R3, #8	// R3 = 8
 SUB R3, R2, R3	// R3 = R2 - 8
-BMI #42		// if board[row] < 8, go to loop_check
+BMI #43		// if board[row] < 8, go to loop_check
 DEC R0		// row--
 LMR R2, R0	// R2 = board[row]
 INC R2		// R2 = board[row] + 1
 SMR R2, R0	// board[row] = board[row] + 1
 LDR R3, #8	// R3 = 8
 SUB R3, R2, R3	// R3 = R2 - 8
-BMI #42		// if board[row] < 8, go to loop_check
+BMI #43		// if board[row] < 8, go to loop_check
 DEC R0		// row--
 LMR R2, R0	// R2 = board[row]
 INC R2		// R2 = board[row] + 1
@@ -62,5 +63,5 @@ INC R2		// R2++
 INC R1		// R1++
 LDR R3, #8	// R3 = 8
 SUB R3, R2, R3	// R3 = R2 - 8
-BMI #47		// if R2 < 8, go to print_solution
+BMI #48		// if R2 < 8, go to print_solution
 BRK
