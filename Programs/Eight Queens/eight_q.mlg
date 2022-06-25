@@ -1,65 +1,65 @@
 // Setup
-0x03,  0x00, // LDR R0, #0	// row (R0) = 0
-0x0c,  0x00, // SMR R0, R0	// board[0] = 0
-0x44,  0x00, // MOV R1, R0	// i (R1) = row
-0x8b,  0x00, // LMR R2, R0	// col (R2) = board[row]
+0x03,  0x00, // 1: LDR R0, #0	// row (R0) = 0
+0x0c,  0x00, // 2: SMR R0, R0	// board[0] = 0
+0x44,  0x00, // 3: MOV R1, R0	// i (R1) = row
+0x8b,  0x00, // 4: LMR R2, R0	// col (R2) = board[row]
 // start_loop
-0x46,  0x17, // DEC R1		// i-- (R1 = R1 - 1)
-0x25,  0x1a, // BMI #27 	// if i >= 0, continue (branch to valid if i < 0)
+0x46,  0x17, // 5: DEC R1		// i-- (R1 = R1 - 1)
+0x25,  0x14, // 6: BMI #21 	// if i >= 0, continue (branch to valid if i < 0)
 // Horizontal check
-0xcb,  0x10, // LMR R3, R1	// R3 = board[i]
-0xc2,  0xb7, // SUB R3, R3, R2	// R3 = board[i] - col
-0x65,  0x1f, // BEQ #32		// if board[i] == col, branch to not_valid
+0xcb,  0x10, // 7: LMR R3, R1	// R3 = board[i]
+0xc2,  0xb7, // 8: SUB R3, R3, R2	// R3 = board[i] - col
+0x65,  0x18, // 9: BEQ #25		// if board[i] == col, branch to not_valid
 // Diagonal check 1
-0xcb,  0x10, // LMR R3, R1	// R3 = board[i]
-0xc2,  0xb7, // SUB R3, R3, R2	// R3 = board[i] - col
-0xc2,  0x37, // SUB R3, R3, R0	// R3 = board[i] - col - row
-0xc2,  0x76, // ADD R3, R3, R1	// R3 = board[i] - col - row + i
-0x65,  0x1f, // BEQ #32		// if board[i] == col + (row - i), branch to not_valid
+0xcb,  0x10, // 10: LMR R3, R1	// R3 = board[i]
+0xc2,  0xb7, // 11: SUB R3, R3, R2	// R3 = board[i] - col
+0xc2,  0x37, // 12: SUB R3, R3, R0	// R3 = board[i] - col - row
+0xc2,  0x76, // 13: ADD R3, R3, R1	// R3 = board[i] - col - row + i
+0x65,  0x18, // 14: BEQ #25		// if board[i] == col + (row - i), branch to not_valid
 // Diagonal check 2
-0xcb,  0x10, // LMR R3, R1	// R3 = board[i]
-0xc2,  0xb7, // SUB R3, R3, R2	// R3 = board[i] - col
-0xc2,  0x36, // ADD R3, R3, R0	// R3 = board[i] - col + row
-0xc2,  0x77, // SUB R3, R3, R1	// R3 = board[i] - col + row - i
-0x65,  0x1f, // BEQ #32		// if board[i] == col - (row - i), branch to not_valid
-0x05,  0x06, // JMP #7		// Goto start_loop
+0xcb,  0x10, // 15: LMR R3, R1	// R3 = board[i]
+0xc2,  0xb7, // 16: SUB R3, R3, R2	// R3 = board[i] - col
+0xc2,  0x36, // 17: ADD R3, R3, R0	// R3 = board[i] - col + row
+0xc2,  0x77, // 18: SUB R3, R3, R1	// R3 = board[i] - col + row - i
+0x65,  0x18, // 19: BEQ #25		// if board[i] == col - (row - i), branch to not_valid
+0x05,  0x04, // 20: JMP #5		// Goto start_loop
 // valid:
-0x06,  0x16, // INC R0		// row+=
-0x83,  0x00, // LDR R2, #0	// R2 = 0
-0x8c,  0x00, // SMR R2, R0	// board[row] = 0
-0x05,  0x31, // JMP #50		// Goto loop_check
+0x06,  0x16, // 21: INC R0		// row+=
+0x83,  0x00, // 22: LDR R2, #0	// R2 = 0
+0x8c,  0x00, // 23: SMR R2, R0	// board[row] = 0
+0x05,  0x29, // 24: JMP #42		// Goto loop_check
 // not_valid:
-0x8b,  0x00, // LMR R2, R0	// R2 = board[row]
-0x86,  0x16, // INC R2		// R2 = board[row] + 1
-0x8c,  0x00, // SMR R2, R0	// board[row] = board[row] + 1
-0xc3,  0x08, // LDR R3, #8	// R3 = 8
-0xc2,  0xe7, // SUB R3, R2, R3	// R3 = R2 - 8
-0x25,  0x31, // BMI #50		// if board[row] < 8, go to loop_check
-0x06,  0x17, // DEC R0		// row--
-0x8b,  0x00, // LMR R2, R0	// R2 = board[row]
-0x86,  0x16, // INC R2		// R2 = board[row] + 1
-0x8c,  0x00, // SMR R2, R0	// board[row] = board[row] + 1
-0xc3,  0x08, // LDR R3, #8	// R3 = 8
-0xc2,  0xe7, // SUB R3, R2, R3	// R3 = R2 - 8
-0x25,  0x31, // BMI #50		// if board[row] < 8, go to loop_check
-0x06,  0x17, // DEC R0		// row--
-0x8b,  0x00, // LMR R2, R0	// R2 = board[row]
-0x86,  0x16, // INC R2		// R2 = board[row] + 1
-0x8c,  0x00, // SMR R2, R0	// board[row] = board[row] + 1
+0x8b,  0x00, // 25: LMR R2, R0	// R2 = board[row]
+0x86,  0x16, // 26: INC R2		// R2 = board[row] + 1
+0x8c,  0x00, // 27: SMR R2, R0	// board[row] = board[row] + 1
+0xc3,  0x08, // 28: LDR R3, #8	// R3 = 8
+0xc2,  0xe7, // 29: SUB R3, R2, R3	// R3 = R2 - 8
+0x25,  0x29, // 30: BMI #42		// if board[row] < 8, go to loop_check
+0x06,  0x17, // 31: DEC R0		// row--
+0x8b,  0x00, // 32: LMR R2, R0	// R2 = board[row]
+0x86,  0x16, // 33: INC R2		// R2 = board[row] + 1
+0x8c,  0x00, // 34: SMR R2, R0	// board[row] = board[row] + 1
+0xc3,  0x08, // 35: LDR R3, #8	// R3 = 8
+0xc2,  0xe7, // 36: SUB R3, R2, R3	// R3 = R2 - 8
+0x25,  0x29, // 37: BMI #42		// if board[row] < 8, go to loop_check
+0x06,  0x17, // 38: DEC R0		// row--
+0x8b,  0x00, // 39: LMR R2, R0	// R2 = board[row]
+0x86,  0x16, // 40: INC R2		// R2 = board[row] + 1
+0x8c,  0x00, // 41: SMR R2, R0	// board[row] = board[row] + 1
 // loop_check:
-0xc3,  0x08, // LDR R3, #8	// R3 = 8
-0xc2,  0xc7, // SUB R3, R0, R3	// R3 = row - 8
-0x25,  0x06, // BMI #7		// if row < 8, branch to start_loop
+0xc3,  0x08, // 42: LDR R3, #8	// R3 = 8
+0xc2,  0xc7, // 43: SUB R3, R0, R3	// R3 = row - 8
+0x25,  0x04, // 44: BMI #5		// if row < 8, branch to start_loop
 // Print Solution (setup)
-0x83,  0x00, // LDR R2, #0	// R2 = 0
-0x43,  0x41, // LDR R1, #65	// R1 = 'A'
+0x83,  0x00, // 45: LDR R2, #0	// R2 = 0
+0x43,  0x41, // 46: LDR R1, #65	// R1 = 'A'
 // print_solution:
-0xcb,  0x20, // LMR R3, R2	// R3 = board[R2]
-0x08,  0x10, // OUT R1, A	// Print rank (letter)
-0x08,  0x30, // OUT R3, A	// Print number (row)
-0x86,  0x16, // INC R2		// R2++
-0x46,  0x16, // INC R1		// R1++
-0xc3,  0x08, // LDR R3, #8	// R3 = 8
-0xc2,  0xe7, // SUB R3, R2, R3	// R3 = R2 - 8
-0x25,  0x38, // BMI #57		// if R2 < 8, go to print_solution
-0x01,  0x00, // BRK
+0xcb,  0x20, // 47: LMR R3, R2	// R3 = board[R2]
+0x08,  0x10, // 48: OUT R1, A	// Print rank (letter)
+0x08,  0x30, // 49: OUT R3, A	// Print number (row)
+0x86,  0x16, // 50: INC R2		// R2++
+0x46,  0x16, // 51: INC R1		// R1++
+0xc3,  0x08, // 52: LDR R3, #8	// R3 = 8
+0xc2,  0xe7, // 53: SUB R3, R2, R3	// R3 = R2 - 8
+0x25,  0x2e, // 54: BMI #47		// if R2 < 8, go to print_solution
+0x01,  0x00, // 55: BRK

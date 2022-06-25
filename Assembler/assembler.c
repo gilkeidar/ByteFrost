@@ -9,6 +9,8 @@ char tokens[MAX_TOKENS][MAX_TOKEN_LENGTH];	// Assembly code split into tokens
 
 int current_line = 1;						// Current line of assembly file
 
+int current_instruction = 1;				// Current instruction (not necessarily line)
+
 char *input_buf;							// Input buffer (stores current line)
 
 int fill_line_buffer(FILE *ifptr);
@@ -120,7 +122,7 @@ int main (int argc, char * args [])
 	//	Loop to read through file line-by-line
 	input_buf = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));	//	Input buffer (for each line in text file)
 	int num_tokens;
-	int line_counter = 0;
+	//int line_counter = 0;
 	int error;
 	uint8_t instruction[2];
 	while (fill_line_buffer(ifptr))
@@ -130,14 +132,15 @@ int main (int argc, char * args [])
 		//printf("writing machine code\n");
 		num_tokens = write_machine_code();	//	Convert Assembly language line to machine language and write to output file
 		//printf("Number of tokens: %d\n", num_tokens);
-		line_counter++;
+		//line_counter++;
 		if (!(error = get_instruction(num_tokens, instruction)))
 		{
 			write_line(instruction, ofptr, num_tokens, binary_flag);
 		}
 		else
 		{
-			fprintf(stderr, "\nError %d in line %d: Tokens %d >>>> %s\n\n", error, line_counter, num_tokens, input_buf);
+			//fprintf(stderr, "\nError %d in line %d: Tokens %d >>>> %s\n\n", error, line_counter, num_tokens, input_buf);
+			fprintf(stderr, "\nError %d in line %d: Tokens %d >>>> %s\n\n", error, current_line, num_tokens, input_buf);
  			exit(0);
 		}
 
@@ -249,14 +252,16 @@ void write_line(uint8_t * instruction, FILE * ofptr, int num_tokens, int binary_
 				//fwrite(&(instruction[i] >> j), )
 			}
 		}*/
+		current_instruction++;
 	}
 	else if (!binary_flag)
 	{
-		fprintf(ofptr, "0x%02x,  0x%02x, // %s\n", instruction[0], instruction[1], input_buf);
+		fprintf(ofptr, "0x%02x,  0x%02x, // %d: %s\n", instruction[0], instruction[1], current_instruction, input_buf);
+		current_instruction++;
 		//printf("0x%02x,  0x%02x, // %s\n", instruction[0], instruction[1], input_buf);
 	}
-		
 
+	
 }
 
 int fill_line_buffer(FILE *ifptr)
