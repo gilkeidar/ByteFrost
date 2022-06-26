@@ -23,7 +23,7 @@ ADD R3, R3, R0	// R3 = board[i] - col + row
 SUB R3, R3, R1	// R3 = board[i] - col + row - i
 BEQ #24		// if board[i] == col - (row - i), branch to :not_valid
 // for_loop_update
-DEC R2              // i--
+DEC R1              // i--
 JMP #6 // goto :for_loop_check
 // :valid
 INC R0		// row++
