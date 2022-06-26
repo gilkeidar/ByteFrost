@@ -256,7 +256,7 @@ void write_line(uint8_t * instruction, FILE * ofptr, int num_tokens, int binary_
 	}
 	else if (!binary_flag)
 	{
-		fprintf(ofptr, "0x%02x,  0x%02x, // %d: %s\n", instruction[0], instruction[1], current_instruction, input_buf);
+		fprintf(ofptr, "0x%02x,  0x%02x, // 0x%02x: %s\n", instruction[0], instruction[1], current_instruction, input_buf);
 		current_instruction++;
 		//printf("0x%02x,  0x%02x, // %s\n", instruction[0], instruction[1], input_buf);
 	}
