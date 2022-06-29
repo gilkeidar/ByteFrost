@@ -57,9 +57,9 @@
 
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
-const int rs = 12, en = 11, d4 = 2, d5 = 3, d6 = 4, d7 = 5;
+const int rs = 12, en = 11, d0 = 0, d1 = 1, d2 = 2, d3 = 3, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
 int _data_pins[] = {d4, d5, d6, d7};    // For modified write4bits we're using
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+LiquidCrystal lcd(rs, en, d0, d1, d2, d3, d4, d5, d6, d7);
 
 void pulseEnable(void) {
   clrPin(en);
@@ -97,6 +97,12 @@ void write4bits(uint8_t value) {
   pulseEnable();
 }
 
+void write8bits(uint8_t value) {
+  PORTD = value;
+
+  pulseEnable();
+}
+
 // write either command or data, with automatic 4/8-bit selection
 void send(uint8_t value, uint8_t mode) {
   digitalWrite(rs, mode);
@@ -119,8 +125,10 @@ void send(uint8_t value, uint8_t mode) {
     write4bits(value);
   }*/
 
-  write4bits(value>>4);
-  write4bits(value);
+  write8bits(value);
+
+  //write4bits(value>>4);
+  //write4bits(value);
 }
 
 inline size_t write(uint8_t value) {
@@ -147,6 +155,7 @@ int buffer_index;               //  Buffer index
 
 // Computer Bus vars
 byte disp_en = 13;
+byte disp_en_val;
 byte ascii_or_int = 10;  // If 0: Print as ASCII; if 1: Print as integer (hex)
 byte bus[] = {14, 15, 16, 17, 18, 19, 8, 9}; // A0, A1, A2, A3, A4, A5, D8, D9
 
@@ -281,22 +290,28 @@ void setup() {
 
 void loop() {
   // From bus
-  if (was_high && digitalRead(disp_en) == LOW)
+  disp_en_val = digitalRead(disp_en);
+  if (was_high && disp_en_val == LOW)
   {
     valid_input = true;
     was_high = false;
   }
-  else if (digitalRead(disp_en) == HIGH)
+  else if (disp_en_val == HIGH)
   {
     was_high = true;
   }
   //valid_input = true;
-  int i;
-  input_char = 0;
-  for (i = 0; i < sizeof(bus); i++)
+  //int i;
+  //input_char = 0;
+  /*for (i = 0; i < sizeof(bus); i++)
   {
     input_char = input_char | (digitalRead(bus[i]) << i); 
-  }
+  }*/
+  input_char = (PINC & 0x3f) | ((PINB & 0x03) << 6);
+
+  /*input_char = PINB & 0x03;
+  input_char = input_char << 6;
+  input_char = input_char | (PINC & 0x3f);*/
 
   // Display
   if (valid_input)
