@@ -6,5 +6,6 @@ Here is a list of included programs.
 
 ## Assembly Programs
 
-* `BIST.asm` - Built-In Self Test (tests hardware operations such as the ALU, RAM, register file, and display) - written by Ron Keidar
-* `memdump.asm` - (fill program information here) - written by Ron Keidar
+* `BIST` - Built-In Self Test (tests hardware operations such as the ALU, RAM, register file, and display) - written by Ron Keidar
+* `Eight Queens` - Solver for the Eight Queens problem. Prints all 92 solutions - written by Gil Keidar and Ron Keidar
+* `memdump` - (fill program information here) - written by Ron Keidar
