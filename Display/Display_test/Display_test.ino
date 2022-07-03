@@ -46,7 +46,7 @@
 #define COLS  20
 #define PRINT_CHAR  0
 #define ESCAPE_CHAR 1
-#define QUEUE_SIZE  256
+#define QUEUE_SIZE  100
 
 // Library functions
 
@@ -83,7 +83,7 @@ void pulseEnable(void) {
   //digitalWrite(en, LOW);
   //delayMicroseconds(1);   // commands need > 37us to settle
 }
-
+#if 0
 void write4bits(uint8_t value) {
   //for (int i = 0; i < 4; i++) {
   //  digitalWrite(_data_pins[i], (value >> i) & 0x01);
@@ -103,12 +103,13 @@ void write4bits(uint8_t value) {
 
   pulseEnable();
 }
+#endif
 
 void write8bits(uint8_t value) {
   //PORTD = value;
 
-  //Serial.print("Printing ");
-  //Serial.println((char) value);
+  Serial.print("Printing ");
+  Serial.println((char) value);
 
   int i;
   for (i = 0; i < 8; i++)
@@ -171,8 +172,8 @@ int buffer_index;               //  Buffer index
 
 // Buffer (queue)
 Character queue[QUEUE_SIZE]; // Input queue
-byte queue_base = 0;     // Base index of queue
-byte queue_pos = 0;      // Position in queue
+int queue_base = 0;     // Base index of queue
+int queue_pos = 0;      // Position in queue
 
 // Computer Bus vars
 byte disp_en = 13;
@@ -314,9 +315,9 @@ void setup() {
   PCMSK0 |= B00100000;  // Activate interrupt on display enable (D13) pin (PCINT3)
 
   // Debug
-  //Serial.begin(57600); // open the serial port at 57600 bps:
+  Serial.begin(57600); // open the serial port at 57600 bps:
 
-  /*queue[0] = {'A', 0};
+  queue[0] = {'A', 0};
   queue[1] = {'B', 0};
   queue[2] = {'C', 0};
   queue[3] = {'D', 0};
@@ -328,7 +329,7 @@ void setup() {
   queue[9] = {'J', 0};
   queue[10] = {'K', 0};
   queue[11] = {'L', 0};
-  queue_pos = 12;*/
+  queue_pos = 12;
 
 }
 
@@ -338,20 +339,21 @@ Character curr_char;
 ISR (PCINT0_vect)
 {
   //Serial.println("Interrupt!");
-  //if (!digitalRead(disp_en))
-  if (!(PINB & 0x20))
+  if (!digitalRead(disp_en))
   {
     //Serial.println("Interrupt handler (disp_en is low)");
     // Read input and add to queue
     input_char = (PINC & 0x3f) | ((PINB & 0x03) << 6);
-    //input_type = digitalRead(ascii_or_int);
-    input_type = (PINB & 0x04) >> 2; 
+    input_type = digitalRead(ascii_or_int);
+
     /*if (input_type)
       input_type = 'I';
     else
       input_type = 'A';*/
 
-    queue[queue_pos++] = {input_char, input_type};
+    queue[queue_pos] = {input_char, input_type};
+
+    queue_pos = (queue_pos + 1) % QUEUE_SIZE;
   }
 }
 
@@ -388,16 +390,16 @@ void loop() {
     }
 
     // Print shadow
-    //Serial.println("Shadow:");
-    //int i, j;
-    //for (i = 0; i < ROWS; i++)
-    //{
-    //  for (j = 0; j < COLS; j++)
-    //    Serial.print((char)shadow[i][j]);
-    //  Serial.println();
-    //}
+    Serial.println("Shadow:");
+    int i, j;
+    for (i = 0; i < ROWS; i++)
+    {
+      for (j = 0; j < COLS; j++)
+        Serial.print((char)shadow[i][j]);
+      Serial.println();
+    }
 
-    queue_base++;
+    queue_base = (queue_base + 1) % QUEUE_SIZE;
   }
 }
 
