@@ -335,6 +335,8 @@ void setup() {
 
 byte input_type;
 Character curr_char;
+int num_interrupts = 0;
+int num_low_interrupts = 0;
 ISR (PCINT0_vect)
 {
   //Serial.println("Interrupt!");
@@ -352,7 +354,9 @@ ISR (PCINT0_vect)
       input_type = 'A';*/
 
     queue[queue_pos++] = {input_char, input_type};
+    num_low_interrupts++;
   }
+  num_interrupts++;
 }
 
 void loop() {
@@ -396,6 +400,14 @@ void loop() {
     //    Serial.print((char)shadow[i][j]);
     //  Serial.println();
     //}
+
+    if (curr_char.input_char == 0x2E)
+    {
+      lcd.print("ints: ");
+      lcd.print(num_interrupts);
+      lcd.print("\nlow_ints :");
+      lcd.print(num_low_interrupts);
+    }
 
     queue_base++;
   }
