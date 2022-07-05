@@ -64,7 +64,7 @@ typedef struct queue_item {
 
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
-const int rs = 12, en = 11, d0 = 0, d1 = 1, d2 = 2, d3 = 3, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
+const int rs = 12, en = 11, d0 = 0, d1 = 1, d2 = 13, d3 = 3, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
 int _data_pins[] = {d0, d1, d2, d3, d4, d5, d6, d7};    // For modified write4bits we're using
 LiquidCrystal lcd(rs, en, d0, d1, d2, d3, d4, d5, d6, d7);
 
@@ -175,7 +175,7 @@ byte queue_base = 0;     // Base index of queue
 byte queue_pos = 0;      // Position in queue
 
 // Computer Bus vars
-byte disp_en = 13;
+byte disp_en = 2;
 byte disp_en_val;
 byte ascii_or_int = 10;  // If 0: Print as ASCII; if 1: Print as integer (hex)
 byte bus[] = {14, 15, 16, 17, 18, 19, 8, 9}; // A0, A1, A2, A3, A4, A5, D8, D9
@@ -308,10 +308,13 @@ void setup() {
 
   buffer_index = 0;
 
+  // Setup interrupt handling
+  attachInterrupt(digitalPinToInterrupt(disp_en), disp_en_handler, RISING); // inverted source signal so both display and the display register should react to rising edge of disp_en signal
+
   // Setup interupt handling
   // Source: https://www.electrosoftcloud.com/en/pcint-interrupts-on-arduino/
-  PCICR |= B00000001; // We activate the interrupts of the PB port
-  PCMSK0 |= B00100000;  // Activate interrupt on display enable (D13) pin (PCINT3)
+  //PCICR |= B00000001; // We activate the interrupts of the PB port
+  //PCMSK0 |= B00100000;  // Activate interrupt on display enable (D13) pin (PCINT3)
 
   // Debug
   //Serial.begin(57600); // open the serial port at 57600 bps:
@@ -337,7 +340,17 @@ byte input_type;
 Character curr_char;
 int num_interrupts = 0;
 int num_low_interrupts = 0;
-ISR (PCINT0_vect)
+
+void disp_en_handler()
+{
+  // Read input and add to queue
+  input_type = (PINB & 0x04) >> 2;
+  input_char = (PINC & 0x3f) | ((PINB & 0x03) << 6);
+  queue[queue_pos++] = {input_char, input_type};
+  num_low_interrupts++;
+}
+
+/*ISR (PCINT0_vect)
 {
   //Serial.println("Interrupt!");
   //if (!digitalRead(disp_en))
@@ -348,16 +361,16 @@ ISR (PCINT0_vect)
     input_char = (PINC & 0x3f) | ((PINB & 0x03) << 6);
     //input_type = digitalRead(ascii_or_int);
     input_type = (PINB & 0x04) >> 2; 
-    /*if (input_type)
-      input_type = 'I';
-    else
-      input_type = 'A';*/
+    //if (input_type)
+    //  input_type = 'I';
+    //else
+    //  input_type = 'A';
 
     queue[queue_pos++] = {input_char, input_type};
     num_low_interrupts++;
   }
   num_interrupts++;
-}
+}*/
 
 void loop() {
   if (queue_pos != queue_base)
@@ -401,13 +414,11 @@ void loop() {
     //  Serial.println();
     //}
 
-    if (curr_char.input_char == 0x2E)
-    {
-      lcd.print("ints: ");
-      lcd.print(num_interrupts);
-      lcd.print("\nlow_ints :");
-      lcd.print(num_low_interrupts);
-    }
+    //if (curr_char.input_char == 0x2E)
+    //{
+    //  lcd.print("\nlow_ints :");
+    //  lcd.print(num_low_interrupts);
+    //}
 
     queue_base++;
   }
