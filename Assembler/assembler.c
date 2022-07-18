@@ -13,6 +13,8 @@ int current_instruction = 1;				// Current instruction (not necessarily line)
 
 char *input_buf;							// Input buffer (stores current line)
 
+int finished_reading = 0;					// Finished reading file
+
 int fill_line_buffer(FILE *ifptr);
 
 int write_machine_code();
@@ -125,9 +127,10 @@ int main (int argc, char * args [])
 	//int line_counter = 0;
 	int error;
 	uint8_t instruction[2];
-	while (fill_line_buffer(ifptr))
+	while (!finished_reading)
 	//while (fgets(input_buf, MAX_LINE_LENGTH, ifptr) != NULL)
 	{
+		finished_reading = fill_line_buffer(ifptr);
 		instruction[0] = instruction[1] = 0;
 		//printf("writing machine code\n");
 		num_tokens = write_machine_code();	//	Convert Assembly language line to machine language and write to output file
@@ -274,7 +277,7 @@ int fill_line_buffer(FILE *ifptr)
 	{
 		input_buf[i] = curr_char;
 		
-		if (curr_char == '\n' || curr_char == 13 || curr_char == 10)	//	If new line, end input buffer string
+		if (curr_char == '\n' || curr_char == 13 || curr_char == 10 || curr_char == EOF)	//	If new line, end input buffer string
 		{
 			input_buf[i] = '\0';
 			break;
@@ -282,13 +285,13 @@ int fill_line_buffer(FILE *ifptr)
 		i++;
 	}
 
-	if (curr_char != '\n' && curr_char != 13 && curr_char != 10)	//	If line is longer than buffer, cut it off (must be a comment since no assembly instruction is this long)
+	if (curr_char != '\n' && curr_char != 13 && curr_char != 10 || curr_char == EOF)	//	If line is longer than buffer, cut it off (must be a comment since no assembly instruction is this long)
 	{
 		input_buf[i - 1] = '\0';
 	}
 	//printf("Current line contents: %sbanana\n", input_buf);
 
-	return (curr_char != EOF);
+	return (curr_char == EOF); // returns 0 if not done, and 1 if read last line
 }
 
 int get_comment() {
