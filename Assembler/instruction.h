@@ -421,4 +421,37 @@ Instruction assembly[] = {
         {8, 5},
         basic_handler
     },
+    // Stack
+    {
+        "PUSH",             // PUSH Rs
+        1,
+        {0x0E, 0x00},
+        {reg},
+        {12},
+        basic_handler
+    },
+    {
+        "POP",              // POP Rd
+        1,
+        {0x0F, 0x00},
+        {reg},
+        {6},
+        basic_handler
+    },
+    {
+        "JSR",              // JSR #Immediate
+        1,
+        {0x10, 0x00},
+        {immediate},
+        {8},
+        abs_branch_handler
+    },
+    {
+        "RTS",              // RTS
+        0,
+        {0x11, 0x00},
+        {none},
+        {0},
+        basic_handler
+    }
 };

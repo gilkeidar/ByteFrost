@@ -432,7 +432,7 @@ int get_instruction(int num_tokens, uint8_t *instruction)
         // First, search by number of parameters
         if (assembly[i].num_params == (num_tokens - 1))
         {
-            // printf("%s: Matched number of params!\n", assembly[i].name);
+             //printf("%s: Matched number of params!\n", assembly[i].name);
             // Second, search by name
             if (!strcmp(assembly[i].name, tokens[0]))
             {
