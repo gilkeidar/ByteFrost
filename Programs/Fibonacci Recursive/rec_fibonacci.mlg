@@ -1,0 +1,32 @@
+0x03,  0x0a, // 0x01: LDR R0, #10             // n = 10
+0x43,  0x00, // 0x02: LDR R1, #0              // R1 = 0
+0x4a,  0x00, // 0x03: SMA R1, #0              // Store 0 in address 0
+0x10,  0x09, // 0x04: JSR #0x0a               // R0 = fibonacci(n)
+0x28,  0x00, // 0x05: OUT R0, i               // print R0
+0x0d,  0x20, // 0x06: OUT #0x20, a            // Print space
+0x09,  0x00, // 0x07: LMA R0, #0              // R0 = *0
+0x28,  0x00, // 0x08: OUT R0, i               // Print fibonacci counter (number of function calls)
+0x01,  0x00, // 0x09: BRK                     // BRK
+0x49,  0x00, // 0x0a: LMA R1, #0              // Increment function call counter
+0x46,  0x16, // 0x0b: INC R1                  // function call counter++
+0x4a,  0x00, // 0x0c: SMA R1, #0              // store function call counter value in address 0
+0x43,  0x02, // 0x0d: LDR R1, #2              // R1 = 2
+0x42,  0x47, // 0x0e: SUB R1, R0, R1          // R1 = n - 2
+0xa5,  0x11, // 0x0f: BPL #0x12               // if (n < 2) {
+0x03,  0x01, // 0x10: LDR R0, #1              //      R0 = 1;
+0x11,  0x00, // 0x11: RTS                     //      return R0; }
+0x06,  0x17, // 0x12: DEC R0                  // R0--
+0x84,  0x00, // 0x13: MOV R2, R0              // R2 = R0
+0x0e,  0x20, // 0x14: PUSH R2                 // Push R2
+0x10,  0x09, // 0x15: JSR #0x0a               // R0 = fibonacci(n - 1)
+0x8f,  0x00, // 0x16: POP R2                  // Pop R2
+0xc4,  0x00, // 0x17: MOV R3, R0              // R3 = R0
+0x86,  0x17, // 0x18: DEC R2                  // R2--
+0x04,  0x20, // 0x19: MOV R0, R2              // R0 = R2
+0x0e,  0x20, // 0x1a: PUSH R2                 // Push R2
+0x0e,  0x30, // 0x1b: PUSH R3                 // Push R3
+0x10,  0x09, // 0x1c: JSR #0x0a               // R0 = fibonacci(n - 2)
+0xcf,  0x00, // 0x1d: POP R3                  // Pop R3
+0x8f,  0x00, // 0x1e: POP R2                  // Pop R2
+0x02,  0xc6, // 0x1f: ADD R0, R0, R3          // R0 = fibonacci(n - 1) + fibonacci(n - 2)
+0x11,  0x00, // 0x20: RTS                     // return R0
