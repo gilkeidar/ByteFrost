@@ -272,11 +272,52 @@ OUT #0x10, A  // Newline
     BRK           // Test 9 failed: R3 != #5
     OUT #0x10, A  // Newline
 
+  
+/////////////////////////////////////////////////////
+// Test 10: PUSH/POP                               //
+/////////////////////////////////////////////////////
+
+    OUT #10, I   // Print 010                  
+    OUT #0x20, A // Print ' '  
+    OUT #0x53, A // Print 'S'
+    OUT #0x54, A // Print 'T'
+    OUT #0x43, A // Print 'C'    
+    OUT #0x3A, A // Print ':'   
+
+    LDR R1, #0xFF  // Stack max capacity
+    PUSH R1
+    DEC R1 
+    BNE -2
+    INC R1
+    POP R2
+    
+    OUT #0x10, A  // Newline
+    OUT #0x52, A // Print 'R'
+    OUT #01, A   // Print '1'
+    OUT #0x3A, A // Print ':'   
+    OUT #0x20, A // Print ' '  
+    OUT R1, I 
+    OUT #0x20, A // Print ' '  
+    OUT #0x20, A // Print ' '  
+    OUT #0x20, A // Print ' '  
+    OUT #0x52, A // Print 'R'
+    OUT #02, A   // Print '2'
+    OUT #0x3A, A // Print ':'   
+    OUT #0x20, A // Print ' '  
+    OUT R2, I 
+  
+    SUB R2, R2, R1
+    BEQ +2
+    BRK     // Fail R1 != R2
+    INC R1
+    BNE -19
+
 // End of BIST    
+
     OUT #0x50, A // Print 'P'    
     OUT #0x41, A // Print 'A'    
     OUT #0x53, A // Print 'S'    
     OUT #0x53, A // Print 'S'    
-  
+
     BRK  // (end of BIST) 
     

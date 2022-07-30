@@ -64,7 +64,7 @@ typedef struct queue_item {
 
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
-const int rs = 12, en = 11, d0 = 0, d1 = 1, d2 = 13, d3 = 3, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
+const int rs = 12, en = 11, d0 = 1, d1 = 0, d2 = 13, d3 = 3, d4 = 4, d5 = 5, d6 = 6, d7 = 7; // d0 and d1 are switched in the implementation
 int _data_pins[] = {d0, d1, d2, d3, d4, d5, d6, d7};    // For modified write4bits we're using
 LiquidCrystal lcd(rs, en, d0, d1, d2, d3, d4, d5, d6, d7);
 
