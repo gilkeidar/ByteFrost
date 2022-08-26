@@ -30,9 +30,9 @@ SMA R0, #11     //	.
 //	Make the root node
 LMA R0, #1		//	R0 = elements[0]
 PUSH R0			//	add_new_node(elements[0])
-JSR #0x2c	//	.
-LDR R1, #1		//	i = 1
-LDR R2, #10		//	R2 = num_elements (10)
+JSR #0x2c		//	.
+LDR R1, #2		//	i = 2
+LDR R2, #11		//	R2 = num_elements (11)
 //	:do_while
 PUSH R1			//	Save R1
 PUSH R2			//	Save R2
