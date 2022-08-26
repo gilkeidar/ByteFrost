@@ -47,7 +47,7 @@ SUB R3, R1, R2	//	while (i < num_elements);
 BMI #0x1c		//	.
 LDR R0, #30		//	R0 = root address (30)
 PUSH R0			//	Push root address
-JSR #0x63		//	traverse(root);
+JSR #0x6e		//	traverse(root);
 OUT #0x10, A		//	printf("\n");
 BRK
 
@@ -77,16 +77,16 @@ MOV R0, R1				// 	R0 = root
 MOV R1, R2				//	R1 = element
 LMR R2, R0				//	R2 = root->value
 SUB R3, R2, R1			//	R3 = root->value - element
-BPL #0x58		//	if (root->value < element) {
+BPL #0x58				//	if (root->value < element) {
 LDR R2, #2				//	R2 = 2
 ADD R2, R0, R2			//	R2 = &(root->right)
 LMR R3, R2				//	R3 = root->right
-BNE #0x53	//	if (root->right == NULL)
+BNE #0x53				//	if (root->right == NULL)
 PUSH R0					//	Save R0
 PUSH R1					//	Save R1
 PUSH R2					//	Save R2
 PUSH R1					//	add_new_node(element);
-JSR #0x2c	//	.
+JSR #0x2c				//	.
 POP R3					//	R3 = next_node (return value)
 POP R2					//	Restore R2
 POP R1					//	Restore R1
@@ -111,7 +111,7 @@ PUSH R0					//	Save R0
 PUSH R1					//	Save R1
 PUSH R2					//	Save R2
 PUSH R1					//	add_new_node(element);
-JSR #0x2c	//	.
+JSR #0x2c				//	.
 POP R3					//	R3 = next_node (return value)
 POP R2					//	Restore R2
 POP R1					//	Restore R1
@@ -130,7 +130,7 @@ POP	R0					//	R0 = return address
 POP R1					//	R1 = root (parameter variable)
 PUSH R0					// 	Push return address
 SUB R1, #0				// 	if (R1 (root) == NULL)
-BNE #0x74	//	.
+BNE #0x74				//	.
 RTS						//	return;
 //	:traverse_func_core
 INC R1					//	R1 = &(root->left)
