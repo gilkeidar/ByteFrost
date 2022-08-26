@@ -40,15 +40,25 @@ LMR R3, R1		//	R3 = element
 PUSH R3			//	Push element
 LDR R3, #30		//	R3 = root address (30)
 PUSH R3			//	Push root
-JSR #0x3c		//	insert(tree, elements[i]);
+JSR #0x46		//	insert(tree, elements[i]);
 POP R2			//	Restore R2
 POP R1			//	Restore R1
 INC R1			//	i++
+PUSH R0			//	Save R0
+PUSH R1			//	Save R1
+PUSH R2			//	Save R2
+LDR R0, #30		//	R0 = root address (30)
+PUSH R0			//	Push root address
+JSR #0x79		//	traverse(root);
+POP R0			//	Pop return value
+POP R2			//	Restore R2
+POP R1			//	Restore R1
+POP R0			//	Restore R0
 SUB R3, R1, R2	//	while (i < num_elements);
 BMI #0x1c		//	.
 LDR R0, #30		//	R0 = root address (30)
 PUSH R0			//	Push root address
-JSR #0x6f		//	traverse(root);
+JSR #0x79		//	traverse(root);
 OUT #0x10, A		//	printf("\n");
 BRK
 
@@ -78,16 +88,16 @@ MOV R0, R1				// 	R0 = root
 MOV R1, R2				//	R1 = element
 LMR R2, R0				//	R2 = root->value
 SUB R3, R2, R1			//	R3 = root->value - element
-BPL #0x59				//	if (root->value < element) {
+BPL #0x63				//	if (root->value < element) {
 LDR R2, #2				//	R2 = 2
 ADD R2, R0, R2			//	R2 = &(root->right)
 LMR R3, R2				//	R3 = root->right
-BNE #0x54				//	if (root->right == NULL)
+BNE #0x5e				//	if (root->right == NULL)
 PUSH R0					//	Save R0
 PUSH R1					//	Save R1
 PUSH R2					//	Save R2
 PUSH R1					//	add_new_node(element);
-JSR #0x2d				//	.
+JSR #0x37				//	.
 POP R3					//	R3 = next_node (return value)
 POP R2					//	Restore R2
 POP R1					//	Restore R1
@@ -98,21 +108,21 @@ RTS
 PUSH R1					//	Push R1 (element)
 LMR R2, R2				//	R2 = root->right
 PUSH R2					//	Push R2 (root->right)
-JSR #0x3c				//	insert(root->right, element);
+JSR #0x46				//	insert(root->right, element);
 RTS
 //	:insert_else_if
-BNE #0x5a				// if (root->value == element) return;
+BNE #0x65				// if (root->value == element) return;
 RTS
 //	:insert_else_if_if
 LDR R2, #1				// 	R2 = 1
 ADD R2, R0, R2			//	R2 = &(root->left)
 LMR R3, R2				// 	R3 = root->left
-BNE #0x6a
+BNE #0x74
 PUSH R0					//	Save R0
 PUSH R1					//	Save R1
 PUSH R2					//	Save R2
 PUSH R1					//	add_new_node(element);
-JSR #0x2d				//	.
+JSR #0x37				//	.
 POP R3					//	R3 = next_node (return value)
 POP R2					//	Restore R2
 POP R1					//	Restore R1
@@ -123,7 +133,7 @@ RTS
 PUSH R1					//	Push R1 (element)
 LMR R2, R2				//	R2 = root->left
 PUSH R2					//	Push R2 (root->left)
-JSR #0x3c				//	insert(root->left, element);
+JSR #0x46				//	insert(root->left, element);
 RTS
 
 //	:traverse_func
@@ -131,14 +141,14 @@ POP	R0					//	R0 = return address
 POP R1					//	R1 = root (parameter variable)
 PUSH R0					// 	Push return address
 SUB R1, #0				// 	if (R1 (root) == NULL)
-BNE #0x75				//	.
+BNE #0x7f				//	.
 RTS						//	return;
 //	:traverse_func_core
 INC R1					//	R1 = &(root->left)
 LMR R0, R1				//	R0 = root->left
 PUSH R1					//	Save R1
 PUSH R0					//	traverse(root->left);
-JSR #0x6f				//	.
+JSR #0x79				//	.
 POP R1					//	Restore R1
 DEC R1					//	R1 = &(root->value)
 LMR R0, R1				//	R0 = root->value
@@ -147,5 +157,5 @@ OUT #0x20, A			//	printf(" ");
 ADD R1, #2				//	R1 = &(root->right)
 LMR R0, R1				// 	R0 = root->right
 PUSH R0					//	traverse(root->right);
-JSR #0x6f				//	.
+JSR #0x79				//	.
 RTS
