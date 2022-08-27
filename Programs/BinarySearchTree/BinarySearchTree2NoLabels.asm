@@ -27,10 +27,10 @@ SMA R3, #10
 //  Create Binary Search Tree
 LDR R0, #30		//	Set next_node = root address
 SMA R0, #11     //	.
-//	Make the root node
-LMA R0, #1		//	R0 = elements[0]
-PUSH R0			//	add_new_node(elements[0])
-JSR #0x2d		//	.
+//	Make the root node 
+LMA R0, #1		//	R0 = elements[0] 
+PUSH R0			//	add_new_node(elements[0]) 
+JSR #0x37		//	.
 LDR R1, #2		//	i = 2
 LDR R2, #11		//	R2 = num_elements (11)
 //	:do_while 
