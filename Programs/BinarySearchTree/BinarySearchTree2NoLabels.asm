@@ -33,13 +33,13 @@ PUSH R0			//	add_new_node(elements[0])
 JSR #0x2d		//	.
 LDR R1, #2		//	i = 2
 LDR R2, #11		//	R2 = num_elements (11)
-//	:do_while
-PUSH R1			//	Save R1
-PUSH R2			//	Save R2
-LMR R3, R1		//	R3 = element
-PUSH R3			//	Push element
-LDR R3, #30		//	R3 = root address (30)
-PUSH R3			//	Push root
+//	:do_while 
+PUSH R1			//	Save R1 
+PUSH R2			//	Save R2 
+LMR R3, R1		//	R3 = element 
+PUSH R3			//	Push element 
+LDR R3, #30		//	R3 = root address (30) 
+PUSH R3			//	Push root 
 JSR #0x46		//	insert(tree, elements[i]);
 POP R2			//	Restore R2
 POP R1			//	Restore R1
