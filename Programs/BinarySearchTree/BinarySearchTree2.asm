@@ -44,6 +44,7 @@ JSR :insert_func	//	insert(tree, elements[i]);
 POP R2			//	Restore R2
 POP R1			//	Restore R1
 SUB R3, R1, R2	//	while (i < num_elements);
+INC R1			//	i++
 BMI :do_while	//	.
 LDR R0, #30		//	R0 = root address (30)
 PUSH R0			//	Push root address
@@ -78,9 +79,11 @@ MOV R1, R2				//	R1 = element
 LMR R2, R0				//	R2 = root->value
 SUB R3, R2, R1			//	R3 = root->value - element
 BPL :insert_else_if		//	if (root->value < element) {
-ADD R2, R0, #2			//	R2 = &(root->right)
+LDR R2, #2				//	R2 = 2
+ADD R2, R0, R2			//	R2 = &(root->right)
 LMR R3, R2				//	R3 = root->right
-BNE :insert_if_else		//	if (root->right == NULL)
+ADD R3, #0				//	if (root->right == NULL)
+BNE :insert_if_else		//	.
 PUSH R0					//	Save R0
 PUSH R1					//	Save R1
 PUSH R2					//	Save R2
@@ -102,7 +105,8 @@ RTS
 BNE :insert_else_if_if			// if (root->value == element) return;
 RTS
 :insert_else_if_if
-ADD R2, R0, #1			//	R2 = &(root->left)
+LDR R2, #1				//	R2 = 1
+ADD R2, R0, R2			//	R2 = &(root->left)
 LMR R3, R2				// 	R3 = root->left
 BNE :insert_else_if_else
 PUSH R0					//	Save R0
@@ -141,7 +145,7 @@ DEC R1					//	R1 = &(root->value)
 LMR R0, R1				//	R0 = root->value
 OUT R0, I				//	printf("%d", root->value);
 OUT #0x20, A			//	printf(" ");
-ADD R1, R1, #2			//	R1 = &(root->right)
+ADD R1, #2				//	R1 = &(root->right)
 LMR R0, R1				// 	R0 = root->right
 PUSH R0					//	traverse(root->right);
 JSR :traverse_func		//	.

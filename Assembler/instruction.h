@@ -11,7 +11,8 @@ typedef enum param {
     immediate,
     out_ai,
     out_id,
-    branch_amt
+    branch_amt,
+    label
 } param;
 
 typedef struct Instruction
