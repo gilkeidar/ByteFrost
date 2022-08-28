@@ -103,6 +103,7 @@ int main(int argc, char ** argv)
         rewind(ifptr);
         rewind(ofptr);
         finished_reading = 0;
+        current_instruction = current_line = 1;
     }
 
     fclose(ifptr);
