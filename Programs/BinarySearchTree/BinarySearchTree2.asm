@@ -31,8 +31,8 @@ SMA R0, #11     //	.
 LMA R0, #1		//	R0 = elements[0]
 PUSH R0			//	add_new_node(elements[0])
 JSR :add_new_node_func	//	.
-LDR R1, #1		//	i = 1
-LDR R2, #10		//	R2 = num_elements (10)
+LDR R1, #2		//	i = 2
+LDR R2, #11		//	R2 = num_elements (11)
 :do_while
 OUT R1, I		//	Print i
 OUT #0x10, A	//	Print '\n'
@@ -43,9 +43,9 @@ PUSH R3			//	Push element
 LDR R3, #30		//	R3 = root address (30)
 PUSH R3			//	Push root
 JSR :insert_func	//	insert(tree, elements[i]);
-LDR R3, #30		//	R3 = root address (30)
-PUSH R3			//	Push root address
-JSR :traverse_func	//	traverse(root);
+//LDR R3, #30		//	R3 = root address (30)
+//PUSH R3			//	Push root address
+//JSR :traverse_func	//	traverse(root);
 POP R2			//	Restore R2
 POP R1			//	Restore R1
 INC R1			//	i++
