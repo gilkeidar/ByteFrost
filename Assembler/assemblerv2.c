@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
+// This is unix only #include <unistd.h> - source code for getopt is added 
 #include <string.h>
 #include <ctype.h>
 #include "errorv2.h"
@@ -118,55 +118,83 @@ void get_input(char ** argv, int argc, int * b_flag, char ** input_file_name, ch
     int index;                      //  Index (used to check for non-option characters)
 
     //  Get input flags
-    while ((current_flag = getopt(argc, argv, "bo:")) != -1)
+    for (index = 1; index < argc; index++)
     {
-        switch (current_flag)
+        if(argv[index][0] == '-')
         {
+            switch(argv[index][1])
+            {
             case 'b':
                 printf("Binary mode activated.\n");
                 *b_flag = 1;
                 break;
             case 'o':
                 o_flag = 1;
-                *output_file_name = optarg;
+                *output_file_name = argv[++index];
                 printf("Output file name: %s\n", *output_file_name);
-                break;
-            case '?':
-                if (optopt == 'o')
-                {
-                    fprintf(stderr, "ERROR: INPUT_FORMAT_ERROR: Option -%c requires an argument.\n", optopt);
-                    exit(INPUT_FORMAT_ERROR);
-                }
-                else
-                {
-                    fprintf(stderr, "ERROR: INPUT_FORMAT_ERROR: Unknown option -%c.\n", optopt);
-                    exit(INPUT_FORMAT_ERROR);
-                }
                 break;
             default:
                 fprintf(stderr, "default case reached.\n");
                 break;
+    
+            }
+
         }
-    }
-
-    //  Get file names
-    for (index = optind; index < argc; index++)
-    {
-        printf("Non-option argument %s\n", argv[index]);
-
-        //  First non-option argument assumed to be input file name
-        if (!got_input_file)
+        else
         {
             *input_file_name = argv[index];
             got_input_file = 1;
         }
-        else
-        {
-            //  Already read input file name - incorrect number of args
-            fprintf(stderr, "ERROR: INCORRECT_NUM_INPUTS: Incorrect number of arguments.\n");
-            exit(INCORRECT_NUM_INPUTS);
-        }
     }
+    // while ((current_flag = getopt(argc, argv, "bo:")) != -1)
+    // {
+    //     switch (current_flag)
+    //     {
+    //         case 'b':
+    //             printf("Binary mode activated.\n");
+    //             *b_flag = 1;
+    //             break;
+    //         case 'o':
+    //             o_flag = 1;
+    //             *output_file_name = optarg;
+    //             printf("Output file name: %s\n", *output_file_name);
+    //             break;
+    //         case '?':
+    //             if (optopt == 'o')
+    //             {
+    //                 fprintf(stderr, "ERROR: INPUT_FORMAT_ERROR: Option -%c requires an argument.\n", optopt);
+    //                 exit(INPUT_FORMAT_ERROR);
+    //             }
+    //             else
+    //             {
+    //                 fprintf(stderr, "ERROR: INPUT_FORMAT_ERROR: Unknown option -%c.\n", optopt);
+    //                 exit(INPUT_FORMAT_ERROR);
+    //             }
+    //             break;
+    //         default:
+    //             fprintf(stderr, "default case reached.\n");
+    //             break;
+    //     }
+    // }
+
+    // //  Get file names
+     // for (index = optind; index < argc; index++)
+    // {
+    //     printf("Non-option argument %d: %s\n", index, argv[index]);
+
+    //     //  First non-option argument assumed to be input file name
+    //     if (!got_input_file)
+    //     {
+    //         *input_file_name = argv[index];
+    //         got_input_file = 1;
+    //     }
+    //     else
+    //     {
+    //         //  Already read input file name - incorrect number of args
+    //         fprintf(stderr, "ERROR: INCORRECT_NUM_INPUTS: Incorrect number of arguments.\n");
+    //         exit(INCORRECT_NUM_INPUTS);
+    //     }
+    // }
 
     if (!got_input_file)
     {
@@ -848,3 +876,4 @@ int rel_branch_handler(Instruction * this, uint8_t * instruction)
 
 	return 0;
 }
+

@@ -43,8 +43,8 @@ PUSH R3			//	Push root
 JSR :insert_func	//	insert(tree, elements[i]);
 POP R2			//	Restore R2
 POP R1			//	Restore R1
-SUB R3, R1, R2	//	while (i < num_elements);
 INC R1			//	i++
+SUB R3, R1, R2	//	while (i < num_elements);
 BMI :do_while	//	.
 LDR R0, #30		//	R0 = root address (30)
 PUSH R0			//	Push root address
@@ -108,7 +108,8 @@ RTS
 LDR R2, #1				//	R2 = 1
 ADD R2, R0, R2			//	R2 = &(root->left)
 LMR R3, R2				// 	R3 = root->left
-BNE :insert_else_if_else
+ADD R3, #0					//	if (root->left == NULL)
+BNE :insert_else_if_else	//	.
 PUSH R0					//	Save R0
 PUSH R1					//	Save R1
 PUSH R2					//	Save R2
