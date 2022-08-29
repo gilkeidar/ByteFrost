@@ -13,5 +13,8 @@ Arduino code for the ByteFrost's display card (an Arduino Nano) for a 2004A LCD 
 ## Documentation
 Documentation for the ByteFrost computer. Includes hardware documentation (i.e. schematics) and software documentation (instruction set specifications, control signal lists, each instruction's micro-code and structure, and assembly syntax). For more documentation, see the [wiki](https://github.com/gilkeidar/ByteFrost/wiki).
 
+## Microcode
+Arduino code for programming the three microcode EEPROMs (using Ben Eater's [EEPROM programmer](https://github.com/beneater/eeprom-programmer/blob/master/eeprom-programmer/eeprom-programmer.ino) as a basis).
+
 ## Programs
 Programs written in ByteFrost assembly that can be compiled using the assembler and run on the ByteFrost computer. Each program comes with the assembly code (`.asm` file), machine language compilation (`.mlg` file), and a binary file (`.bin` file).
