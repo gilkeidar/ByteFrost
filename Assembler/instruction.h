@@ -454,5 +454,31 @@ Instruction assembly[] = {
         {none},
         {0},
         basic_handler
+    },
+    // Test and Compare
+    {
+        "COMP",             // COMP Rs1, Rs2 (equivalent to SUB Rd, Rs1, Rs2 without saving result to Rd)
+        2,
+        {0x12, 0x07},
+        {reg, reg},
+        {12, 14},
+        basic_handler
+    },
+    {
+        "COMP",             // COMP Rs1, immediate (equivalent to SUB Rs1, immediate without saving result to Rs1)
+        2,
+        {0x13, 0x07},
+        {reg, immediate},
+        {6, 12},
+        basic_handler
+    },
+    {
+        "TST",              //  TST Rs  (equivalent to ADD Rs, #0)
+        1,
+        {0x06, 0x06},
+        {reg},
+        {6},
+        basic_handler
     }
+
 };
