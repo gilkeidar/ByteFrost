@@ -24,6 +24,7 @@ char *input_buf;                            //  Input buffer (stores current lin
 int finished_reading = 0;                   //  Finished reading file
 char tokens[MAX_TOKENS][MAX_TOKEN_LENGTH];	//  Assembly code split into tokens
 Label * root = NULL;                        //  Label binary search tree root
+int pass = 1;                               //  Current assembler pass
 
 int main(int argc, char ** argv)
 {
@@ -38,8 +39,8 @@ int main(int argc, char ** argv)
     get_input(argv, argc, &b_flag, &input_file_name, &output_file_name);
 
     //  Got input
-    printf("Input file name:\t%s\n", input_file_name);
-    printf("Output file name:\t%s\n", output_file_name);
+    //printf("Input file name:\t%s\n", input_file_name);
+    //printf("Output file name:\t%s\n", output_file_name);
 
     /*  Step 2: Run through input file twice to get and replace labels with addresses   */
     FILE *ifptr = fopen(input_file_name, "r");
@@ -65,15 +66,14 @@ int main(int argc, char ** argv)
     //  Allocate memory for input buffer
     input_buf = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
 
-    int i;
     int num_tokens;
     uint8_t instruction[2];
     
-    for (int i = 0; i < 2; i++)
+    for (pass = 0; pass < 2; pass++)
     {
-        if (i == 1)
+        if (pass == 1)
         {
-            printf("\n\nSECOND PASS\n\n");
+            //printf("\n\nSECOND PASS\n\n");
         }
         while (!finished_reading)
         {
@@ -131,7 +131,7 @@ void get_input(char ** argv, int argc, int * b_flag, char ** input_file_name, ch
             case 'o':
                 o_flag = 1;
                 *output_file_name = argv[++index];
-                printf("Output file name: %s\n", *output_file_name);
+                //printf("Output file name: %s\n", *output_file_name);
                 break;
             default:
                 fprintf(stderr, "default case reached.\n");
@@ -425,7 +425,7 @@ char * integer_to_imm_string(int n)
     }
     string[length - 1] = '\0';
 
-    printf("Label address: %d\tImmediate string: %s\n", n, string);
+    //printf("Label address: %d\tImmediate string: %s\n", n, string);
 
     return string;
 }
@@ -437,11 +437,19 @@ char * get_label_address(Label * current, char * label_name)
     char * label_address = NULL;
     if (current == NULL)
     {
-        printf("Current is null, returning 0 immediate\n");
+        //printf("Current is null, returning 0 immediate\n");
+        if (pass == 1)
+        {
+            //  Second pass occurs but label not found - this is likely a call to a label that doesn't exist, so throw an error
+            fprintf(stderr, "ERROR: Label %s not found in line %d >>>> %s\n\n", label_name, current_line, input_buf);
+
+            // Exit
+            exit(0);
+        }
         return zero_imm;
     }
 
-    printf("current->label: %s\tlabel_name: %s\n", current->label, label_name);
+    //printf("current->label: %s\tlabel_name: %s\n", current->label, label_name);
 
     if (strcmp(current->label, label_name) == 0)
     {
@@ -573,7 +581,9 @@ char * get_label_name(char * label)
         name[i - 1] = label[i];
     }
 
-    name[i] = '\0';
+    name[i - 1] = '\0';
+
+    //printf("Label: %s\tLabel name: %s\n", label, name);
 
     return name;
 }
@@ -642,7 +652,7 @@ void traverse_label_tree(Label * current)
 {
     if (current == NULL) return;
     traverse_label_tree(current->left);
-    printf("Label: %s, instruction number %d\n", current->label, current->instruction);
+    //printf("Label: %s, instruction number %d\n", current->label, current->instruction);
     traverse_label_tree(current->right);
 }
 
