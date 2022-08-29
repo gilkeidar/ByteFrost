@@ -98,7 +98,7 @@
 0x8f,  0x00, // 0x55: POP R2					//	Restore R2
 0x4f,  0x00, // 0x56: POP R1					//	Restore R1
 0x0f,  0x00, // 0x57: POP R0					// 	Restore R0
-0xcb,  0x20, // 0x58: LMR R3, R2				//	root->right = next_node (return value)
+0xcc,  0x20, // 0x58: SMR R3, R2				//	root->right = next_node (return value)
 0x11,  0x00, // 0x59: RTS
 // :insert_if_else
 0x0e,  0x10, // 0x5a: PUSH R1					//	Push R1 (element)
@@ -124,7 +124,7 @@
 0x8f,  0x00, // 0x6c: POP R2					//	Restore R2
 0x4f,  0x00, // 0x6d: POP R1					//	Restore R1
 0x0f,  0x00, // 0x6e: POP R0					// 	Restore R0
-0xcb,  0x20, // 0x6f: LMR R3, R2				//	root->left = next_node (return value)
+0xcc,  0x20, // 0x6f: SMR R3, R2				//	root->left = next_node (return value)
 0x11,  0x00, // 0x70: RTS
 // :insert_else_if_else
 0x0e,  0x10, // 0x71: PUSH R1					//	Push R1 (element)

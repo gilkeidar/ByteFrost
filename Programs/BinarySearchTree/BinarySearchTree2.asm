@@ -98,7 +98,7 @@ POP R3					//	R3 = next_node (return value)
 POP R2					//	Restore R2
 POP R1					//	Restore R1
 POP R0					// 	Restore R0
-LMR R3, R2				//	root->right = next_node (return value)
+SMR R3, R2				//	root->right = next_node (return value)
 RTS
 :insert_if_else
 PUSH R1					//	Push R1 (element)
@@ -124,7 +124,7 @@ POP R3					//	R3 = next_node (return value)
 POP R2					//	Restore R2
 POP R1					//	Restore R1
 POP R0					// 	Restore R0
-LMR R3, R2				//	root->left = next_node (return value)
+SMR R3, R2				//	root->left = next_node (return value)
 RTS
 :insert_else_if_else
 PUSH R1					//	Push R1 (element)
