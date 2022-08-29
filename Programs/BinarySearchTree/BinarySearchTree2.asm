@@ -43,6 +43,9 @@ PUSH R3			//	Push element
 LDR R3, #30		//	R3 = root address (30)
 PUSH R3			//	Push root
 JSR :insert_func	//	insert(tree, elements[i]);
+LDR R3, #30		//	R3 = root address (30)
+PUSH R3			//	Push root address
+JSR :traverse_func	//	traverse(root);
 POP R2			//	Restore R2
 POP R1			//	Restore R1
 INC R1			//	i++
