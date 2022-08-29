@@ -343,7 +343,7 @@ int write_machine_code()
     if (get_label())
     {
         //  Line starts with a label - return 0 tokens
-        printf("Line starts with a label\n");
+        //printf("Line starts with a label\n");
         return 0;
     }
 	int comment_index = get_comment(), i;
@@ -396,23 +396,23 @@ int write_machine_code()
 
 int num_digits(int n)
 {
-    printf("input n: %d\n", n);
+    //printf("input n: %d\n", n);
     int digits = 1;
 
     while ((n /= 10) > 0)
     {
-        printf("n: %d\n", n);
+        //printf("n: %d\n", n);
         digits++;
     }
 
-    printf("Integer: %d\tNum digits: %d\n", n, digits);
+    //printf("Integer: %d\tNum digits: %d\n", n, digits);
 
     return digits;
 }
 
 char * integer_to_imm_string(int n)
 {
-    printf("INTEGER_TO_IMM_STRING()\n");
+    //printf("INTEGER_TO_IMM_STRING()\n");
     int length = num_digits(n) + 2; // + 2 for '#' and '\0' characters
     int i;
     char * string = (char *)malloc(length * sizeof(char));
@@ -433,7 +433,7 @@ char * integer_to_imm_string(int n)
 char * zero_imm = "#0";
 char * get_label_address(Label * current, char * label_name)
 {
-    printf("get_label_address()\n");
+    //printf("get_label_address()\n");
     char * label_address = NULL;
     if (current == NULL)
     {
@@ -445,17 +445,17 @@ char * get_label_address(Label * current, char * label_name)
 
     if (strcmp(current->label, label_name) == 0)
     {
-        printf("Found label!\n");
+        //printf("Found label!\n");
         return integer_to_imm_string(current->instruction);
     }
     
     if (strcmp(current->label, label_name) < 0)
     {
-        printf("Traversing label to right child\n");
+        //printf("Traversing label to right child\n");
         return get_label_address(current->right, label_name);
     }
 
-    printf("Traversing label to left child\n");
+    //printf("Traversing label to left child\n");
     return get_label_address(current->left, label_name);
 }
 
@@ -591,11 +591,11 @@ Label * add_new_label()
 void insert_label(Label * current)
 {
     //  Add label to binary search tree
-    printf("insert_label()\n");
+    //printf("insert_label()\n");
 
     if (current == NULL)
     {
-        printf("current is NULL\n");
+        //printf("current is NULL\n");
         //  First label to be added
         root = add_new_label();
 
@@ -657,17 +657,17 @@ void write_line(uint8_t * instruction, FILE * ofptr, int num_tokens, int binary_
 	// if (*current_char == '/')
 	// 	has_comment = 1;
 
-    printf("write_line()\n");
+    //printf("write_line()\n");
 
     if (num_tokens == 0 && input_buf[0] == ':')
     {
-        printf("Line started with a label\n");
+        //printf("Line started with a label\n");
         //  Insert label to label binary search tree
         insert_label(root);
 
-        printf("Root is null: %d\n", root == NULL);
+        //printf("Root is null: %d\n", root == NULL);
 
-        printf("finished inserting label\n");
+        //printf("finished inserting label\n");
 
         if (!binary_flag)
         {
