@@ -34,6 +34,8 @@ JSR :add_new_node_func	//	.
 LDR R1, #1		//	i = 1
 LDR R2, #10		//	R2 = num_elements (10)
 :do_while
+OUT R1, I		//	Print i
+OUT #0x10, A	//	Print '\n'
 PUSH R1			//	Save R1
 PUSH R2			//	Save R2
 LMR R3, R1		//	R3 = element
