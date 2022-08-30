@@ -49,7 +49,7 @@ JSR :insert_func	//	insert(tree, elements[i]);
 POP R2			//	Restore R2
 POP R1			//	Restore R1
 INC R1			//	i++
-SUB R3, R1, R2	//	while (i < num_elements);
+COMP R1, R2	//	while (i < num_elements);
 BMI :do_while	//	.
 LDR R0, #30		//	R0 = root address (30)
 PUSH R0			//	Push root address
