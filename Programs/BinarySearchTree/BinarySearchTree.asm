@@ -49,7 +49,7 @@ JSR :insert_func	//	insert(tree, elements[i]);
 POP R2			//	Restore R2
 POP R1			//	Restore R1
 INC R1			//	i++
-COMP R1, R2	//	while (i < num_elements);
+COMP R1, R2		//	while (i < num_elements);
 BMI :do_while	//	.
 LDR R0, #30		//	R0 = root address (30)
 PUSH R0			//	Push root address
@@ -82,12 +82,12 @@ PUSH R0					//	push return address
 MOV R0, R1				// 	R0 = root
 MOV R1, R2				//	R1 = element
 LMR R2, R0				//	R2 = root->value
-SUB R3, R2, R1			//	R3 = root->value - element
+COMP R2, R1				//	comp root->value - element
 BPL :insert_else_if		//	if (root->value < element) {
 LDR R2, #2				//	R2 = 2
 ADD R2, R0, R2			//	R2 = &(root->right)
 LMR R3, R2				//	R3 = root->right
-ADD R3, #0				//	if (root->right == NULL)
+TST R3					//	if (root->right == NULL)
 BNE :insert_if_else		//	.
 PUSH R0					//	Save R0
 PUSH R1					//	Save R1
@@ -113,7 +113,7 @@ RTS
 LDR R2, #1				//	R2 = 1
 ADD R2, R0, R2			//	R2 = &(root->left)
 LMR R3, R2				// 	R3 = root->left
-ADD R3, #0					//	if (root->left == NULL)
+TST R3					//	if (root->left == NULL)
 BNE :insert_else_if_else	//	.
 PUSH R0					//	Save R0
 PUSH R1					//	Save R1
@@ -137,7 +137,7 @@ RTS
 POP	R0					//	R0 = return address
 POP R1					//	R1 = root (parameter variable)
 PUSH R0					// 	Push return address
-SUB R1, #0				// 	if (R1 (root) == NULL)
+TST R1					// 	if (R1 (root) == NULL)
 BNE :traverse_func_core	//	.
 RTS						//	return;
 :traverse_func_core
