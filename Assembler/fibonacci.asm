@@ -1,0 +1,8 @@
+LDR R0, #0	// R0 = 0
+LDR R1, #1	// R1 = 1
+OUT R1, I
+ADD R0, R0, R1
+OUT R0, I
+ADD R1, R0, R1
+BPL -4
+BRK
