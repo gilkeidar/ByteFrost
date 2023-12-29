@@ -28,12 +28,6 @@ char * disk_dir_name = NULL;    //  Specified disk directory name
 
 //  Function prototypes
 
-/**
- * @brief Parse utility arguments from commandline
- * 
- * @param argv Argument array passed into main()
- * @param argc Length of argument array passed into main()
- */
 void getInput(char ** argv, int argc);
 void pack();
 void unpack();
@@ -76,7 +70,12 @@ int main(int argc, char ** argv) {
     }
 }
 
-
+/**
+ * @brief Parse utility arguments from commandline
+ * 
+ * @param argv Argument array passed into main()
+ * @param argc Length of argument array passed into main()
+ */
 void getInput(char ** argv, int argc) {
     printf("getInput()\n");
 
@@ -169,6 +168,10 @@ void getInput(char ** argv, int argc) {
     }
 }
 
+/**
+ * @brief Packs the disk directory (specified by -p flag parameter) into a
+ * ByteFrost disk file (name specified by -o flag parameter, or uses default)
+ */
 void pack() {
     printf("pack()\n");
 
@@ -204,10 +207,23 @@ void pack() {
         disk_dir_name, disk_file_name);
 }
 
+/**
+ * @brief Unpacks the ByteFrost disk file (specified by the -u parameter) into
+ * a directory with the name {disk file}_unpacked
+ */
 void unpack() {
     printf("unpack()\n");
 }
 
+/**
+ * @brief Opens the given directory and verifies that it is of the correct
+ * format for packing. Allocates a DiskDirectory struct with the directory's
+ * information and returns a pointer to it.
+ * 
+ * @param directory_name Name of the directory to open
+ * @return DiskDirectory * pointer to a DiskDirectory struct containing the
+ * specified directory's info
+ */
 DiskDirectory * getDiskDirectory(char * directory_name) {
     printf("getDiskDirectory()\n");
     //  Attempt to open the disk directory
@@ -432,6 +448,13 @@ DiskDirectory * getDiskDirectory(char * directory_name) {
     return disk_directory;
 }
 
+/**
+ * @brief Creates a new empty ByteFrost FileSystem version 1 disk file with
+ * the given name.
+ * 
+ * @param disk_name Name for the ByteFrost disk file
+ * @return FILE * File pointer to the created disk file
+ */
 FILE * createBFSDiskv1(char * disk_name) {
     printf("createBFSDiskv1()\n");
     //  Input validation
@@ -473,6 +496,14 @@ FILE * createBFSDiskv1(char * disk_name) {
     return disk;
 }
 
+/**
+ * @brief Writes the boot file in the given DiskDirectory struct into the
+ * given ByteFrost disk file.
+ * 
+ * @param disk_dir DiskDirectory struct that has a file pointer to the boot
+ * file
+ * @param disk File * for the ByteFrost disk file to write into
+ */
 void writeBootFile(DiskDirectory * disk_dir, FILE * disk) {
     printf("writeBootFile()\n");
     //  Input validation
@@ -498,6 +529,15 @@ void writeBootFile(DiskDirectory * disk_dir, FILE * disk) {
     }
 }
 
+/**
+ * @brief Writes the file with index fileIndex in disk_dir into the given
+ * ByteFrost disk file.
+ * 
+ * @param disk_dir DiskDirectory struct that has a file pointer of the file
+ * to write to the disk
+ * @param fileIndex index of the file in the DiskDirectory struct
+ * @param disk File * for the ByteFrost disk file to write into
+ */
 void writeFileToDisk(DiskDirectory * disk_dir, int fileIndex, FILE * disk) {
     printf("writeFileToDisk()\n");
     //  Input validation
@@ -607,9 +647,9 @@ void writeFileToDisk(DiskDirectory * disk_dir, int fileIndex, FILE * disk) {
 }
 
 /**
- * @brief Allocate an inode block
+ * @brief Allocate an inode block (updates the disk's inode freemap)
  * 
- * @param disk 
+ * @param disk File * to a ByteFrost disk file
  * @return int Returns an inode block pointer
  */
 int allocateInode(FILE * disk) {
@@ -684,6 +724,12 @@ int allocateInode(FILE * disk) {
     return -1;
 }
 
+/**
+ * @brief Allocates a data block (updates the data block free map in the disk)
+ * 
+ * @param disk File * of a ByteFrost disk file
+ * @return int the disk block number of the allocated data block
+ */
 int allocateDataBlock(FILE * disk) {
     printf("allocateDataBlock()\n");
 
@@ -739,6 +785,14 @@ int allocateDataBlock(FILE * disk) {
     return -1;
 }
 
+/**
+ * @brief Shifts the given integer (x) to the right by shiftAmt bits; always
+ * shifts in 0s from the left.
+ * 
+ * @param x integer whose value will be shifted
+ * @param shiftAmt number of bytes to shift x right
+ * @return int (x >> shiftAmt), with 0s coming in from the left
+ */
 int logicalShiftRight(int x, int shiftAmt) {
     //  Based on https://stackoverflow.com/a/16981120
     int size = sizeof(int) * 8;
@@ -755,8 +809,11 @@ int logicalShiftRight(int x, int shiftAmt) {
  * @brief Splits the given file name and returns an array of length 2 for the
  * filename before the extension and the extension
  * 
- * @param filename 
- * @return char ** 
+ * @param filename Filename to split
+ * @return char ** that points at an array of two strings, first being the
+ * string before the dot and the second being the string after the dot. It is
+ * possible that one (or both) strings are empty depending on the dot location
+ * and length of filename.
  */
 char ** splitFileExtension(char * filename) {
     //  Input validation
@@ -842,6 +899,15 @@ FileType getFileType(char * extension) {
     return UNKNOWN;
 }
 
+/**
+ * @brief Allocates a directory entry for the specified file (updates a 
+ * directory entry with the given filename and inode block pointer in the disk
+ * file)
+ * 
+ * @param filename Filename of the file to add to the directory
+ * @param inode_block Inode block of the given file
+ * @param disk File * to a ByteFrost disk file to write into
+ */
 void allocateDirectoryEntry(char * filename, int inode_block, FILE * disk) {
     printf("allocateDirectoryEntry()\n");
 
@@ -933,6 +999,14 @@ void allocateDirectoryEntry(char * filename, int inode_block, FILE * disk) {
     exit(UNEXPECTED_ERROR);
 }
 
+/**
+ * @brief Set the inode metadata for the specified inode (updates the inode
+ * in the given disk file)
+ * 
+ * @param type FileType (type of the file that uses this inode)
+ * @param inode_block Inode block number
+ * @param disk File * to a ByteFrost disk file to write into
+ */
 void setInodeMetadata(FileType type, int inode_block, FILE * disk) {
     printf("setInodeMetadata()\n");
 

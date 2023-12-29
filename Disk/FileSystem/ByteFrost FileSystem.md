@@ -18,7 +18,9 @@ the code, stack, heap, etc.).
 
 A few other changes may be necessary besides reading the program
 code from the disk into RAM in order to execute it, such as
-enlarging the address space slightly (perhaps initially a minor jump from 8-bit addressing to 9 or 10 bits, though eventually a 16-bit address space is desirable).
+enlarging the address space slightly (perhaps initially a minor jump from 8-bit 
+addressing to 9 or 10 bits, though eventually a 16-bit address space is 
+desirable).
 
 ##  File System version 1 Specs
 
@@ -33,7 +35,8 @@ enlarging the address space slightly (perhaps initially a minor jump from 8-bit 
 |   Maximum file size               |   `31.5 KB`   |
 |   Inode size                      |   `256 bytes` |
 
-~~Disk file size is `16 MB` so that disk block pointers are `16 bits` wide (even though most of the 16 MB won't be used; if all
+~~Disk file size is `16 MB` so that disk block pointers are `16 bits` wide (even
+though most of the 16 MB won't be used; if all
 16 files are at max size, a little over half a megabyte will be
 used up). In later versions, disk space will be used more fully.~~
 
@@ -53,8 +56,10 @@ The disk layout looks like this:
 (`(2 KB + 0.75 KB + 4 KB) / 512 KB = 1.3%` overhead, and
     `1.25 KB / 512 KB = 0.2%` unused).
 
-Each directory entry takes `16 bytes` of space (`15 bytes` for filename (15-char filenames) and `1 bytes` for inode block pointer (though disk block pointers
-are 11 bits long, all inode blocks are less than 256, so only one byte is needed)).
+Each directory entry takes `16 bytes` of space (`15 bytes` for filename (15-char
+filenames) and `1 bytes` for inode block pointer (though disk block pointers
+are 11 bits long, all inode blocks are less than 256, so only one byte is 
+needed)).
 
 If a filename takes the full 15 characters, no zero-sentinel is included. If its
 length is less than 15 characters, a zero senintel must be included.
