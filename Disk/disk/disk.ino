@@ -2,6 +2,7 @@
 
 #define OVERWRITE_DISK  0
 #define DEBUG           1
+#define DISK_BLOCK_SIZE 256
 
 //  PIN definitions
 //  Data Bus (RAM read / write data) PORTD (digital pins 0 - 7)
@@ -19,11 +20,18 @@ SdFile root;
 //  ByteFrost disk file
 File disk;
 
-//  ByteFrost disk file name
-const String BYTEFROST_DISK_NAME = "disk";
+//  ByteFrost config file
+File config;
+
+//  ByteFrost disk file name (default)
+const int MAX_DISK_NAME_LEN = 1024;
+const String BYTEFROST_DEFAULT_DISK_NAME = "disk";
+
+//  ByteFrost config file name
+const String BYTEFROST_CONFIG_FILE_NAME = "bf.con";
 
 //  Size of ByteFrost disk in KB
-const uint32_t BYTEFROST_DISK_SIZE = 1024;
+const uint32_t BYTEFROST_DISK_SIZE = 512;
 const int chipSelect = SDCARD_SS_PIN;
 
 /**
@@ -186,65 +194,65 @@ int printFile(String filename) {
  *  @param truncate if true (non-zero), override disk if it exists.
  *  @returns 1 if successful, and 0 otherwise.
  */
-int createDisk(int truncate) {
-  // Serial.println("Checking whether this SD card already has a ByteFrost disk file...");
+// int createDisk(int truncate) {
+//   // Serial.println("Checking whether this SD card already has a ByteFrost disk file...");
 
-  if (!truncate && SD.exists(BYTEFROST_DISK_NAME)) {
-    Serial.println("This SD card already has a ByteFrost disk file. Returning.");
+//   if (!truncate && SD.exists(BYTEFROST_DISK_NAME)) {
+//     Serial.println("This SD card already has a ByteFrost disk file. Returning.");
 
-    return 1;
-  }
+//     return 1;
+//   }
 
-  Serial.println("No ByteFrost disk file found or truncate was set. Creating one...");
+//   Serial.println("No ByteFrost disk file found or truncate was set. Creating one...");
 
-  File disk;
-  if (!(disk = SD.open(BYTEFROST_DISK_NAME, O_WRITE | O_CREAT))) {
-    Serial.println("Error: Failed to create ByteFrost disk file \"" + BYTEFROST_DISK_NAME + "\"!");
-    return 0;
-  }
+//   File disk;
+//   if (!(disk = SD.open(BYTEFROST_DISK_NAME, O_WRITE | O_CREAT))) {
+//     Serial.println("Error: Failed to create ByteFrost disk file \"" + BYTEFROST_DISK_NAME + "\"!");
+//     return 0;
+//   }
 
-  Serial.print("Initializing disk size to ");
-  Serial.print(BYTEFROST_DISK_SIZE, DEC);
-  Serial.println(" KB.");
+//   Serial.print("Initializing disk size to ");
+//   Serial.print(BYTEFROST_DISK_SIZE, DEC);
+//   Serial.println(" KB.");
 
-  //  Write from start of file
-  if (!disk.seek(0)) {
-    Serial.println("Error: Couldn't move to start of file.");
-  }
+//   //  Write from start of file
+//   if (!disk.seek(0)) {
+//     Serial.println("Error: Couldn't move to start of file.");
+//   }
 
-  //  Allocate a buffer
-  uint8_t buffer[1024];
+//   //  Allocate a buffer
+//   uint8_t buffer[1024];
 
-  //  Write buffer to disk file to set its size correctly
+//   //  Write buffer to disk file to set its size correctly
 
-  for (int i = 0; i < BYTEFROST_DISK_SIZE; i++) {
-    uint32_t bytesWritten = disk.write(buffer, 1024);
+//   for (int i = 0; i < BYTEFROST_DISK_SIZE; i++) {
+//     uint32_t bytesWritten = disk.write(buffer, 1024);
 
-    if (bytesWritten != 1024) {
-      Serial.print("Error: disk file initialized incorrectly.");
+//     if (bytesWritten != 1024) {
+//       Serial.print("Error: disk file initialized incorrectly.");
 
-      Serial.println("Attempting to remove corrupted disk file...");
+//       Serial.println("Attempting to remove corrupted disk file...");
 
-      disk.close();
+//       disk.close();
 
-      if (!SD.remove(BYTEFROST_DISK_NAME)) {
-        Serial.println("Error: Couldn't delete corrupted disk file.");
+//       if (!SD.remove(BYTEFROST_DISK_NAME)) {
+//         Serial.println("Error: Couldn't delete corrupted disk file.");
 
-        return 0;
-      }
+//         return 0;
+//       }
 
-      return 0;
-    }
-  }
+//       return 0;
+//     }
+//   }
 
-  disk.close();
+//   disk.close();
 
-  Serial.print("Successfully created file \"" + BYTEFROST_DISK_NAME + " \" of size ");
-  Serial.print(BYTEFROST_DISK_SIZE, DEC);
-  Serial.println(" KB.");
+//   Serial.print("Successfully created file \"" + BYTEFROST_DISK_NAME + " \" of size ");
+//   Serial.print(BYTEFROST_DISK_SIZE, DEC);
+//   Serial.println(" KB.");
 
-  return 1;
-}
+//   return 1;
+// }
 
 /**
  *  Go interrupt handler.
@@ -308,21 +316,145 @@ void setup() {
   Serial.println("================================");
 
   //  Create ByteFrost disk file (or if it exists, do nothing)
-  if (!createDisk(OVERWRITE_DISK)) {
-    while (1)
-      ;
-  }
+  // if (!createDisk(OVERWRITE_DISK)) {
+  //   while (1)
+  //     ;
+  // }
 
   #endif
 
+  //  Disk file name to search for (get from bytefrost.config)
+  String disk_file_name = BYTEFROST_DEFAULT_DISK_NAME;
+
+  //  Check that a config file exists and if so try to open it
+  if (SD.exists(BYTEFROST_CONFIG_FILE_NAME) 
+    && (config = SD.open(BYTEFROST_CONFIG_FILE_NAME.c_str(), FILE_READ))) 
+  {
+    //  Successfully opened the config file
+    #if DEBUG
+    Serial.println("Found " + BYTEFROST_CONFIG_FILE_NAME + " file!");
+    #endif
+
+    //  Store disk name in buffer
+    int disk_file_name_length = config.available();
+
+    if (disk_file_name_length > MAX_DISK_NAME_LEN) {
+      #if DEBUG
+      Serial.print("Error: disk name length is over ");
+      Serial.print(MAX_DISK_NAME_LEN);
+      Serial.println(" chars.");
+      #endif
+      while (1)
+        ;
+    }
+
+    char disk_name[disk_file_name_length + 1];
+    
+    config.read(disk_name, disk_file_name_length);
+
+    disk_name[disk_file_name_length] = '\0';
+
+    #if DEBUG
+    Serial.print("Disk file name: ");
+    Serial.println(disk_name);
+    #endif
+
+    disk_file_name = disk_name;
+  }
+  else {
+    //  Create the config file with default disk name
+    #if DEBUG
+    Serial.println("Error: " + BYTEFROST_CONFIG_FILE_NAME + " file not found. Creating it with default disk name.");
+    #endif
+
+    if (!(config = SD.open(BYTEFROST_CONFIG_FILE_NAME.c_str(), FILE_WRITE))) {
+      //  Failed to create config file
+      #if DEBUG
+      Serial.println("Error: Couldn't create " + BYTEFROST_CONFIG_FILE_NAME + " file.");
+      #endif
+
+      while (1)
+        ;
+    }
+
+    //  Write disk name into config file
+    int bytesWritten = config.print(disk_file_name);
+
+    if (bytesWritten != disk_file_name.length()) {
+      #if DEBUG
+      Serial.print("Error: Tried to write ");
+      Serial.print(disk_file_name.length());
+      Serial.print(" bytes to " + BYTEFROST_CONFIG_FILE_NAME + ", but only wrote ");
+      Serial.print(bytesWritten);
+      Serial.println(" bytes");
+      #endif
+
+      while (1)
+        ;
+    }
+    
+    config.close();
+
+    #if DEBUG
+    Serial.println("Created " + BYTEFROST_CONFIG_FILE_NAME + " file.");
+    #endif
+  }
+
   //  Open ByteFrost disk
-  if (!(disk = SD.open(BYTEFROST_DISK_NAME))) {
+  #if DEBUG
+  Serial.println("Opening ByteFrost disk file '" + disk_file_name + "'...");
+  #endif
+
+  if (!(disk = SD.open(disk_file_name))) {
     #if DEBUG
     Serial.println("Error: Couldn't open disk file.");
     #endif
     while (1)
       ;
   }
+
+  #if DEBUG
+  Serial.println("Opened ByteFrost disk file '" + disk_file_name + "'.");
+  #endif
+
+  #if DEBUG
+  Serial.println("Printing the first 30 disk blocks...\n");
+
+  char buf[DISK_BLOCK_SIZE];
+  int bytesRead;
+  for (int i = 0; i < 200; i++) {
+    bytesRead = disk.read(buf, DISK_BLOCK_SIZE);
+
+    if (bytesRead != DISK_BLOCK_SIZE) {
+      Serial.print("Error: Failed to read disk block ");
+      Serial.print(i);
+      Serial.print(": Tried to read ");
+      Serial.print(DISK_BLOCK_SIZE);
+      Serial.print(" bytes, but read ");
+      Serial.print(bytesRead);
+      Serial.println(" bytes instead.");
+
+      while (1)
+        ;
+    }
+    // Serial.print("Block ");
+    // Serial.print(i);
+    // Serial.println(":");
+
+    Serial.write(buf);
+    
+    // for (int j = 0; j < DISK_BLOCK_SIZE; j++) {
+    //   Serial.write(buf[j]);
+
+    //   // if (j % 64 == 0)
+    //   //   Serial.write("\n");
+    // }
+
+    // Serial.println();
+  }
+
+  #endif
+
 }
 
 void loop() {

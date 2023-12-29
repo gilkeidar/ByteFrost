@@ -50,6 +50,27 @@ The disk layout looks like this:
 |   `2043 - 2047`   |   `5`     |   `1.25 KB`   |   Unused              |
 
 `504 KB (data) / 512 KB (total) = 98.4%` of the disk can be used for data
-(`1.6%` overhead).
+(`(2 KB + 0.75 KB + 4 KB) / 512 KB = 1.3%` overhead, and
+    `1.25 KB / 512 KB = 0.2%` unused).
 
-Each directory entry takes `16 bytes` of space (`14 bytes` for filename (14-char filenames) and `2 bytes` for inode block pointer (`11 bits` of which are used as disk block pointers are 11 bits long)).
+Each directory entry takes `16 bytes` of space (`15 bytes` for filename (15-char filenames) and `1 bytes` for inode block pointer (though disk block pointers
+are 11 bits long, all inode blocks are less than 256, so only one byte is needed)).
+
+If a filename takes the full 15 characters, no zero-sentinel is included. If its
+length is less than 15 characters, a zero senintel must be included.
+
+To mark a directory entry invalid, set its inode block pointer to `0`.
+
+### Inode Structure
+
+|   Field                           |   Size        |
+|   ---                             |   ---         |
+|   File size (in bytes)            |   `2 bytes`   |
+|   File size (in blocks)           |   `1 byte`    |
+|   File type                       |   `1 byte`    |
+|   126 direct data block pointers  |   `252 bytes` |
+
+Each file can at most be allocated `126 blocks` (hence file size
+in blocks can be represented using one byte), and as the
+max file size is thus `31.5 KB`, the file size in bytes can be
+represented using two bytes.
