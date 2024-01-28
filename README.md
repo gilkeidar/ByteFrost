@@ -4,6 +4,9 @@ The Breadboard 8-bit CPU and Computer
 
 Be sure to check out the [YouTube channel](https://www.youtube.com/@bytefrost) for more in-depth explanations of how the ByteFrost works!
 
+![ByteFrost Under Development](ByteFrost.jpg)
+*ByteFrost under development*
+
 In this Github repository are software tools for using the ByteFrost computer:
 
 ## Assembler
