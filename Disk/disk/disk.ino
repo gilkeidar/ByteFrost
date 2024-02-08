@@ -629,65 +629,127 @@ uint16_t writeBeffer2Mem(uint16_t address)
     return i;
 }
 
+/**
+ * writeCommandToSR() Write hiByte and loByte to Shift Register.  
+ * This is a debug function only
+ * It requires 
+ *     LoByte to end with 010
+ *     hiByte to end with 001
+ *
+ */
+void writeCommandToSR(uint8_t loByte, uint8_t hiByte)
+{
+    Serial.print("SR loByte: 0x");
+    Serial.println(loByte, HEX);
+    Serial.print("SR hiByte: 0x");
+    Serial.println(hiByte, HEX);
+    //  Disable SRAM Read, Enable Write (for debug only)
+    REG_PORT_OUTSET1 = SRAM_OE_INV_PB03;
+    REG_PORT_OUTCLR1 = WE_INV_PB02;
+
+    setBusDirection(OUTPUT);
+ 
+    writeToBus(loByte);
+    // Debug only use RESET to trigger Load
+    REG_PORT_OUTCLR0 = RST_PA19;
+    REG_PORT_OUTSET0 = RST_PA19;
+
+    writeToBus(hiByte);
+    REG_PORT_OUTCLR0 = RST_PA19;
+    REG_PORT_OUTSET0 = RST_PA19;
+
+    setBusDirection(INPUT);
+    REG_PORT_OUTSET1 = WE_INV_PB02 | SRAM_OE_INV_PB03;
+}
 int num_iterations = 0;
-void loop() {
-  // put your main code here, to run repeatedly:
-  // Serial.println("Hello World from MKRZero!");
-  // digitalWrite(SHIFT, HIGH);
-  // REG_PORT_OUTSET1 = WE_INV_PB02 | SRAM_OE_INV_PB03;
-  // delay(1000);
-  // REG_PORT_OUTCLR1 = WE_INV_PB02 | SRAM_OE_INV_PB03;
-  // delay(1000);
+void loop() 
+{
+    // put your main code here, to run repeatedly:
+    // Serial.println("Hello World from MKRZero!");
+    // digitalWrite(SHIFT, HIGH);
+    // REG_PORT_OUTSET1 = WE_INV_PB02 | SRAM_OE_INV_PB03;
+    // delay(1000);
+    // REG_PORT_OUTCLR1 = WE_INV_PB02 | SRAM_OE_INV_PB03;
+    // delay(1000);
 
-  //  Loop to write a sector then read a sector once (then end)
+    //  Loop to write a sector then read a sector once (then end)
   
-  uint16_t return_val;
+    uint16_t return_val;
 
-  if (num_iterations < 1) {
+    if (num_iterations < 1) 
+    {
+        for(int i=0; i< SECTOR_SIZE; i++) 
+            sectorDataBuffer[i] = i; 
 
-    for(int i=0; i< SECTOR_SIZE; i++) 
-        sectorDataBuffer[i] = i; 
+        return_val = writeBeffer2Mem(0);
 
-    return_val = writeBeffer2Mem(0);
+        Serial.print("writeBeffer2Mem: ");
+        Serial.println(return_val);
+      
+        memset(sectorDataBuffer, 0, sizeof(sectorDataBuffer)); 
 
-    Serial.print("writeBeffer2Mem: ");
-    Serial.println(return_val);
-   
-    memset(sectorDataBuffer, 0, sizeof(sectorDataBuffer)); 
+        return_val = readMem2Buffer(0);
 
-    return_val = readMem2Buffer(0);
+        Serial.print("readMem2Buffer: ");
+        Serial.println(return_val);
 
-    Serial.print("readMem2Buffer: ");
-    Serial.println(return_val);
+    // Now check the read value is equal to the one initially written.
+        uint good_results = 0;
+        //  Read SECTOR_SIZE bytes
 
-// Now check the read value is equal to the one initially written.
-    uint good_results = 0;
-    //  Read SECTOR_SIZE bytes
+        for (uint16_t i = 0; i < SECTOR_SIZE; i++) 
+        {
+          //  Get current pointed to data value
+        
+          if (sectorDataBuffer[i] != i)
+          {
+            Serial.print("value at address ");
+            Serial.print(i);
+            Serial.print(":\t\t");
+            Serial.print((uint8_t)sectorDataBuffer[i]);
+            Serial.print(" | Broken bits: ");
+            Serial.print(sectorDataBuffer[i] ^ i);
+            Serial.print(" | Difference: ");
+            Serial.println(sectorDataBuffer[i] - i);
+          } else 
+          {
+            good_results++;
+          }
+        }
 
-    for (uint16_t i = 0; i < SECTOR_SIZE; i++) {
-      //  Get current pointed to data value
-     
-      if (sectorDataBuffer[i] != i)
-      {
-        Serial.print("value at address ");
-        Serial.print(i);
-        Serial.print(":\t\t");
-        Serial.print((uint8_t)sectorDataBuffer[i]);
-        Serial.print(" | Broken bits: ");
-        Serial.print(sectorDataBuffer[i] ^ i);
-        Serial.print(" | Difference: ");
-        Serial.println(sectorDataBuffer[i] - i);
-      } else 
-      {
-        good_results++;
-      }
+        // digitalWrite(SRAM_OE_INV, HIGH);
+        Serial.print("Good values: ");
+        Serial.print(good_results);
+        Serial.print(" / ");
+        Serial.println(SECTOR_SIZE);
+        num_iterations++;
+
+
+        // Test Serial Shift Register
+        uint16_t sr_cmd;
+        uint8_t sr_bit;
+        sr_cmd = 0;
+        int i;
+        // Flash the SRs
+        for (i = 0; i<16; i++)
+        {
+            digitalWrite(SHIFT, HIGH);
+            digitalWrite(SHIFT, LOW);
+        }
+        
+        // Now write something
+
+        writeCommandToSR(0x52, 0xE1); 
+        for (i = 0; i<16; i++)
+        {
+            sr_bit = digitalRead(SERIAL_IN);
+            sr_cmd  = (sr_cmd << 1) | sr_bit;
+            digitalWrite(SHIFT, HIGH);
+            digitalWrite(SHIFT, LOW);
+            Serial.print("SR bit: ");
+            Serial.println(sr_bit);
+        }
+        Serial.print("SR Command: 0x");
+        Serial.println(sr_cmd, HEX);
     }
-
-    // digitalWrite(SRAM_OE_INV, HIGH);
-    Serial.print("Good values: ");
-    Serial.print(good_results);
-    Serial.print(" / ");
-    Serial.println(SECTOR_SIZE);
-    num_iterations++;
-  }
 }
