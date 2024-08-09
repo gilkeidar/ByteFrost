@@ -479,6 +479,15 @@ Instruction assembly[] = {
         {reg},
         {6},
         basic_handler
+    },
+    //  Load Special Register
+    {
+        "LSP",              //  LSP immediate
+        1,
+        {0x14, 0x00},
+        {immediate},
+        {6},
+        basic_handler
     }
 
 };
