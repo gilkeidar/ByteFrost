@@ -1,5 +1,5 @@
 //////////////////////////////////
-// Enhance to 16bit attress range
+// Enhance to 16bit address range
 // 0x0000 .. 0x1FFF  ROM 
 // 0x2000 .. 0xDFFF  RAM
 // 0xE000 .. 0xFFFF  Registers (MMIO)
@@ -7,8 +7,8 @@
 // Set Stack Pointer to 0x7700
 //////////////////////////////////
 
-LSP DP, #0x40
-LSP SP, #0x77
+LSP %DP, #0x40
+LSP %SP, #0x77
 
 //////////////////////////////////
 // Test 1: Shift Left (8: ASL)  //
@@ -32,7 +32,7 @@ OUT #0x20, A  // Print ' '
 ASL R2, R2    // (Unlike ROL, ASL does not take the carry in back)
 OUT R2, I     //            (0xD0)   
 LDR R3, #0xD0 
-SUB R3, R3, R2           (carry is set)   
+SUB R3, R3, R2// (carry is set)   
 BEQ +2        // RELATIVE JUMP
 BRK           // Test 1 failed
 ADD R3, #0x01 // (reset carry)
@@ -323,6 +323,7 @@ OUT #0x10, A  // Newline
     SUB R2, R2, R1
     BEQ +2
     BRK     // Fail R1 != R2
+	INC R1 
     BNE -19
 
 // End of BIST    

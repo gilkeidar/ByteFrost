@@ -1,3 +1,15 @@
+//////////////////////////////////
+// Enhance to 16bit address range
+// 0x0000 .. 0x1FFF  ROM 
+// 0x2000 .. 0xDFFF  RAM
+// 0xE000 .. 0xFFFF  Registers (MMIO)
+// Set Data Pointer to  0x4000
+// Set Stack Pointer to 0x7700
+//////////////////////////////////
+
+LSP %DP, #0x40
+LSP %SP, #0x77
+
 // Setup
 LDR R0, #0	// row (R0) = 0
 SMR R0, R0	// board[0] = 0

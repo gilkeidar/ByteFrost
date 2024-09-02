@@ -7,7 +7,8 @@
 typedef enum param {
     none, 
     instruction, 
-    reg, 
+    reg,
+    special_reg,
     immediate,
     out_ai,
     out_id,
@@ -482,11 +483,11 @@ Instruction assembly[] = {
     },
     //  Load Special Register
     {
-        "LSP",              //  LSP immediate
-        1,
+        "LSP",              //  LSP SPECIAL_REG, immediate 
+        2,
         {0x14, 0x00},
-        {immediate},
-        {6},
+        {special_reg, immediate},
+        {6, 8},
         basic_handler
     }
 

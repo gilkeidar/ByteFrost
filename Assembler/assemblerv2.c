@@ -503,6 +503,9 @@ int get_param_seq(param *param_seq, int num_params)
                 strcpy(tokens[i + 1], get_label_address(root, get_label_name(tokens[i + 1])));
                 //tokens[i + 1] = get_label_address(root, tokens[i + 1]);
                 break;
+            case '%':
+                param_seq[i] = special_reg;
+                break;
             default:
                 param_seq[i] = instruction;
                 break;
@@ -566,6 +569,8 @@ int get_instruction(int num_tokens, uint8_t *instruction)
             }
         }
     }
+
+    fprintf(stderr, "Instruction not found!\n");
 	
     return instruction_found;    
     
@@ -734,6 +739,21 @@ int get_register(char * register_token)
     exit(1);
 }
 
+int get_special_register(char * special_reg_token) {
+	if (!strcmp(special_reg_token, "%PC"))
+		return 0;
+	
+	if (!strcmp(special_reg_token, "%DP"))
+		return 1;
+
+	if (!strcmp(special_reg_token, "%SP"))
+		return 2;
+
+	fprintf(stderr, "Error on line %d: invalid special register\n%s\n", current_line, input_buf);
+
+	exit(1);
+}
+
 int get_immediate(char * immediate_token)
 {
 	if (immediate_token[0] == '#')
@@ -793,6 +813,8 @@ int param_value(char * token, param type)
     {
         case reg:
             return get_register(token);
+        case special_reg:
+			return get_special_register(token);
         case immediate:
             return get_immediate(token);
         case out_ai:
