@@ -9,6 +9,7 @@
 
 LSP %DP, #0x40
 LSP %SP, #0x77
+LSP %PC, #0x00
 
 // Setup
 LDR R0, #0	// row (R0) = 0
