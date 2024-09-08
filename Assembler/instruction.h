@@ -262,7 +262,14 @@ Instruction assembly[] = {
         {6, 12},
         basic_handler
     },
-    
+    {
+        "NOT",
+        2,
+        {0x06, 0x05},
+        {reg, immediate},
+        {6, 12},
+        basic_handler
+    },
     {
         "ADD",
         2,
@@ -293,6 +300,46 @@ Instruction assembly[] = {
         {0x06, 0x17},
         {reg},
         {6},
+        basic_handler
+    },
+    {
+        "ASL",
+        2,
+        {0x06, 0x08},
+        {reg, immediate},
+        {6, 12},
+        basic_handler
+    },
+    {
+        "ROL",
+        2,
+        {0x06, 0x09},
+        {reg, immediate},
+        {6, 12},
+        basic_handler
+    },
+    {
+        "LSR",
+        2,
+        {0x06, 0x0a},
+        {reg, immediate},
+        {6, 12},
+        basic_handler
+    },
+    {
+        "ASR",
+        2,
+        {0x06, 0x0b},
+        {reg, immediate},
+        {6, 12},
+        basic_handler
+    },
+    {
+        "ROR",
+        2,
+        {0x06, 0x0c},
+        {reg, immediate},
+        {6, 12},
         basic_handler
     },
     {
