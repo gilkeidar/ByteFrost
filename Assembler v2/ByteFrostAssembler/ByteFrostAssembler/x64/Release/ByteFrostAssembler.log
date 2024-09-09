@@ -1,0 +1,6 @@
+﻿  assembler.cpp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 251 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  ByteFrostAssembler.vcxproj -> C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\x64\Release\ByteFrostAssembler.exe
