@@ -28,6 +28,7 @@ LSP %SP, #0xDF		//	Stack page is 223 (last RAM page)
 					//	from ROM to RAM)
 	LDR R0, :ram_function	//	Load R0 with ram_function address
 	DEC R0					//	Ensure R0 points to correct address (weird assembler shenanigans)
+	ASL R0, #1				//	R0 = (ram_function PC lower byte - 1) << 1 = address of first byte of instr
 	LDR R1, #0		//	Load R1 with starting address in RAM page
 	LDR R2, #18		//	Length of copy (length of ram_function in instructions)
 	ASL R2, #1		//	R2 = R2 << 1 (length of ram_function in bytes)
@@ -44,10 +45,10 @@ LSP %SP, #0xDF		//	Stack page is 223 (last RAM page)
 	JMP :while_loop		//	}
 :after_while
 	//	3.	Call ram_function()
-	LSP %PC, #0x20	//	Set dummy PC high byte to #0x20 (first RAM page)
+	LSP %PC, #0x10	//	Set dummy PC high byte to #0x10 (first RAM page)
 	LDR R0, #0x00	//	R0 = 0x00
 	PUSH R0 		//	Push high byte of return address
-	JSR	:ram_function			//	Call ram_function()
+	JSR	#0x01		//	Call ram_function() (jump to 0x2000) - does 0x01 since assembler subtracts 1 from this immediate
 	//	4.	Print "Done"
 	OUT #0x44, A	//	Print 'D'
 	OUT #0x6f, A	//	Print 'o'
