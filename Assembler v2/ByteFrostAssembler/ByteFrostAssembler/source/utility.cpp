@@ -103,7 +103,7 @@ bool isFILEString(std::string s) {
 
 	if (s.length() == 0)	return false;
 
-	int dotIndex = s.find_first_of('.');
+	size_t dotIndex = s.find_first_of('.');
 
 	std::cout << "dot index: " << std::to_string(dotIndex) << std::endl;
 	
@@ -117,3 +117,39 @@ bool isFILEString(std::string s) {
 		&& isTEXTString(s.substr(dotIndex + 1));
 }
 
+//	String parsing
+
+bool stringEndsWith(std::string s, std::string ending) {
+	//	s ends with the string ending iff there exists a string v s.t.
+	//		s = v ending.
+	//	Hence, s ends with string ending iff:
+	//	1.	s.length() >= ending.length()
+	//	2.	s[s.length() - ending.length()]...s[s.length() - 1] == ending
+	if (s.length() < ending.length())	return false;
+	
+	for (int i = 0; i < ending.length(); i++)
+	{
+		if (s[s.length() - ending.length() + i] != ending[i])
+			return false;
+	}
+
+	return true;
+}
+
+std::string getFlagName(std::string flag_string) {
+	if (flag_string.length() == 0 || flag_string[0] != '-') {
+		throwError(flag_string + " is not a valid flag string (parsing error).");
+	}
+	return flag_string.substr(1);
+}
+
+//	Error Handling
+
+void throwError(std::string error_string) {
+	std::cerr << "Error: " << error_string << std::endl;
+	exit(1);
+}
+
+void throwWarning(std::string warning_string) {
+	std::cerr << "Warning: " << warning_string << std::endl;
+}

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-Assembler::Assembler(int argc, char** argv) : clap(this, argc, argv) {
+Assembler::Assembler(int argc, char** argv) : clap(argc, argv) {
 	//	Initialize Assembler state.
 	std::cout << "Assembler constructor." << std::endl;
 }

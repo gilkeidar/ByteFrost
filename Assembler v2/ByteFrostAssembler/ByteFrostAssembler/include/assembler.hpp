@@ -25,11 +25,11 @@ private:
 	//	Global data
 
 	//	Command-Line Arguments
-	CommandLineArguments commandLineArguments;
+	CommandLineArguments * commandLineArguments;
 
 	//	Line vector
 
-	//	Pipeline Stage 0: Command-Line String Parser (CSLP)
+	//	Pipeline Stage 0: Command-Line Argument Parser (CLAP)
 	CLAP clap;
 
 	//	Pipeline Stage 1: Parser

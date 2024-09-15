@@ -24,6 +24,9 @@
     <ClCompile Include="source\clap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\utility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\assembler.hpp">

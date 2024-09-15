@@ -81,3 +81,39 @@ bool isNUMBERString(std::string s);
  * @return true if s is in FILE and false otherwise.
  */
 bool isFILEString(std::string s);
+
+//	String parsing
+
+/**
+ * @brief Determines whether the string s ends with the string ending.
+ * I.e., does there exist a string v s.t. s = v ending
+ * @param s string to check
+ * @param ending string that s may end with
+ * @return true if s ends with ending and false otherwise.
+ */
+bool stringEndsWith(std::string s, std::string ending);
+
+/**
+ * @brief Returns the flag name of a given flag string.
+ * @note This function throws an error if the flag_string does not begin with a
+ * flag prefix ('-')
+ * @param flag_string Flag string
+ * @return flag name of the given flag string
+ */
+std::string getFlagName(std::string flag_string);
+
+//	Error Handling
+
+/**
+ * @brief Prints the given error string to stderr, then exits the program with
+ * exit code 1.
+ * @param error_string Error string message
+ */
+void throwError(std::string error_string);
+
+/**
+ * @brief Prints the given warning string to stderr, but does not exit the
+ * program.
+ * @param warning_string Warning string massage
+ */
+void throwWarning(std::string warning_string);
