@@ -3,8 +3,8 @@
 This is the first stage of the ByteFrost Assembler pipeline.
 The **Command-Line Argument Parser (CLAP)** takes as input the command-line
 arguments received from running the ByteFrost Assembler on a command-line shell
-and writes to a `CommandLineArguments` object which is stored by the 
-`Assembler` (the `Assembler` passes a reference to this object to the CLAP).
+and allocates and fills a `CommandLineArguments` object; it then returns a
+pointer to this object to the `Assembler`.
 
 ##  Definitions
 
@@ -52,6 +52,9 @@ The `CLFlag` struct is defined as follows:
 struct CLFlag {
     string flagName;
     vector<CLTokenType> expected_pattern;
+    //  Argument values filled by CLAP if each argument's CLTokenType matches
+    //  the corresponding CLTokenType in the expected_pattern vector
+    vector<CLToken> values;
     bool isSet = false;
 };
 ```
