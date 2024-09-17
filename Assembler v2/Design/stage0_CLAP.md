@@ -10,38 +10,47 @@ pointer to this object to the `Assembler`.
 
 ### `CLToken`s
 
+A `CLToken` is a struct containing a `CLTokenType` enum and a token string:
+
+```cpp
+struct CLToken {
+    CLTokenType type;
+    string token_string;
+}
+```
+
 The CLAP recognizes the following Command-Line Argument Token (`CLToken`) types,
 which are the values of the `CLTokenType` enum:
 
 ```cpp
-enum CLTokenType = {FLAG, NUMBER, FILE_NAME, TEXT, INVALID}
+enum CLTokenType = {FLAG, NUMBER, FILE_NAME, TEXT, INVALID};
 ```
 
 ####    `FLAG`
 
-A command-line argument string `w` is mapped to `CLTokenType.FLAG` if
+A command-line argument string `w` is mapped to `CLTokenType::FLAG` if
 1. The length of `w` is `>= 2`.
 2. `w[0] = '-'`.
 3. `w[1]...w[len(w) - 1]` $\in TEXT$
 
 ####    `NUMBER`
 
-A command-line argument string `w` is mapped to `CLTokenType.NUMBER` if 
+A command-line argument string `w` is mapped to `CLTokenType::NUMBER` if 
 1. `w` $\in NUMBER$.
 
 ####    `FILE_NAME`
 
-A command-line argument string `w` is mapped to `CLTokenType.FILE_NAME` if
+A command-line argument string `w` is mapped to `CLTokenType::FILE_NAME` if
 1. `w` $\in FILE$.
 
 ####    `TEXT`
 
-A command-line argument string `w` is mapped to `CLTokenType.TEXT` if
+A command-line argument string `w` is mapped to `CLTokenType::TEXT` if
 1. `w` $\in TEXT$.
 
 ####    `INVALID`
 
-A command-line argument string `w` is mapped to `CLTokenType.INVALID` if
+A command-line argument string `w` is mapped to `CLTokenType::INVALID` if
 1. `w` cannot be mapped to any `CLTokenType` that is not `CLTokenType.INVALID`.
 
 ### `CLFlag`

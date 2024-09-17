@@ -135,6 +135,7 @@
     <ClCompile Include="source\assembler.cpp" />
     <ClCompile Include="source\clap.cpp" />
     <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\parser.cpp" />
     <ClCompile Include="source\utility.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -142,6 +143,7 @@
     <ClInclude Include="include\clap.hpp" />
     <ClInclude Include="include\constants.hpp" />
     <ClInclude Include="include\utility.hpp" />
+    <ClInclude Include="include\parser.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

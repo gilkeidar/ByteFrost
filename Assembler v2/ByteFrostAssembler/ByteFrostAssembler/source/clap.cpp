@@ -9,7 +9,7 @@ CLAP::CLAP(int argc, char** argv) {
 }
 
 CommandLineArguments * CLAP::run() {
-	std::cout << "Stage 0: CLAP.run()" << std::endl;
+	std::cout << "=== Stage 0: CLAP.run() ===" << std::endl;
 	
 	//	Convert each command-line argument from a char * (string) w to a
 	//	CLToken and add it to a vector<CLToken> tokens

@@ -13,5 +13,8 @@ void Assembler::run() {
 	std::cout << "Assembler run()" << std::endl;
 
 	//	Stage 0: Command-Line Argument Parsing
-	clap.run();
+	this->commandLineArguments = clap.run();
+
+	//	Stage 1: Parser
+	this->lines = parser.run(this->commandLineArguments);
 }

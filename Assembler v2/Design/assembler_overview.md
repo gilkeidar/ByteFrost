@@ -25,6 +25,19 @@ These set definitions are used in the parsing stages of the assembler pipelines.
     * $NUMBER = \{\epsilon, -, +\} \circ N$
 10. $FILE$ is the set of file names.
     * $FILE = TEXT \circ \{.\} \circ TEXT$
+11. $INSTRUCTIONS$ is the set of recognized instruction names.
+    * $INSTRUCTIONS \subseteq TEXT$.
+    * String membership in $INSTRUCTIONS$ can be checked by using the
+        `Assembler`'s `std::unordered_map<string, std::vector<Instruction>>`
+        hashmap (? this hashmap is initialized in the `Assembler` constructor)
+12. $GREGISTERS$ is the set of general purpose register names.
+    * $GREGISTERS = \{R0, R1, R2, R3\}$
+    * $GREGISTERS \subseteq TEXT$.
+13. $SREGISTERS$ is the set of special register names.
+    * $SREGISTERS = \{DHPC, SPH, DPH, \dots\}$
+    * $SREGISTERS \subseteq TEXT$.
+    * **NOTE: $SREGISTERS$ strings do not contain the % prefix, they are only
+    the special register names!**
 
 ### Other Terms
 

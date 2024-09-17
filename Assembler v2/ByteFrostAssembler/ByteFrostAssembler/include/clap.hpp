@@ -3,10 +3,7 @@
 #include <vector>
 #include <unordered_map>
 
-//	Forward declaration of Assembler class
-class Assembler;
-
-enum CLTokenType {FLAG, NUMBER, FILE_NAME, TEXT, INVALID};
+enum class CLTokenType {FLAG, NUMBER, FILE_NAME, TEXT, INVALID};
 
 struct CLToken {
 	CLTokenType type;

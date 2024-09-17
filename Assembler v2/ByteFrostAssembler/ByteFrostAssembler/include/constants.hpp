@@ -2,8 +2,6 @@
 #include <string>
 
 //	Command-Line Arguments
-//#define	UNSET_FILE_NAME			"UNSET"
-//#define ASSEMBLY_FILE_ENDING	(std::string) "asm"
 const std::string UNSET_FILE_NAME = "UNSET";
 const std::string ASSEMBLY_FILE_ENDING = "asm";
 
@@ -11,4 +9,9 @@ const std::string ASSEMBLY_FILE_ENDING = "asm";
 #define OUTPUT_FILE_FLAG_NAME	"o"
 
 //	Parsing
-#define	UNDERSCORE	'_'
+#define	UNDERSCORE				'_'
+#define	SPECIAL_REGISTER_PREFIX	'%'
+#define	IMMEDIATE_PREFIX		'#'
+#define	DIRECTIVE_PREFIX		'.'
+#define	LABEL_PREFIX			':'
+const std::string COMMENT_START = "//";

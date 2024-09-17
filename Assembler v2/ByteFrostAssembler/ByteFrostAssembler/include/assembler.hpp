@@ -1,5 +1,6 @@
 #pragma once
 #include "clap.hpp"
+#include "parser.hpp"
 
 /**
  * @brief Assembler class. Contains all objects that handle software pipeline,
@@ -28,11 +29,13 @@ private:
 	CommandLineArguments * commandLineArguments;
 
 	//	Line vector
+	std::vector<Line*> lines;
 
 	//	Pipeline Stage 0: Command-Line Argument Parser (CLAP)
 	CLAP clap;
 
 	//	Pipeline Stage 1: Parser
+	Parser parser;
 
 	//	...
 };
