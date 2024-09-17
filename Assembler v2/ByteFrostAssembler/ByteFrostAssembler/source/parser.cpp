@@ -72,7 +72,9 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments) {
 	
 	std::vector<Line*> lines;
 
-	for (std::string s : line_strings) {
+	//for (std::string s : line_strings) {
+	for (int line_count = 0; line_count < line_strings.size(); line_count++) {
+		std::string s = line_strings[line_count];
 		std::cout << "== CONVERTING s to Line * ==" << std::endl;
 		std::cout << "s = " << s << std::endl;
 
@@ -126,6 +128,12 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments) {
 		std::vector<Token> tokens;
 
 		for (std::string w : token_strings) {
+			Token t = stringToToken(w);
+			//	Throw error if token is invalid
+			if (t.type == TokenType::INVALID) {
+				throwError("Invalid token '" + t.token_string + "' in line "
+					+ std::to_string(line_count + 1) + ": " + s);
+			}
 			tokens.push_back(stringToToken(w));
 		}
 
