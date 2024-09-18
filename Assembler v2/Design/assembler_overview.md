@@ -28,7 +28,7 @@ These set definitions are used in the parsing stages of the assembler pipelines.
 11. $INSTRUCTIONS$ is the set of recognized instruction names.
     * $INSTRUCTIONS \subseteq TEXT$.
     * String membership in $INSTRUCTIONS$ can be checked by using the
-        `Assembler`'s `std::unordered_map<string, std::vector<Instruction>>`
+        `Assembler`'s `std::unordered_map<string, std::vector<AssemblyInstruction>>`
         hashmap (? this hashmap is initialized in the `Assembler` constructor)
 12. $GREGISTERS$ is the set of general purpose register names.
     * $GREGISTERS = \{R0, R1, R2, R3\}$
@@ -43,7 +43,6 @@ These set definitions are used in the parsing stages of the assembler pipelines.
 
 **`.asm` file** - a ByteFrost assembly file; each line of such a file may
 contain at most one assembly statement.
-
 
 ##  Pipeline
 
@@ -114,7 +113,7 @@ Each line is a string `s`, which is parsed in the following way:
     value)). If the number of tokens / types of token arguments don't match the
     expected ones for the `LineType` and its derived class, then an error will
     be thrown. The `Line` object is then added to a list of `Line`s in the
-    `Assembler`, e.g. `vector<Line> lines`.
+    `Assembler`, e.g. `vector<Line *> lines`.
 
 2. **Preprocessor**.
 
@@ -144,7 +143,7 @@ private:
     CommandLineArguments args;
 
     //  Line vector
-    std::vector<Line> lines;
+    std::vector<Line *> lines;
 
     //  Pipeline Stage 0 - Command-Line String Parser (CLSP)
     CommandLineParser clsp;
