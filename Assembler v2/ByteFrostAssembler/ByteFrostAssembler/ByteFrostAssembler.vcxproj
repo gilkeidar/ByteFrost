@@ -140,6 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\assembler.hpp" />
+    <ClInclude Include="include\assembly_instructions.hpp" />
     <ClInclude Include="include\clap.hpp" />
     <ClInclude Include="include\constants.hpp" />
     <ClInclude Include="include\utility.hpp" />

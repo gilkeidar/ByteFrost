@@ -1,6 +1,7 @@
 #pragma once
 #include "clap.hpp"
 #include "parser.hpp"
+#include "assembly_instructions.hpp"
 
 /**
  * @brief Assembler class. Contains all objects that handle software pipeline,
@@ -30,6 +31,17 @@ private:
 
 	//	Line vector
 	std::vector<Line*> lines;
+
+	//	Assembly Instruction hashmap 
+	//	(string name -> vector<AssemblyInstruction>)
+	std::unordered_map<std::string, std::vector<AssemblyInstruction>> instructions;
+
+	/**
+	 * @brief Populate Assembly Instruction hashmap.
+	 */
+	void initializeAssemblyInstructions();
+
+	//	ISA vector (index: opcode -> ISAInstruction)
 
 	//	Pipeline Stage 0: Command-Line Argument Parser (CLAP)
 	CLAP clap;

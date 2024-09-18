@@ -2,6 +2,7 @@
 #include "clap.hpp"
 #include "utility.hpp"
 #include "constants.hpp"
+#include "assembly_instructions.hpp"
 #include <iostream>
 #include <fstream>
 
@@ -23,7 +24,8 @@ Parser::Parser() {
 	this->special_registers.insert("DPH");	//	DP High Byte
 }
 
-std::vector<Line*> Parser::run(CommandLineArguments* arguments) {
+std::vector<Line*> Parser::run(CommandLineArguments* arguments,
+	std::unordered_map<std::string, std::vector<AssemblyInstruction>> instructions) {
 	std::cout << "=== Stage 1: Parser.run() ===" << std::endl;
 
 	//	1.	Open the input file
@@ -128,33 +130,51 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments) {
 		std::vector<Token> tokens;
 
 		for (std::string w : token_strings) {
-			Token t = stringToToken(w);
+			Token t = stringToToken(w, instructions);
 			//	Throw error if token is invalid
 			if (t.type == TokenType::INVALID) {
 				throwError("Invalid token '" + t.token_string + "' in line "
 					+ std::to_string(line_count + 1) + ": " + s);
 			}
-			tokens.push_back(stringToToken(w));
+			tokens.push_back(t);
 		}
 
 		for (Token t : tokens) {
 			std::cout << "Token: " << TokenToString(t) << std::endl;
 		}
+
+		//	3.4	Generate a Line object and add it to the vector<Line *> lines.
+		Line* line = generateLine(s, tokens, instructions);
+
+		//	Print line found
+
+		std::cout << "Line: " << LineToString(line) << std::endl;
+
+		//	Check that line isn't invalid
+		if (line->type == LineType::INVALID) {
+			throwError("Line " + std::to_string(line_count + 1) 
+				+ " is invalid.");
+		}
+
+
+		lines.push_back(line);
 	}
 
-	return {};
+	return lines;
 }
 
-Token Parser::stringToToken(std::string w) {
+Token Parser::stringToToken(std::string w, 
+	std::unordered_map<std::string, std::vector<AssemblyInstruction>> instructions) {
 	//	Given a string w, match it with a TokenType and return a Token 
 	//	containing w and the matched TokenType.
 
 	TokenType type;
 
 	if (isTEXTString(w)) {
-		if (false) {
+		if (instructions.find(w) != instructions.end()) {
 			//	TODO: Check whether w is an instruction (need Assembler's
 			//	std::string -> std::vector<Instruction> hashmap to exist)
+			type = TokenType::INSTRUCTION;
 		}
 		else if (this->general_registers.find(w) != this->general_registers.end()) {
 			//	Check whether w is a general purpose register
@@ -199,32 +219,127 @@ Token Parser::stringToToken(std::string w) {
 
 std::string TokenTypeToString(TokenType t) {
 	switch (t) {
-		case TokenType::INSTRUCTION:
-			return "INSTRUCTION";
-		case TokenType::GREGISTER:
-			return "GREGISTER";
-		case TokenType::TEXT:
-			return "TEXT";
-		case TokenType::SREGISTER:
-			return "SREGISTER";
-		case TokenType::NUMBER:
-			return "NUMBER";
-		case TokenType::IMMEDIATE:
-			return "IMMEDIATE";
-		case TokenType::DIRECTIVE:
-			return "DIRECTIVE";
-		case TokenType::LABEL:
-			return "LABEL";
-		case TokenType::INVALID:
-			return "INVALID";
-		default:
-			return "UNKNOWN_TYPE";
+	case TokenType::INSTRUCTION:
+		return "INSTRUCTION";
+	case TokenType::GREGISTER:
+		return "GREGISTER";
+	case TokenType::TEXT:
+		return "TEXT";
+	case TokenType::SREGISTER:
+		return "SREGISTER";
+	case TokenType::NUMBER:
+		return "NUMBER";
+	case TokenType::IMMEDIATE:
+		return "IMMEDIATE";
+	case TokenType::DIRECTIVE:
+		return "DIRECTIVE";
+	case TokenType::LABEL:
+		return "LABEL";
+	case TokenType::INVALID:
+		return "INVALID";
+	default:
+		return "UNKNOWN_TYPE";
 	}
 }
 
 std::string TokenToString(Token t) {
-	return "{type: " 
-		+ TokenTypeToString(t.type) 
-		+ ", token_string: " 
+	return "{type: "
+		+ TokenTypeToString(t.type)
+		+ ", token_string: "
 		+ t.token_string + "}";
+}
+
+Line* Parser::generateLine(std::string s, std::vector<Token> tokens,
+	std::unordered_map<std::string, std::vector<AssemblyInstruction>> instructions) {
+	//	Given vector<Token> tokens, allocate and return a Line object.
+	Line* line = nullptr;
+
+	//	Identify line type
+	if (tokens.size() == 0) {
+		//	Line has no tokens - type is Empty
+		return new Line(LineType::EMPTY, s, tokens);
+	}
+
+	//	Line has at least one token
+	if (tokens[0].type == TokenType::INSTRUCTION) {
+		//	Line may be an instruction - verify that the rest of the tokens
+		//	match the expected argument sequence of an instruction with the
+		//	name tokens[0].token_string
+		std::vector<AssemblyInstruction> possibleInstrs =
+			instructions[tokens[0].token_string];
+
+		for (AssemblyInstruction& instruction : possibleInstrs) {
+			if (matchesInstructionArgs(tokens, instruction)) {
+				return new InstructionLine(s, tokens, &instruction);
+			}
+		}
+
+		//	No valid instruction found
+		throwError("Incorrect arguments for instruction '"
+			+ tokens[0].token_string + "'.");
+	}
+	//	TODO: Add checks for Preprocessor directives and label definitions here
+	else {
+		//	Invalid line
+		return new Line(LineType::INVALID, s, tokens);
+	}
+}
+
+bool Parser::matchesInstructionArgs(std::vector<Token> tokens, AssemblyInstruction& instruction) {
+	//	Check whether token types match the instruction's expected arguments
+	//	For this to be true:
+	//	1.	tokens.size() - 1 == instruction->expected_param_types.size().
+	//	2.	tokens[0].type == TokenType::INSTRUCTION.
+	//	3.	for i = 0 to instruction->expected_param_types.size():
+	//			tokens[i + 1].type matches expected_param_type[i]
+
+	if (tokens.size() - 1 != instruction.expected_param_types.size())
+		return false;
+
+	if (tokens[0].type != TokenType::INSTRUCTION)
+		return false;
+
+	//	"Quantity" type arguments may be immediates, Labels, or constants
+	//	(which are TEXT tokens that the parser will assume are the name of 
+	//	preprocessor constants - if it isn't, then the preprocessor will throw
+	//	an error).
+	std::unordered_set<TokenType> quantity_types({ TokenType::IMMEDIATE,
+		TokenType::LABEL, TokenType::TEXT });
+
+	for (int i = 0; i < instruction.expected_param_types.size(); i++) {
+		if ((quantity_types.find(tokens[i + 1].type) != quantity_types.end())
+			&&
+			(quantity_types.find(instruction.expected_param_types[i]) != quantity_types.end()))
+		{
+			//	Both argument types are quantity types
+			continue;
+		}
+		if (tokens[i + 1].type != instruction.expected_param_types[i]) {
+			//	found arguments that don't match in type
+			return false;
+		}
+	}
+
+	return true;
+}
+
+std::string LineTypeToString(LineType t) {
+	switch (t) {
+	case LineType::INSTRUCTION:
+		return "INSTRUCTION";
+	case LineType::DIRECTIVE:
+		return "DIRECTIVE";
+	case LineType::LABEL_DEFINITION:
+		return "LABEL_DEFINITION";
+	case LineType::EMPTY:
+		return "EMPTY";
+	case LineType::INVALID:
+		return "INVALID";
+	default:
+		return "UNKNOWN_TYPE";
+	}
+}
+
+std::string LineToString(Line* line) {
+	return "{ type: " + LineTypeToString(line->type) + "}";
 }
