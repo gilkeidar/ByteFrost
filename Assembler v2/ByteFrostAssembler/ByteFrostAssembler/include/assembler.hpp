@@ -1,6 +1,7 @@
 #pragma once
 #include "clap.hpp"
 #include "parser.hpp"
+#include "file_generation.hpp"
 #include "assembly_instructions.hpp"
 
 /**
@@ -49,5 +50,10 @@ private:
 	//	Pipeline Stage 1: Parser
 	Parser parser;
 
-	//	...
+	//	Pipeline Stage 2: Preprocessor
+
+	//	Pipeline Stage 3: Label Handler
+
+	//	Pipeline Stage 4: Output File Generation
+	OutputFileGenerator file_generator;
 };

@@ -136,6 +136,15 @@ bool stringEndsWith(std::string s, std::string ending) {
 	return true;
 }
 
+std::string removeFileExtension(std::string file_name) {
+	if (!isFILEString(file_name)) {
+		throwError("String '" + file_name + "' is not a valid file name string.");
+	}
+	int dotIndex = file_name.find_first_of('.');
+
+	return file_name.substr(0, dotIndex);
+}
+
 std::string getFlagName(std::string flag_string) {
 	if (flag_string.length() == 0 || flag_string[0] != '-') {
 		throwError(flag_string + " is not a valid flag string (parsing error).");

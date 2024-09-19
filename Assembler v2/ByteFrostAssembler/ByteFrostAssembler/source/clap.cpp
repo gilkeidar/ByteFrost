@@ -65,11 +65,12 @@ CommandLineArguments * CLAP::run() {
 
 			//	Flag is recognized by the assembler; set current_flag field
 			current_flag = &(arguments->flags[flag_name]);
+			//	Set flag
+			current_flag->is_set = true;
 
 			//	If there are any expected arguments, set arguments field and
 			//	the current flag argument index
 			if (current_flag->expected_pattern.size() > 0) {
-				current_flag->is_set = true;
 				flagArguments = true;
 				currentFlagArgument = 0;
 			}

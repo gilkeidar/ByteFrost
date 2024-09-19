@@ -25,7 +25,7 @@ Parser::Parser() {
 }
 
 std::vector<Line*> Parser::run(CommandLineArguments* arguments,
-	std::unordered_map<std::string, std::vector<AssemblyInstruction>> instructions) {
+	std::unordered_map<std::string, std::vector<AssemblyInstruction>> & instructions) {
 	std::cout << "=== Stage 1: Parser.run() ===" << std::endl;
 
 	//	1.	Open the input file
@@ -164,7 +164,7 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 }
 
 Token Parser::stringToToken(std::string w, 
-	std::unordered_map<std::string, std::vector<AssemblyInstruction>> instructions) {
+	std::unordered_map<std::string, std::vector<AssemblyInstruction>> & instructions) {
 	//	Given a string w, match it with a TokenType and return a Token 
 	//	containing w and the matched TokenType.
 
@@ -250,7 +250,7 @@ std::string TokenToString(Token t) {
 }
 
 Line* Parser::generateLine(std::string s, std::vector<Token> tokens,
-	std::unordered_map<std::string, std::vector<AssemblyInstruction>> instructions) {
+	std::unordered_map<std::string, std::vector<AssemblyInstruction>> & instructions) {
 	//	Given vector<Token> tokens, allocate and return a Line object.
 	Line* line = nullptr;
 
@@ -265,7 +265,7 @@ Line* Parser::generateLine(std::string s, std::vector<Token> tokens,
 		//	Line may be an instruction - verify that the rest of the tokens
 		//	match the expected argument sequence of an instruction with the
 		//	name tokens[0].token_string
-		std::vector<AssemblyInstruction> possibleInstrs =
+		std::vector<AssemblyInstruction> & possibleInstrs =
 			instructions[tokens[0].token_string];
 
 		for (AssemblyInstruction& instruction : possibleInstrs) {

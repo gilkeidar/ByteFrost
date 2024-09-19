@@ -20,6 +20,13 @@ void Assembler::run() {
 
 	//	Stage 1: Parser
 	this->lines = parser.run(this->commandLineArguments, this->instructions);
+
+	//	Stage 2: Preprocessor
+
+	//	Stage 3: Label Handler
+
+	//	Stage 4: Output File Generation
+	file_generator.run(this->lines, *(this->commandLineArguments));
 }
 
 void Assembler::initializeAssemblyInstructions() {

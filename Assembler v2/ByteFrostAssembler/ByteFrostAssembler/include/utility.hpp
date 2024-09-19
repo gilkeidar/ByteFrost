@@ -94,6 +94,14 @@ bool isFILEString(std::string s);
 bool stringEndsWith(std::string s, std::string ending);
 
 /**
+ * @brief Given a file name string, return the name of the file without its
+ * file extension. (e.g., given "test.asm", return "test")
+ * @param file_name 
+ * @return 
+ */
+std::string removeFileExtension(std::string file_name);
+
+/**
  * @brief Returns the flag name of a given flag string.
  * @note This function throws an error if the flag_string does not begin with a
  * flag prefix ('-')

@@ -133,7 +133,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source\assembler.cpp" />
+    <ClCompile Include="source\assembly_instructions.cpp" />
     <ClCompile Include="source\clap.cpp" />
+    <ClCompile Include="source\file_generation.cpp" />
+    <ClCompile Include="source\isa.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\parser.cpp" />
     <ClCompile Include="source\utility.cpp" />
@@ -143,6 +146,8 @@
     <ClInclude Include="include\assembly_instructions.hpp" />
     <ClInclude Include="include\clap.hpp" />
     <ClInclude Include="include\constants.hpp" />
+    <ClInclude Include="include\file_generation.hpp" />
+    <ClInclude Include="include\isa.hpp" />
     <ClInclude Include="include\utility.hpp" />
     <ClInclude Include="include\parser.hpp" />
   </ItemGroup>

@@ -49,17 +49,17 @@ public:
 	Parser();
 
 	std::vector<Line *> run(CommandLineArguments* arguments, 
-		std::unordered_map<std::string, std::vector<AssemblyInstruction>> instructions);
+		std::unordered_map<std::string, std::vector<AssemblyInstruction>> & instructions);
 private:
 	std::unordered_set<char> delimiters;
 	std::unordered_set<std::string> general_registers;
 	std::unordered_set<std::string> special_registers;
 
 	Token stringToToken(std::string w, 
-		std::unordered_map<std::string, std::vector<AssemblyInstruction>> instructions);
+		std::unordered_map<std::string, std::vector<AssemblyInstruction>> & instructions);
 
 	Line* generateLine(std::string s, std::vector<Token> tokens,
-		std::unordered_map<std::string, std::vector<AssemblyInstruction>> instructions);
+		std::unordered_map<std::string, std::vector<AssemblyInstruction>> & instructions);
 
 	bool matchesInstructionArgs(std::vector<Token> tokens, AssemblyInstruction & instruction);
 };
