@@ -26,36 +26,83 @@ uint16_t getTokenIntValue(Token t) {
 }
 
 std::vector<uint16_t> AssemblyInstruction::generateCode(InstructionLine& line) {
-	//	INITIAL IMPLEMENTATION - only works for "ADD Rd, Rs1, Rs2"!!!!
-	
 	//	Instruction strings that are equivalent to this AssemblyInstruction
 	std::vector<uint16_t> code;
-	
-	//	Create std::vector<Argument> vector for each ISAInstruction in the
-	//	AssemblyInstruction's instruction sequence
-	//	(for ADD Rd, Rs1, Rs2, the instruction sequence is {opcode 2})
-	std::vector<Argument> arguments{
-		{
-			ArgumentType::Func,
-			4,
-			6
-		},
-		{
-			ArgumentType::Rd,
-			2,
-			getTokenIntValue(line.tokens[1])	//	Need to convert token value to int value!
-		},
-		{
-			ArgumentType::Rs1,
-			2,
-			getTokenIntValue(line.tokens[2])
-		},
-		{
-			ArgumentType::Rs2,
-			2,
-			getTokenIntValue(line.tokens[3])
-		}
-	};
 
-	return { isa[2].generateCode(arguments) };
+	for (int i = 0; i < this->instruction_sequence.size(); i++) {
+		//	Create std::vector<Argument> vector for the current ISAInstrcuction
+		//	in the AssemblyInstruction's instruction sequence
+		std::vector<Argument> arguments;
+
+		for (int j = 0; j < this->instruction_sequence_arguments[i].size(); j++) {
+			AssemblyArgument assemblyArg = this->instruction_sequence_arguments[i][j];
+
+			//	Copy the Argument from the AssemblyArgument
+			Argument arg = assemblyArg.argument;
+
+			switch (assemblyArg.source) {
+				case ArgumentSource::Token: {
+					//	This argument's value is an index of the token in the
+					//	InstructionLine that contains the value.
+					if (assemblyArg.argument.value >= line.tokens.size()) {
+						throwError(
+							"AssemblyArgument from Token expects value from token of index "
+							+ std::to_string(assemblyArg.argument.value)
+							+ ", but only have " 
+							+ std::to_string(line.tokens.size())
+							+ " tokens available in line."
+						);
+					}
+					arg.value = getTokenIntValue(line.tokens[assemblyArg.argument.value]);
+					break;
+				}
+				case ArgumentSource::Constant: {
+					//	No need to do anything; arg value is already correct
+					break;
+				}
+				default:
+					break;
+			}
+
+			arguments.push_back(arg);
+		}
+		code.push_back(this->instruction_sequence[i]->generateCode(arguments));
+	}
+
+	return code;
 }
+
+//std::vector<uint16_t> AssemblyInstruction::generateCode(InstructionLine& line) {
+//	//	INITIAL IMPLEMENTATION - only works for "ADD Rd, Rs1, Rs2"!!!!
+//	
+//	//	Instruction strings that are equivalent to this AssemblyInstruction
+//	std::vector<uint16_t> code;
+//	
+//	//	Create std::vector<Argument> vector for each ISAInstruction in the
+//	//	AssemblyInstruction's instruction sequence
+//	//	(for ADD Rd, Rs1, Rs2, the instruction sequence is {opcode 2})
+//	std::vector<Argument> arguments{
+//		{
+//			ArgumentType::Func,
+//			4,
+//			6
+//		},
+//		{
+//			ArgumentType::Rd,
+//			2,
+//			getTokenIntValue(line.tokens[1])	//	Need to convert token value to int value!
+//		},
+//		{
+//			ArgumentType::Rs1,
+//			2,
+//			getTokenIntValue(line.tokens[2])
+//		},
+//		{
+//			ArgumentType::Rs2,
+//			2,
+//			getTokenIntValue(line.tokens[3])
+//		}
+//	};
+//
+//	return { isa[2].generateCode(arguments) };
+//}

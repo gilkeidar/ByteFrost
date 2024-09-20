@@ -82,9 +82,11 @@ void OutputFileGenerator::createBINFile(std::ofstream& output_file) {
 				instructionLine->instruction->generateCode(*instructionLine);
 
 			for (uint16_t code : instruction_code) {
-				std::cout << "Instruction code: " << std::to_string(code) << std::endl;
 				char lowByte = code & 0xff;
 				char highByte = (code >> 8) & 0xff;
+				std::cout << "Instruction code: Low: " 
+					<< std::hex << (code & 0xff)
+					<< " High: " << std::hex << ((code >> 8) & 0xff) << std::endl;
 				output_file.write(&lowByte, 1);
 				output_file.write(&highByte, 1);
 			}
