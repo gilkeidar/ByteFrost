@@ -1,13 +1,17 @@
 #pragma once
 #include <vector>
 #include <string>
+#include "constants.hpp"
 
 enum class ArgumentType {
 	Rd,
 	Rs1,
 	Rs2,
 	Immediate,
-	Func
+	Func,
+	BranchCondition,
+	OUTDisplayType,
+	SpecialRegister
 };
 
 std::string ArgumentTypeToString(ArgumentType t);
@@ -31,23 +35,150 @@ struct ISAInstruction {
 	uint16_t generateCode(std::vector<Argument> arguments) const;
 };
 
+//	Common Argument Definitions
+const ExpectedArgument Rd = { ArgumentType::Rd, GREGISTER_SIZE, RD_DEF_POSITION };
+const ExpectedArgument Rs1 = { ArgumentType::Rs1, GREGISTER_SIZE, RS1_DEF_POSITION };
+const ExpectedArgument Rs2 = { ArgumentType::Rs2, GREGISTER_SIZE, RS2_DEF_POSITION };
+
 const ISAInstruction isa[] = {
 	{	//	NOP
-		0,
+		NOP_OPCODE,
 		{}
 	},
 	{	//	BRK
-		1,
+		BRK_OPCODE,
 		{}
 	},
-	{
-		//	ALU
-		2,
+	{	//	ALU
+		ALU_OPCODE,
 		{
-			{ArgumentType::Func, 4, 8},
-			{ArgumentType::Rd, 2, 6},
-			{ArgumentType::Rs1, 2, 12},
-			{ArgumentType::Rs2, 2, 14}
+			{ArgumentType::Func, ALU_FUNC_SIZE, 8},
+			Rd,
+			Rs1,
+			Rs2
 		}
-	}
+	},
+	{	//	Load Immediate to Reg (LDR)
+		LDR_OPCODE,
+		{
+			Rd,
+			{ArgumentType::Immediate, 8, 8}
+		}
+	},
+	{	//	MOV
+		MOV_OPCODE,
+		{
+			Rd,
+			Rs1
+		}
+	},
+	{	//	Branch Absolute Immediate
+		BRANCH_ABS_IMM_OPCODE,
+		{
+			{ArgumentType::BranchCondition, BRANCH_COND_SIZE, 5},
+			{ArgumentType::Immediate, 8, 8}
+		}
+	},
+	{	//	ALU Immediate
+		ALU_IMM_OPCODE,
+		{
+			{ArgumentType::Func, ALU_FUNC_SIZE, 8},
+			Rd,
+			{ArgumentType::Immediate, 4, 12}
+		}
+	},
+	{	//	Branch Relative Immediate
+		BRANCH_REL_IMM_OPCODE,
+		{
+			{ArgumentType::BranchCondition, BRANCH_COND_SIZE, 5},
+			{ArgumentType::Immediate, 8, 8}
+		}
+	},
+	{	//	OUT Register
+		OUT_REG_OPCODE,
+		{
+			Rs1,
+			{ArgumentType::OUTDisplayType, 1, 5}
+		}
+	},
+	{	//	Load Memory Absolute
+		LMA_OPCODE,
+		{
+			Rd,
+			{ArgumentType::Immediate, 8, 8}
+		}
+	},
+	{	//	Store Memory Absolute
+		SMA_OPCODE,
+		{
+			Rd,
+			{ArgumentType::Immediate, 8, 8}
+		}
+	},
+	{	//	Load Memory Registers
+		LMR_OPCODE,
+		{
+			Rd,
+			Rs1
+		}
+	},
+	{	//	Store Memory Registers
+		SMR_OPCODE,
+		{
+			Rd,
+			Rs1
+		}
+	},
+	{	//	OUT Immediate
+		OUT_IMM_OPCODE,
+		{
+			{ArgumentType::Immediate, 8, 8},
+			{ArgumentType::OUTDisplayType, 1, 5}
+		}
+	},
+	{	//	PUSH
+		PUSH_OPCODE,
+		{
+			Rs1
+		}
+	},
+	{	//	POP
+		POP_OPCODE,
+		{
+			Rd
+		}
+	},
+	{	//	JSR
+		JSR_OPCODE,
+		{
+			{ArgumentType::Immediate, 8, 8}
+		}
+	},
+	{	//	RTS
+		RTS_OPCODE,
+		{}
+	},
+	{	//	Test Reg
+		TST_REG_OPCODE,
+		{
+			{ArgumentType::Func, ALU_FUNC_SIZE, 8},
+			Rs1,
+			Rs2
+		}
+	},
+	{	//	Test Immediate
+		TST_IMM_OPCODE,
+		{
+			{ArgumentType::Func, ALU_FUNC_SIZE, 8},
+			Rd,
+			{ArgumentType::Immediate, 4, 12}
+		}
+	},
+	{	//	Test Immediate
+		LSP_IMM_OPCODE,
+		{
+			{ArgumentType::SpecialRegister, SREGISTER_SIZE, 6},
+			{ArgumentType::Immediate, 8, 8}
+		}
+	},
 };
