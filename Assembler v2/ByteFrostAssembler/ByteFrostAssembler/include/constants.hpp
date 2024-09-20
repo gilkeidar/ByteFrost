@@ -18,6 +18,14 @@ const std::string COMMENT_START = "//";
 
 //	Instruction Arguments
 
+//	Argument Source
+
+//	Token Source (1-indexed as tokens[0] is the instruction name)
+#define	FIRST_TOKEN		1
+#define	SECOND_TOKEN	2
+#define	THIRD_TOKEN		3
+#define	FOURTH_TOKEN	4
+
 //	Instruction Argument Sizes
 #define	GREGISTER_SIZE	2
 #define	SREGISTER_SIZE	2
@@ -28,6 +36,21 @@ const std::string COMMENT_START = "//";
 #define	RD_DEF_POSITION		6
 #define	RS1_DEF_POSITION	12
 #define	RS2_DEF_POSITION	14
+
+//	Function Bit Values
+#define	OR_FUNC_BITS	0
+#define	AND_FUNC_BITS	2
+#define	XOR_FUNC_BITS	4
+#define	NOT_FUNC_BITS	5
+#define	ADD_FUNC_BITS	6
+#define	SUB_FUNC_BITS	7
+#define	ASL_FUNC_BITS	8
+#define ROL_FUNC_BITS	9
+#define	LSR_FUNC_BITS	0xa
+#define	ASR_FUNC_BITS	0xb
+#define	ROR_FUNC_BITS	0xc
+#define	ADC_FUNC_BITS	0xe
+#define	SBC_FUNC_BITS	0xf
 
 //	Assembly Instructions
 
