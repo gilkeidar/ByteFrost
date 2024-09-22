@@ -14,7 +14,7 @@ public:
 private:
     std::vector<Line *> lines;
 
-    void createMLGFile(std::ofstream & output_file)/
+    void createMLGFile(std::ofstream & output_file);
     void createBINFile(std::ofstream & output_file);
 };
 ```

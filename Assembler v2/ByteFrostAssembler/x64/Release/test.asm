@@ -6,4 +6,5 @@ ADD R1, R2, R3	//	this is a comment
 				//This is not a comment and includes an invalid token:
 //		     :label_test	  // another comment
 MOV R1, R2
+LDR R1, #5
 BRK

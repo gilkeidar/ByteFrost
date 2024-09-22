@@ -14,6 +14,8 @@ const std::string ASSEMBLY_FILE_ENDING = "asm";
 #define	IMMEDIATE_PREFIX		'#'
 #define	DIRECTIVE_PREFIX		'.'
 #define	LABEL_PREFIX			':'
+#define	BYTE_SELECT_START		'['
+#define	BYTE_SELECT_END			']'
 const std::string COMMENT_START = "//";
 
 //	Instruction Arguments

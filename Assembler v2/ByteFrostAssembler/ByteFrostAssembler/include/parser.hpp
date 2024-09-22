@@ -9,7 +9,7 @@
 struct AssemblyInstruction;
 
 enum class TokenType {INSTRUCTION, GREGISTER, TEXT, SREGISTER, NUMBER, IMMEDIATE, 
-	DIRECTIVE, LABEL, INVALID};
+	DIRECTIVE, LABEL, BYTE_CONSTANT, BYTE_LABEL, INVALID};
 
 struct Token {
 	TokenType type;

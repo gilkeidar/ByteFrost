@@ -38,6 +38,9 @@ These set definitions are used in the parsing stages of the assembler pipelines.
     * $SREGISTERS \subseteq TEXT$.
     * **NOTE: $SREGISTERS$ strings do not contain the % prefix, they are only
     the special register names!**
+14. $BYTE\_SELECT$ is the set of possible instances of byte selection (array
+    syntax)
+    * $BYTE\_SELECT = \{\texttt{[}~\}~\circ ND~\circ \{~\texttt{]}\}$
 
 ### Other Terms
 

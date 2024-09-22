@@ -204,10 +204,25 @@ Token Parser::stringToToken(std::string w,
 		//	w is a preprocessor directive
 		type = TokenType::DIRECTIVE;
 	}
-	else if (w.length() >= 2 && w[0] == LABEL_PREFIX 
-		&& isTEXTString(w.substr(1))) {
+	//else if (w.length() >= 2 && w[0] == LABEL_PREFIX 
+	//	&& isTEXTString(w.substr(1))) {
+	//	//	w is a label
+	//	type = TokenType::LABEL;
+	//}
+	/*else if (w.length() >= 3) {
+
+	}*/
+	else if (isLABELString(w)) {
 		//	w is a label
 		type = TokenType::LABEL;
+	}
+	else if (isBYTE_CONSTANTString(w)) {
+		//	w is a byte selection of a constant
+		type = TokenType::BYTE_CONSTANT;
+	}
+	else if (isBYTE_LABELString(w)) {
+		//	w is a byte selection of a label
+		type = TokenType::BYTE_LABEL;
 	}
 	else {
 		//	w is invalid
@@ -235,6 +250,10 @@ std::string TokenTypeToString(TokenType t) {
 		return "DIRECTIVE";
 	case TokenType::LABEL:
 		return "LABEL";
+	case TokenType::BYTE_CONSTANT:
+		return "BYTE_CONSTANT";
+	case TokenType::BYTE_LABEL:
+		return "BYTE_LABEL";
 	case TokenType::INVALID:
 		return "INVALID";
 	default:
@@ -303,8 +322,14 @@ bool Parser::matchesInstructionArgs(std::vector<Token> tokens, AssemblyInstructi
 	//	(which are TEXT tokens that the parser will assume are the name of 
 	//	preprocessor constants - if it isn't, then the preprocessor will throw
 	//	an error).
-	std::unordered_set<TokenType> quantity_types({ TokenType::IMMEDIATE,
-		TokenType::LABEL, TokenType::TEXT });
+	/*std::unordered_set<TokenType> quantity_types({ TokenType::IMMEDIATE,
+		TokenType::LABEL, TokenType::TEXT });*/
+	std::unordered_set<TokenType> quantity_types({
+			TokenType::IMMEDIATE,
+			TokenType::TEXT,
+			TokenType::BYTE_CONSTANT,
+			TokenType::BYTE_LABEL
+		});
 
 	for (int i = 0; i < instruction.expected_param_types.size(); i++) {
 		if ((quantity_types.find(tokens[i + 1].type) != quantity_types.end())

@@ -82,6 +82,38 @@ bool isNUMBERString(std::string s);
  */
 bool isFILEString(std::string s);
 
+/**
+ * @brief Determines whether a given string represents a label (i.e. whether
+ * s is of the form : \circ TEXT)
+ * @param s string to check
+ * @return true if s represents a label and false otherwise.
+ */
+bool isLABELString(std::string s);
+
+/**
+ * @brief Determines whether a given string represents a byte selection (i.e.,
+ * whether s is of the form [ ND ])
+ * @param s string to check
+ * @return true if s is in BYTE_SELECT and false otherwise.
+ */
+bool isBYTE_SELECTString(std::string s);
+
+/**
+ * @brief Determines whether a given string is a byte selection of a constant
+ * (i.e., whether s is of the form TEXT \circ BYTE_SELECT)
+ * @param s string to check
+ * @return true if s is in BYTE_CONSTANT and false otherwise.
+ */
+bool isBYTE_CONSTANTString(std::string s);
+
+/**
+ * @brief Determines whether a given string is a byte selection of a label
+ * (i.e., whether s is of the form LABEL \circ BYTE_SELECT)
+ * @param s string to check
+ * @return true if s is in BYTE_LABEL and false otherwise
+ */
+bool isBYTE_LABELString(std::string s);
+
 //	String parsing
 
 /**

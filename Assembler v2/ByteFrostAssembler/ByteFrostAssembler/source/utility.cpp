@@ -117,6 +117,64 @@ bool isFILEString(std::string s) {
 		&& isTEXTString(s.substr(dotIndex + 1));
 }
 
+bool isLABELString(std::string s) {
+	//	In order for s to represent a label:
+	//	1.	s.length() >= 2.
+	//	2.	s[0] is ':'.
+	//	3.	s[1:end] is in TEXT.
+
+	if (s.length() < 2)			return false;
+	if (s[0] != LABEL_PREFIX)		return false;
+	if (!isTEXTString(s.substr(1)))	return false;
+
+	return true;
+}
+
+bool isBYTE_SELECTString(std::string s) {
+	//	In order for s to be in BYTE_SELECT:
+	//	1.	s.length() >= 3.
+	//	2.	s[0] is '[' and s[s.length() - 1] is ']'.
+	//	3.	s[1:s.length() - 2] is in ND.
+
+	if (s.length() < 3)		return false;
+	if (s[0] != BYTE_SELECT_START || s[s.length() - 1] != BYTE_SELECT_END)	
+		return false;
+
+	return isUnsignedDecimalString(s.substr(1, s.length() - 2));
+}
+
+bool isBYTE_CONSTANTString(std::string s) {
+	//	In order for s to be in BYTE_CONSTANT:
+	//	1.	s.length() >= 2.
+	//	2.	s = uv such that u is in TEXT and v is in BYTE_SELECT.
+
+	if (s.length() < 2)	return false;
+
+	int byteSelectIndex = s.find_first_of(BYTE_SELECT_START);
+
+	//	No byte select start character in s
+	if (byteSelectIndex == s.npos)	return false;
+
+	return isTEXTString(s.substr(0, byteSelectIndex))
+		&& isBYTE_SELECTString(s.substr(byteSelectIndex));
+}
+
+bool isBYTE_LABELString(std::string s) {
+	//	In order for s to be in BYTE_LABEL:
+	//	1. s.length() >= 2.
+	//	2. s = uv such that u is a label and v is in BYTE_SELECT.
+
+	if (s.length() < 2)	return false;
+
+	int byteSelectIndex = s.find_first_of(BYTE_SELECT_START);
+
+	//	No byte select start character in s
+	if (byteSelectIndex == s.npos)	return false;
+
+	return isLABELString(s.substr(0, byteSelectIndex))
+		&& isBYTE_SELECTString(s.substr(byteSelectIndex));
+}
+
 //	String parsing
 
 bool stringEndsWith(std::string s, std::string ending) {

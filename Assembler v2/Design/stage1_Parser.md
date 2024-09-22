@@ -33,7 +33,7 @@ The Parser recognizes the following `Token` types, which are the values of the
 
 ```cpp
 enum TokenType = {INSTRUCTION, GREGISTER, TEXT, SREGISTER, NUMBER, IMMEDIATE,
-DIRECTIVE, LABEL, INVALID};
+DIRECTIVE, LABEL, BYTE_CONSTANT, BYTE_LABEL, INVALID};
 ```
 ####    `INSTRUCTION`
 
@@ -88,6 +88,20 @@ A token string `w` is mapped to `TokenType::LABEL` if
 2. `w[0] = ':'`.
 3. `w[1]...w[len(w) - 1]` $\in TEXT$.
 
+####    `BYTE_CONSTANT`
+
+A token string `w` is mapped to `TokenType::BYTE_CONSTANT` if
+1. There exist string `u` $\in TEXT$ and `v` $\in BYTE\_SELECT$ such that
+    `w = uv`.
+
+####    `BYTE_LABEL`
+
+A token string `w` is mapped to `TokenType::BYTE_LABEL` if
+1. There exist strings `u` and `v` such that:
+    1. `u` can be mapped to `TokenType::LABEL`,
+    2. `v` $\in BYTE\_SELECT$, and
+    3. `w = uv`
+
 ####    `INVALID`
 
 A token string `w` is mapped to `TokenType::INVALID` if
@@ -113,10 +127,14 @@ immediates (e.g., `#0x5`), labels, (e.g., `:main`), and preprocessor constants
 as `ADD R1, PI` will be marked as a mismatch since `PI` is of type 
 `TokenType::TEXT` and not `TokenType::IMMEDIATE`.
 
-To avoid this, the Parser has a set of "quantity types" which are defined as
-the set `{TokenType::IMMEDIATE, TokenType::LABEL, TokenType::TEXT}`.
+~~To avoid this, the Parser has a set of "quantity types" which are defined as
+the set `{TokenType::IMMEDIATE, TokenType::LABEL, TokenType::TEXT}`.~~
 
-If an argument's `TokenType` is a quantity type and its corresponding expected
+To avoid this, the Parser has a set of "quantity types" which are defined as the
+set `{TokenType::IMMEDIATE, TokenType::BYTE_LABEL, TokenType::TEXT,
+TokenType::CONSTANT_LABEL}.`
+
+~~If an argument's `TokenType` is a quantity type and its corresponding expected
 argument type is also a quantity type, then the Parser will mark these as
 matching even if their `TokenType`s are different. This allows for a single
 definition of the instruction `ADD immediate` with the expected parameter types
@@ -126,7 +144,39 @@ mean that `TokenType::LABEL` will be allowed, which may seem unnatural; but this
 can be caught later on by comparing the size of the quantities. E.g., a label
 is always a 16-bit quantity as it's an address, and the immediate in
 `ADD immediate` is capped at being 4-bits, so the Assembler will throw a warning
-that information loss can occur).
+that information loss can occur).~~
+
+If an argument's `TokenType` is a quantity type and its corresponding expected
+argument type is also a quantity type, then the Parser will mark these as
+matching even if their `TokenType`s are different. This allows for a single
+definition of the instruction `ADD immediate` with the expected parameter types
+vector `{TokenType::GREGISTER, TokenType::IMMEDIATE}` without needing to
+explicitly specify that `TokenType::TEXT` is also allowed.
+This means that, for `ADD immediate,` the Parser will allow the following
+invocations:
+*   `ADD R1, #4`        (immediate)
+*   `ADD R1, :main[1]`  (label byte (high byte specified))
+*   `ADD R1, PI`        (constant (understood by the Parser as TEXT))
+*   `ADD R1, PI[5]`     (constant byte (6th byte specified))
+
+But the following invocations are disallowed:
+*   `ADD R1, R2`        (second argument cannot be a general register)
+*   `ADD R1, :main`     (second argument may not be a label)
+*   `ADD R1, LDR`       (second argument may not be another instruction)
+
+This also ensures that an assembly instruction that expects a label will always
+get exactly a label, as `TokenType::LABEL` is not a quantity type, e.g.:
+`BEQ :label` has the expected parameter types vector `{TokenType::LABEL}`, so
+the invocation `BEQ :main` is allowed, but `BEQ #5`, `BEQ :main[0]`, and
+`BEQ ADDRESS_CONSTANT` are not allowed.
+
+As branch instructions only use labels, the programmer cannot hardcode branch
+addresses. This restriction both promotes good practices (since all branch
+addresses are labels, the code is easier to read) and also avoids undue bugs as
+the ByteFrost assembler supports assembly instruction derivation, i.e., assembly
+instructions *derive* into ISA instructions, and some assembly instructions may
+derive into multiple ISA instructions, so the programmer should not rely on
+counting instructions to calculate jump sizes.
 
 ### `Line`s
 
