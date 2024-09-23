@@ -63,6 +63,19 @@ uint16_t ISAInstruction::generateCode(std::vector<Argument> arguments) const {
 	return instruction_string;
 }
 
+std::string ArgumentRepresentationToString(ArgumentRepresentation r) {
+	switch (r) {
+		case ArgumentRepresentation::Signed:
+			return "Signed";
+		case ArgumentRepresentation::Unsigned:
+			return "Unsigned";
+		case ArgumentRepresentation::SignedOrUnsigned:
+			return "SignedOrUnsigned";
+		default:
+			return "UNKNOWN_REPRESENTATION";
+	}
+}
+
 std::string ArgumentTypeToString(ArgumentType t) {
 	switch (t) {
 		case ArgumentType::Rd:

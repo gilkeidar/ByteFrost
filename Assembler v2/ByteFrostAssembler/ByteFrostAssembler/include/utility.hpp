@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "isa.hpp"
 
 //	Parsing Utilities
 
@@ -74,6 +75,13 @@ bool isUnsignedNumberString(std::string s);
 bool isNUMBERString(std::string s);
 
 /**
+ * @brief Determines whether a given string represents an immediate.
+ * @param s string to check
+ * @return true if s represents an immeidate and false otherwise.
+ */
+bool isImmediateString(std::string s);
+
+/**
  * @brief Determines whether a given string represents a file name (i.e.,
  * whether s is in FILE).
  * (FILE = TEXT \circ \{.\} \circ TEXT)
@@ -141,6 +149,48 @@ std::string removeFileExtension(std::string file_name);
  * @return flag name of the given flag string
  */
 std::string getFlagName(std::string flag_string);
+
+//	Size Checking
+
+///**
+// * @brief Determines whether the given integer value can be represented in a
+// * binary string of the specified length (bit_width).
+// * @param value integer value to check
+// * @param bit_width length of binary string
+// * @param unsigned_representation whether the binary string representation is
+// * unsigned (true) or two's complement signed (false)
+// * @return true if value can be represented in a binary string of the specified
+// * length, and false otherwise.
+// * @deprecated (not implemented properly - use unsigned-only version)
+// */
+//bool fitsInBitWidth(int value, int bit_width, bool unsigned_representation);
+//
+///**
+// * @brief Determines whether the given integer value can be represented in a
+// * binary string of the specified length (max_bit_width).
+// * @param unsigned_value integer value to check (value is treated as unsigned).
+// * @param max_bit_width length of binary string.
+// * @note  If the unsigned_value integer is negative, this function will throw
+// * a warning as the computation may be inaccurate.
+// * @return true if the value can be represented in a binary string of the
+// * specified length, and false otherwise.
+// */
+//bool fitsInBitWidth(int unsigned_value, int max_bit_width);
+
+/**
+ * @brief Determines whether the given integer value can be represented in a
+ * binary string of the specified length (argument_size) given the 
+ * ISAInstruction's ExpectedArgument's ArgumentRepresentation (which determines
+ * the range of possible values in the binary string of the specified length).
+ * @param imm_value Immediate value to check
+ * @param argument_size length of binary string which needs to store the 
+ *		immediate value
+ * @param argument_rep the kind of representation (signed, unsigned, or either)
+ * that the binary string can use.
+ * @return true if the immediate value can fit in the binary string using the
+ * specified representation and specified length, and false otherwise.
+ */
+bool fitsArgumentRange(int imm_value, int argument_size, ArgumentRepresentation argument_rep);
 
 //	Error Handling
 

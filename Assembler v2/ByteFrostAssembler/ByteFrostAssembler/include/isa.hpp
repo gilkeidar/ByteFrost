@@ -14,10 +14,23 @@ enum class ArgumentType {
 	SpecialRegister
 };
 
+/**
+ * @brief Specifies whether an argument value may be in signed (2's complement)
+ * representation, unsigned representation, or either.
+ */
+enum class ArgumentRepresentation {
+	Signed,
+	Unsigned,
+	SignedOrUnsigned
+};
+
+std::string ArgumentRepresentationToString(ArgumentRepresentation r);
+
 std::string ArgumentTypeToString(ArgumentType t);
 
 struct ExpectedArgument {
 	ArgumentType type;
+	ArgumentRepresentation rep;
 	int size;		//	size of argument in bits
 	int position;	//	position of argument's starting bit in instruction string
 };
@@ -36,9 +49,9 @@ struct ISAInstruction {
 };
 
 //	Common Argument Definitions
-const ExpectedArgument Rd = { ArgumentType::Rd, GREGISTER_SIZE, RD_DEF_POSITION };
-const ExpectedArgument Rs1 = { ArgumentType::Rs1, GREGISTER_SIZE, RS1_DEF_POSITION };
-const ExpectedArgument Rs2 = { ArgumentType::Rs2, GREGISTER_SIZE, RS2_DEF_POSITION };
+const ExpectedArgument Rd = { ArgumentType::Rd, ArgumentRepresentation::Unsigned, GREGISTER_SIZE, RD_DEF_POSITION };
+const ExpectedArgument Rs1 = { ArgumentType::Rs1, ArgumentRepresentation::Unsigned, GREGISTER_SIZE, RS1_DEF_POSITION };
+const ExpectedArgument Rs2 = { ArgumentType::Rs2, ArgumentRepresentation::Unsigned, GREGISTER_SIZE, RS2_DEF_POSITION };
 
 const ISAInstruction isa[] = {
 	{	//	NOP
@@ -52,7 +65,7 @@ const ISAInstruction isa[] = {
 	{	//	ALU
 		ALU_OPCODE,
 		{
-			{ArgumentType::Func, ALU_FUNC_SIZE, 8},
+			{ArgumentType::Func, ArgumentRepresentation::Unsigned, ALU_FUNC_SIZE, 8},
 			Rd,
 			Rs1,
 			Rs2
@@ -62,7 +75,7 @@ const ISAInstruction isa[] = {
 		LDR_OPCODE,
 		{
 			Rd,
-			{ArgumentType::Immediate, 8, 8}
+			{ArgumentType::Immediate, ArgumentRepresentation::SignedOrUnsigned, 8, 8}
 		}
 	},
 	{	//	MOV
@@ -75,44 +88,44 @@ const ISAInstruction isa[] = {
 	{	//	Branch Absolute Immediate
 		BRANCH_ABS_IMM_OPCODE,
 		{
-			{ArgumentType::BranchCondition, BRANCH_COND_SIZE, 5},
-			{ArgumentType::Immediate, 8, 8}
+			{ArgumentType::BranchCondition, ArgumentRepresentation::Unsigned, BRANCH_COND_SIZE, 5},
+			{ArgumentType::Immediate, ArgumentRepresentation::SignedOrUnsigned, 8, 8}
 		}
 	},
 	{	//	ALU Immediate
 		ALU_IMM_OPCODE,
 		{
-			{ArgumentType::Func, ALU_FUNC_SIZE, 8},
+			{ArgumentType::Func, ArgumentRepresentation::Unsigned, ALU_FUNC_SIZE, 8},
 			Rd,
-			{ArgumentType::Immediate, 4, 12}
+			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 4, 12}
 		}
 	},
 	{	//	Branch Relative Immediate
 		BRANCH_REL_IMM_OPCODE,
 		{
-			{ArgumentType::BranchCondition, BRANCH_COND_SIZE, 5},
-			{ArgumentType::Immediate, 8, 8}
+			{ArgumentType::BranchCondition, ArgumentRepresentation::Unsigned, BRANCH_COND_SIZE, 5},
+			{ArgumentType::Immediate, ArgumentRepresentation::Signed, 8, 8}
 		}
 	},
 	{	//	OUT Register
 		OUT_REG_OPCODE,
 		{
 			Rs1,
-			{ArgumentType::OUTDisplayType, 1, 5}
+			{ArgumentType::OUTDisplayType, ArgumentRepresentation::Unsigned, 1, 5}
 		}
 	},
 	{	//	Load Memory Absolute
 		LMA_OPCODE,
 		{
 			Rd,
-			{ArgumentType::Immediate, 8, 8}
+			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned,  8, 8}
 		}
 	},
 	{	//	Store Memory Absolute
 		SMA_OPCODE,
 		{
 			Rd,
-			{ArgumentType::Immediate, 8, 8}
+			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 8, 8}
 		}
 	},
 	{	//	Load Memory Registers
@@ -132,8 +145,8 @@ const ISAInstruction isa[] = {
 	{	//	OUT Immediate
 		OUT_IMM_OPCODE,
 		{
-			{ArgumentType::Immediate, 8, 8},
-			{ArgumentType::OUTDisplayType, 1, 5}
+			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 8, 8},
+			{ArgumentType::OUTDisplayType, ArgumentRepresentation::Unsigned, 1, 5}
 		}
 	},
 	{	//	PUSH
@@ -151,7 +164,7 @@ const ISAInstruction isa[] = {
 	{	//	JSR
 		JSR_OPCODE,
 		{
-			{ArgumentType::Immediate, 8, 8}
+			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 8, 8}
 		}
 	},
 	{	//	RTS
@@ -161,7 +174,7 @@ const ISAInstruction isa[] = {
 	{	//	Test Reg
 		TST_REG_OPCODE,
 		{
-			{ArgumentType::Func, ALU_FUNC_SIZE, 8},
+			{ArgumentType::Func, ArgumentRepresentation::Unsigned, ALU_FUNC_SIZE, 8},
 			Rs1,
 			Rs2
 		}
@@ -169,16 +182,16 @@ const ISAInstruction isa[] = {
 	{	//	Test Immediate
 		TST_IMM_OPCODE,
 		{
-			{ArgumentType::Func, ALU_FUNC_SIZE, 8},
+			{ArgumentType::Func, ArgumentRepresentation::Unsigned, ALU_FUNC_SIZE, 8},
 			Rd,
-			{ArgumentType::Immediate, 4, 12}
+			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 4, 12}
 		}
 	},
 	{	//	Test Immediate
 		LSP_IMM_OPCODE,
 		{
-			{ArgumentType::SpecialRegister, SREGISTER_SIZE, 6},
-			{ArgumentType::Immediate, 8, 8}
+			{ArgumentType::SpecialRegister, ArgumentRepresentation::Unsigned, SREGISTER_SIZE, 6},
+			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 8, 8}
 		}
 	},
 };

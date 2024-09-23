@@ -5,6 +5,8 @@
 #include "assembly_instructions.hpp"
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <iomanip>
 
 Parser::Parser() {
 	//	Initialize delimiter set to {' ', '\t', ','}
@@ -73,6 +75,12 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 	//	3.	Generate a std::vector<Line *> lines vector
 	
 	std::vector<Line*> lines;
+
+	//	The Parser assumes that the address of the first instruction will be 0.
+	//	This value may end up being shifted by the Preprocessor if the user
+	//	specified that the address of the first instruction should be 
+	//	elsewhere.
+	uint16_t current_address = 0;
 
 	//for (std::string s : line_strings) {
 	for (int line_count = 0; line_count < line_strings.size(); line_count++) {
@@ -144,7 +152,7 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 		}
 
 		//	3.4	Generate a Line object and add it to the vector<Line *> lines.
-		Line* line = generateLine(s, tokens, instructions);
+		Line* line = generateLine(s, tokens, instructions, current_address);
 
 		//	Print line found
 
@@ -194,8 +202,9 @@ Token Parser::stringToToken(std::string w,
 		//	w is a number
 		type = TokenType::NUMBER;
 	}
-	else if (w.length() >= 2 && w[0] == IMMEDIATE_PREFIX &&
-		isNUMBERString(w.substr(1))) {
+	/*else if (w.length() >= 2 && w[0] == IMMEDIATE_PREFIX &&
+		isNUMBERString(w.substr(1))) {*/
+	else if (isImmediateString(w)) {
 		//	w is an immediate
 		type = TokenType::IMMEDIATE;
 	}
@@ -269,14 +278,15 @@ std::string TokenToString(Token t) {
 }
 
 Line* Parser::generateLine(std::string s, std::vector<Token> tokens,
-	std::unordered_map<std::string, std::vector<AssemblyInstruction>> & instructions) {
+	std::unordered_map<std::string, std::vector<AssemblyInstruction>> & instructions,
+	uint16_t & current_address) {
 	//	Given vector<Token> tokens, allocate and return a Line object.
 	Line* line = nullptr;
 
 	//	Identify line type
 	if (tokens.size() == 0) {
 		//	Line has no tokens - type is Empty
-		return new Line(LineType::EMPTY, s, tokens);
+		return new Line(LineType::EMPTY, s, tokens, current_address);
 	}
 
 	//	Line has at least one token
@@ -289,7 +299,10 @@ Line* Parser::generateLine(std::string s, std::vector<Token> tokens,
 
 		for (AssemblyInstruction& instruction : possibleInstrs) {
 			if (matchesInstructionArgs(tokens, instruction)) {
-				return new InstructionLine(s, tokens, &instruction);
+				//	Update next line's address
+				uint16_t instruction_address = current_address;
+				current_address = getNextLineAddress(current_address, instruction);
+				return new InstructionLine(s, tokens, instruction_address, &instruction);
 			}
 		}
 
@@ -300,7 +313,7 @@ Line* Parser::generateLine(std::string s, std::vector<Token> tokens,
 	//	TODO: Add checks for Preprocessor directives and label definitions here
 	else {
 		//	Invalid line
-		return new Line(LineType::INVALID, s, tokens);
+		return new Line(LineType::INVALID, s, tokens, current_address);
 	}
 }
 
@@ -366,5 +379,40 @@ std::string LineTypeToString(LineType t) {
 }
 
 std::string LineToString(Line* line) {
-	return "{ type: " + LineTypeToString(line->type) + "}";
+	std::stringstream lineAddressStringStream;
+	lineAddressStringStream << std::setfill('0') << std::setw(4) << std::hex << line->line_address;
+	return "{ address: 0x" + lineAddressStringStream.str() + ", type: " + LineTypeToString(line->type) + " }";
+}
+
+uint16_t Parser::getNextLineAddress(uint16_t current_address, AssemblyInstruction & instruction) {
+	//	Compute address of next line based on size of AssemblyInstruction on
+	//	current line.
+	//	Size of assembly instruction = 
+	//		length of derived ISAInstruction sequence * sizeof(ISAInstruction)
+	uint16_t next_address = current_address
+		+ (instruction.instruction_sequence.size() * ISA_INSTRUCTION_SIZE_BYTES);
+
+	//	Check for overflow - if overflow occurs, the program is too large for
+	//	the address space
+	//	TODO - at this point, the Parser doesn't know whether the address is for
+	//	a ROM program or a RAM program. If this is specified in a preprocessor
+	//	directive, then the preprocessor needs to check that the program can
+	//	fit in the ROM / RAM as well.
+	//	However, the parser can still check that the program doesn't exceed the
+	//	maximum possible length of a program, which right now is the size of the
+	//	RAM.
+	
+	//	Address of last byte of the given instruction (only need to check for
+	//	overflow on the given instruction, as it may be the last instruction in
+	//	the program)
+	uint16_t address_of_last_byte = next_address - 1;
+
+	//	if last byte address < current_address, classic overflow occurred
+	//	if last byte address >= RAM_SIZE_BYTES, then 
+	if (address_of_last_byte < current_address
+		|| address_of_last_byte > RAM_SIZE_BYTES) {
+		throwError("Program is too big to store in either the RAM or the ROM.");
+	}
+
+	return next_address;
 }

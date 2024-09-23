@@ -5,6 +5,16 @@
 #include "isa.hpp"
 
 /**
+ * @brief Given a string that represents an immediate, this function returns
+ * the immediate's value.
+ * @param immediate_string string that represents an immediate.
+ * @return integer value of the given immediate string.
+ * @note This function throws an error if the given string does not represent
+ * an immediate.
+ */
+int getImmediateValue(std::string immediate_string);
+
+/**
  * @brief Given a Token t, returns its integer value as it would be represented
  * in an instruction string.
  * @note Only works for Tokens whose TokenType is such that they can be
@@ -15,7 +25,7 @@
  * @return integer value of Token t's string value as it would be represented
  * in an instruction string.
  */
-uint16_t getTokenIntValue(Token t);
+int getTokenIntValue(Token t);
 
 enum class ArgumentSource {Token, Constant};
 
@@ -383,4 +393,21 @@ const AssemblyInstruction assembly_instructions[] = {
 			}
 		}
 	},
+	//{	//	Branch 
+	//	"MOV",
+	//	{TokenType::GREGISTER, TokenType::GREGISTER},
+	//	{&isa[MOV_OPCODE]},
+	//	{
+	//		{
+	//			{
+	//				ArgumentSource::Token,
+	//				{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+	//			},
+	//			{
+	//				ArgumentSource::Token,
+	//				{ArgumentType::Rs1, GREGISTER_SIZE, SECOND_TOKEN}
+	//			},
+	//		}
+	//	}
+	//},
 };

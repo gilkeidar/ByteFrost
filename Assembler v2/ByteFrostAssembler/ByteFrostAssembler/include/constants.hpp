@@ -56,7 +56,10 @@ const std::string COMMENT_START = "//";
 
 //	Assembly Instructions
 
-//	ISA Instruction
+//	ISA Instructions
+
+//	Size of ISA Instructions in bytes
+#define	ISA_INSTRUCTION_SIZE_BYTES	2
 
 //	NOP
 #define	NOP_OPCODE	0
@@ -120,3 +123,25 @@ const std::string COMMENT_START = "//";
 
 //	Load Special Register Immediate
 #define	LSP_IMM_OPCODE	0x14
+
+//	Address confinements
+//	Address space is 16-bit (64KB), and is divided as follows:
+//	FFFF	MMIO
+//	|		MMIO
+//	E000	MMIO
+//	DFFF	RAM
+//	|		RAM
+//	2000	RAM
+//	1999	ROM
+//	|		ROM
+//	0000	ROM
+//	Can only store instructions in ROM and RAM regions, but each program can
+//	only be written for one region (ROM or RAM).
+#define	MIN_ADDRESS		0x0000
+#define	MAX_ADDRESS		0xDFFF
+#define	ROM_START_ADDRESS	0x0000
+#define	ROM_END_ADDRESS		0x1999
+#define	RAM_START_ADDRESS	0x2000
+#define	RAM_END_ADDRESS		0xDFFF
+#define	ROM_SIZE_BYTES	(8 * 1024)
+#define	RAM_SIZE_BYTES	(48 * 1024)

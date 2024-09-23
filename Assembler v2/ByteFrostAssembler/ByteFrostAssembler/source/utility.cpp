@@ -2,6 +2,8 @@
 #include "constants.hpp"
 #include <iostream>
 #include <string>
+#include <math.h>
+
 
 bool isAlpha(char c) {
 	bool result = ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z');
@@ -89,10 +91,21 @@ bool isNUMBERString(std::string s) {
 	std::cout << "isNUMBERString(" << s << ")" << std::endl;
 	//	In order for s to be in NUMBER:
 	//	1. s is not empty (s.length >= 1)
-	//	1. (s[0] is '-' or '+' and s[1:end] is in N) || (s is in N)
+	//	2. (s[0] is '-' or '+' and s[1:end] is in N) || (s is in N)
 	if (s.length() == 0)	return false;
 	if (s[0] == '-' || s[0] == '+')	return isUnsignedNumberString(s.substr(1));
 	return isUnsignedNumberString(s);
+}
+
+bool isImmediateString(std::string s) {
+	//	In order for s to represent an immediate:
+	//	1. s.length() >= 2.
+	//	2. s[0] is IMMEDIATE_PREFIX
+	//	3. s[1:end] is in NUMBER.
+	if (s.length() < 2)	return false;
+	if (s[0] != IMMEDIATE_PREFIX)	return false;
+
+	return isNUMBERString(s.substr(1));
 }
 
 bool isFILEString(std::string s) {
@@ -208,6 +221,110 @@ std::string getFlagName(std::string flag_string) {
 		throwError(flag_string + " is not a valid flag string (parsing error).");
 	}
 	return flag_string.substr(1);
+}
+
+//	Size Checking
+
+//bool fitsInBitWidth(int x, int max_bit_width, bool unsigned_representation) {
+//	//	Determine value's necessary (minimum) bit width when representing in
+//	//	binary
+//	//	Note: Given an integer value x, the minimum number of bits needed to
+//	//		represent the value in a binary string is given as follows:
+//	//	(Note: if x < 0, then the binary string is in 2's complement notation;
+//	//			otherwise, it's unsigned)
+//	//	Note that overrides previous note in parentheses: unsigned / two's
+//	//	complement notation is decided by unsigned_representation bool input
+//	//	TODO: FILL THIS METHOD
+//	//	Given an integer value x, the minimum number of bits needed to
+//	//	represent the value in a binary string (n) is given as follows:
+//	//	Case 1: Representation is unsigned.
+//	//		Case 1.1:	x = 0.
+//	//			Then, n = 1.
+//	//		Case 1.2:	x > 0.
+//	//			Then, n = floor(log_2(x)) + 1.
+//	//		Case 1.3:	x < 0.
+//	//			Then n cannot be defined as representation is unsigned.
+//	//			Throw an error.
+//	//	Case 2:	Representation is signed 2's complement.
+//	//		Case 2.1:	x = 0 or x = -1.
+//	//			Then, n = 1.
+//	//		Case 2.2:	x < -1.
+//	//			Then, n = floor(log_2(|x| - 1)) + 2.
+//	//		Case 2.3:	x >= 1.
+//	//			Then, n = floor(log_2(x)) + 2.
+//
+//	//	minimum representation length
+//	int n = INT_MAX;
+//	
+//	if (unsigned_representation) {
+//		//	Case 1:	Representation is unsigned.
+//		if (x == 0) {
+//			//	Case 1.1.	x = 0.
+//			n = 1;
+//		}
+//		else if (x > 0) {
+//			//	Case 1.2.	x > 0.
+//			//	n = floor(log_2(x)) + 1.
+//			n = floor(log2(x)) + 1;
+//		}
+//		else {
+//			//	Case 1.3. x < 0.
+//			//	Impossible to represent in unsigned notation.
+//			throwError("It is impossible to represent the negative value "
+//				+ std::to_string(x) + " in an unsigned binary string of length "
+//				+ std::to_string(max_bit_width) + ".");
+//		}
+//	}
+//	else {
+//		//	Case 2: Representation is signed 2's complement.
+//		if (x == 0 || x == -1) {
+//			//	Case 2.1:	x = 0 or x = -1.
+//			n = 1;
+//		}
+//	}
+//
+//	return n <= max_bit_width;
+//}
+//
+//bool fitsInBitWidth(int unsigned_value, int max_bit_width) {
+//	//	Determines whether the given value may be represented in a binary
+//	//	string of length max_bit_width.
+//	//	NOTE: This function computes the minimum necessary length 
+//	return false;
+//}
+
+bool fitsArgumentRange(int imm_value, int argument_size, ArgumentRepresentation argument_rep) {
+	//	Let x be the immediate value and n be the argument size (bit width).
+	//	A signed (2's complement) binary string of length n may represent
+	//		values in the range -2^(n - 1) to 2^(n - 1) - 1.
+	//	An unsigned binary string of length n may represent values in the range
+	//		0 to 2^n - 1.
+	//	Case 1:	argument_rep = ArgumentRepresentation::Signed
+	//		Return true if x is within the range -2^(n - 1) to 2^(n - 1) - 1.
+	//	Case 2: argument_rep = ArgumentRepresentation::Unsigned
+	//		Return true if x is within the range 0 to 2^n - 1.
+	//	Case 3: argument_rep = ArgumentRepresentation::SignedOrUnsigned
+	//		Return true if x is within the range -2^(n - 1) to 2^n - 1.
+
+	std::cout << "fitsArgumentRange(value: " << std::to_string(imm_value)
+		<< " | n = " << std::to_string(argument_size) << " | rep: " 
+		<< ArgumentRepresentationToString(argument_rep) << std::endl;
+
+	int min_val_signed = (-1) << (argument_size - 1);		//	-2^(n - 1)
+	int max_val_signed = (1 << (argument_size - 1)) - 1;	//	2^(n - 1) - 1
+	int min_val_unsigned = 0;
+	int max_val_unsigned = (1 << argument_size) - 1;		//	2^n - 1
+
+	switch (argument_rep) {
+		case ArgumentRepresentation::Signed:
+			return (min_val_signed <= imm_value) && (imm_value <= max_val_signed);
+		case ArgumentRepresentation::Unsigned:
+			return (min_val_unsigned <= imm_value) && (imm_value <= max_val_unsigned);
+		case ArgumentRepresentation::SignedOrUnsigned:
+			return (min_val_signed <= imm_value) && (imm_value <= max_val_unsigned);
+		default:
+			throwError("Undefined default cause reached in fitsArgumentRange()");
+	}
 }
 
 //	Error Handling
