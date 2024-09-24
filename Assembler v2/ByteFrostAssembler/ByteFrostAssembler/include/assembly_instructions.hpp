@@ -6,16 +6,6 @@
 #include "isa.hpp"
 
 /**
- * @brief Given a string that represents an immediate, this function returns
- * the immediate's value.
- * @param immediate_string string that represents an immediate.
- * @return integer value of the given immediate string.
- * @note This function throws an error if the given string does not represent
- * an immediate.
- */
-int getImmediateValue(std::string immediate_string);
-
-/**
  * @brief Given a Token t, returns its integer value as it would be represented
  * in an instruction string.
  * @note Only works for Tokens whose TokenType is such that they can be

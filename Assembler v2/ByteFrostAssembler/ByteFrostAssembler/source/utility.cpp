@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 #include <math.h>
+#include <sstream>
+#include <stdlib.h>
 
 
 bool isAlpha(char c) {
@@ -232,6 +234,139 @@ std::string getFlagName(std::string flag_string) {
 		throwError(flag_string + " is not a valid flag string (parsing error).");
 	}
 	return flag_string.substr(1);
+}
+
+//	Extracting value from string
+
+long long getNumberValue(std::string number_string) {
+	//	First, check that the given string represents a number. If it does not,
+	//	throw an error.
+	if (!isNUMBERString(number_string)) {
+		throwError("Given string '" + number_string 
+			+ "' does not represent a number.");
+	}
+
+	//	The given string is in NUMBER.
+	//	NUMBER = {'', '-', '+'} \circ N
+	//		   = {'', '-', '+'} \circ (ND U NH)
+	std::string v = number_string;
+	int multiplier = 1;
+
+	if (!isUnsignedNumberString(v)) {
+		//	v is not in N, so v[0] is '-' or '+', meaning v[1:end] is in N.
+		if (v[0] == '-') {
+			multiplier = -1;
+		}
+
+		//	Remove sign character from v
+		v = v.substr(1);
+	}
+
+	//	v is in N.
+	//	There are two cases:
+	//	Case 1: v is in ND.
+	//	Case 2: v is in NH.
+
+	if (isUnsignedDecimalString(v)) {
+		//	Case 1 - v is in ND.
+		return multiplier * std::stoi(v);
+	}
+	else if (isUnsignedHexadecimalString(v)) {
+		//	Case 2 - v is in NH.
+		//std::stringstream converter;
+		//long result;
+		//converter << std::hex << v;
+		/*converter << std::hex << "0xdeadbeef";
+		converter >> result;
+		std::cout << "number is in NH and has value " << std::hex << result << std::endl;
+		return multiplier * result;*/
+		long long result = strtoll(v.c_str(), nullptr, 16);
+		std::cout << "sizeof(long): " << std::to_string(sizeof(long)) << std::endl;
+		std::cout << "result: " << std::hex << result << std::endl;
+		return multiplier * result;
+	}
+	else {
+		//	Error - v is neither in ND or NH.
+		throwError("String '" + v + "' is in N but not in NH or ND.");
+	}
+}
+
+int getImmediateValue(std::string immediate_string) {
+	//	First, check that the given string represents an immediate. If it does
+	//	not, throw an error.
+	if (!isImmediateString(immediate_string)) {
+		throwError("Given string '" + immediate_string
+			+ "' does not represent an immediate.");
+	}
+
+	//	An immediate is a string of the form '#'v where v is in NUMBER.
+	//	NUMBER = {'', '-', '+'} \circ N
+	//		   = {'', '-', '+'} \circ (ND U NH)
+
+	//	Get the integer value of string v in NUMBER.
+	return getNumberValue(immediate_string.substr(1));
+}
+
+std::string getConstantNameFromByteConstant(std::string byte_constant_string) {
+	//	First, check that the given string is in BYTE_CONSTANT. If it is not,
+	//	throw an error.
+	if (!isBYTE_CONSTANTString(byte_constant_string)) {
+		throwError("Given string '" + byte_constant_string 
+			+ "' is not in BYTE_CONSTANT.");
+	}
+
+	//	In order for a string s to be in BYTE_CONSTANT:
+	//	1.	s.length() >= 2.
+	//	2.	s = uv such that u is in TEXT and v is in BYTE_SELECT.
+
+	int byteSelectIndex = byte_constant_string.find_first_of(BYTE_SELECT_START);
+
+	return byte_constant_string.substr(0, byteSelectIndex);
+}
+
+int getConstantIndexFromByteConstant(std::string byte_constant_string) {
+	//	First, check that the given string is in BYTE_CONSTANT. If it is not,
+	//	throw an error.
+	if (!isBYTE_CONSTANTString(byte_constant_string)) {
+		throwError("Given string '" + byte_constant_string
+			+ "' is not in BYTE_CONSTANT.");
+	}
+
+	//	Get integer index string
+	int byteSelectIndex = byte_constant_string.find_first_of(BYTE_SELECT_START);
+
+	//	Index number string is a substring of byte_constant_string from index s
+	//	to e, inclusive, defined as:
+	//	s = index of BYTE_SELECT_START + 1
+	//	e = index of BYTE_SELECT_END = byte_constant_string.size() - 2
+	//	so length of number string is:
+	//	e - s + 1 = byte_constant_string.size() - 2 - (byteSelectIndex + 1) + 1
+	//		= byte_constant_size.size() - 2 - byteSelectIndex - 1 + 1
+	//		= byte_constant_size.size() - byteSelectIndex - 2
+	std::string indexString = byte_constant_string.substr(byteSelectIndex + 1,
+		byte_constant_string.size() - byteSelectIndex - 2);
+
+	return getNumberValue(indexString);
+}
+
+//	Extract value from integers
+
+uint8_t getByteFromInt(long long integer, int byte) {
+	//	Byte selection must be 0 - 7
+	if (byte < 0 || byte >= sizeof(long long)) {
+		throwError("Can only select bytes 0 - 7 from an long long; received byte selection "
+			+ std::to_string(byte) + " instead.");
+	}
+
+	uint8_t byte_mask = 0xFF;
+
+	return (integer >> (byte * 8)) & byte_mask;
+}
+
+//	String generation
+
+std::string generateImmediateString(long immediate_value) {
+	return IMMEDIATE_PREFIX + std::to_string(immediate_value);
 }
 
 //	Size Checking

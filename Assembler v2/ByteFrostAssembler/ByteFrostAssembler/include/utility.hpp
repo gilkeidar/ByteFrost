@@ -162,6 +162,71 @@ std::string removeFileExtension(std::string file_name);
  */
 std::string getFlagName(std::string flag_string);
 
+//	Extracting value from string
+
+/**
+ * @brief Given a string that represents a number, this function returns the
+ * number's value.
+ * @param number_string string that represents a number.
+ * @return long long (8 bytes) integer value of the given number string.
+ * @note This function throws an error if the given string does not represent a
+ * number.
+ */
+long long getNumberValue(std::string number_string);
+
+/**
+ * @brief Given a string that represents an immediate, this function returns
+ * the immediate's value.
+ * @param immediate_string string that represents an immediate.
+ * @return integer value of the given immediate string.
+ * @note This function throws an error if the given string does not represent
+ * an immediate.
+ */
+int getImmediateValue(std::string immediate_string);
+
+/**
+ * @brief Given a string that is in BYTE_CONSTANT, this function returns the
+ * constant's name.
+ * @param byte_constant_string string that is in BYTE_CONSTANT
+ * @return name of constant (substring of given string before byte selection
+ * array syntax)
+ * @note This function throws an error if the given string is not in 
+ * BYTE_CONSTANT.
+ */
+std::string getConstantNameFromByteConstant(std::string byte_constant_string);
+
+/**
+ * @brief Givne a string that is in BYTE_CONSTANT, this function returns the
+ * integer index in the byte selection array syntax.
+ * @param byte_constant_string string that is in BYTE_CONSTANT
+ * @return integer index in the byte selection array syntax.
+ * @note This function throws an error if the given string is not in 
+ * BYTE_COSNTANT.
+ */
+int getConstantIndexFromByteConstant(std::string byte_constant_string);
+
+//	Extract value from int
+
+/**
+ * @brief Returns an unsigned byte value of the specified byte from the given
+ * long long.
+ * @param integer long long integer to extract byte from
+ * @param byte which byte to extract from long long (0 being the LSB and 7 being
+ * the MSB)
+ * @return specified unsigned byte value from given integer.
+ * @note This function throws an error if the byte selected is not 0 - 7.
+ */
+uint8_t getByteFromInt(long long integer, int byte);
+
+//	String generation
+
+/**
+ * @brief Generates an immediate string with the given value.
+ * @param immediate_value immediate value
+ * @return Immediate string with the given number value.
+ */
+std::string generateImmediateString(long immediate_value);
+
 //	Size Checking
 
 ///**

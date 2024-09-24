@@ -33,7 +33,7 @@ struct PreprocessorConstant {
 	 * ensure that PreprocessorConstants are not declared with a size larger 
 	 * than this.
 	 */
-	long value;
+	long long value;
 };
 
 class Preprocessor {
@@ -44,10 +44,10 @@ private:
 	//	Hashmap of string -> PreprocessorConstant
 	std::unordered_map<std::string, PreprocessorConstant> constants;
 
-	//void handleDirective(DirectiveLine* line);
+	void handleDirective(DirectiveLine* line);
 
 	//	Directive handlers
-	//void handleDefineDirective(DirectiveLine* line);
+	void handleDefineDirective(DirectiveLine* line);
 };
 
 //	Directives array

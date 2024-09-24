@@ -2,55 +2,6 @@
 #include "utility.hpp"
 #include <sstream>
 
-int getImmediateValue(std::string immediate_string) {
-	//	First, check that the given string represents an immediate. If it does
-	//	not, throw an error.
-	if (!isImmediateString(immediate_string)) {
-		throwError("Given string '" + immediate_string 
-			+ "' does not represent an immediate.");
-	}
-
-	//	An immediate is a string of the form '#'v where v is in NUMBER.
-	//	NUMBER = {'', '-', '+'} \circ N
-	//		   = {'', '-', '+'} \circ (ND U NH)
-
-	//	Get the string v in NUMBER.
-	std::string v = immediate_string.substr(1);
-	int multiplier = 1;
-
-	if (!isUnsignedNumberString(v)) {
-		//	v is not in N, so v[0] is '-' or '+', meaning v[1:end] is in N.
-		if (v[0] == '-') {
-			multiplier = -1;
-		}
-
-		//	Remove sign character from v
-		v = v.substr(1);
-	}
-
-	//	v is in N.
-	//	There are two cases:
-	//	Case 1: v is in ND.
-	//	Case 2: v is in NH.
-
-	if (isUnsignedDecimalString(v)) {
-		//	Case 1 - v is in ND.
-		return multiplier * std::stoi(v);
-	}
-	else if (isUnsignedHexadecimalString(v)) {
-		//	Case 2 - v is in NH.
-		std::stringstream converter;
-		int result;
-		converter << std::hex << v;
-		converter >> result;
-		return multiplier * result;
-	}
-	else {
-		//	Error - v is neither in ND or NH.
-		throwError("String '" + v + "' is in N but not in NH or ND.");
-	}
-}
-
 //	TODO: modify this method so that it also takes a maximum bit size
 //	restriction (which comes from the Argument struct in AssemblyArgument)
 //	Add a check that if the Token's integer value's minimum bit width is larger
