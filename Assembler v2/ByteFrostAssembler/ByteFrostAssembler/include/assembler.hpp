@@ -3,6 +3,7 @@
 #include "parser.hpp"
 #include "file_generation.hpp"
 #include "assembly_instructions.hpp"
+#include "preprocessor.hpp"
 
 /**
  * @brief Assembler class. Contains all objects that handle software pipeline,
@@ -37,10 +38,19 @@ private:
 	//	(string name -> vector<AssemblyInstruction>)
 	std::unordered_map<std::string, std::vector<AssemblyInstruction>> instructions;
 
+	//	Preprocessor Directive hashmap
+	//	(string name -> Directive)
+	std::unordered_map<std::string, Directive> directives;
+
 	/**
 	 * @brief Populate Assembly Instruction hashmap.
 	 */
 	void initializeAssemblyInstructions();
+
+	/**
+	 * @brief Populate Directive hashmap.
+	 */
+	void initializePreprocessorDirectives();
 
 	//	ISA vector (index: opcode -> ISAInstruction)
 
@@ -51,6 +61,7 @@ private:
 	Parser parser;
 
 	//	Pipeline Stage 2: Preprocessor
+	Preprocessor preprocessor;
 
 	//	Pipeline Stage 3: Label Handler
 

@@ -27,7 +27,8 @@ Parser::Parser() {
 }
 
 std::vector<Line*> Parser::run(CommandLineArguments* arguments,
-	std::unordered_map<std::string, std::vector<AssemblyInstruction>> & instructions) {
+	std::unordered_map<std::string, std::vector<AssemblyInstruction>> & instructions,
+	std::unordered_map<std::string, Directive>& directives) {
 	std::cout << "=== Stage 1: Parser.run() ===" << std::endl;
 
 	//	1.	Open the input file
@@ -83,7 +84,7 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 	uint16_t current_address = 0;
 
 	//for (std::string s : line_strings) {
-	for (int line_count = 0; line_count < line_strings.size(); line_count++) {
+	for (unsigned int line_count = 0; line_count < line_strings.size(); line_count++) {
 		std::string s = line_strings[line_count];
 		std::cout << "== CONVERTING s to Line * ==" << std::endl;
 		std::cout << "s = " << s << std::endl;
@@ -152,7 +153,8 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 		}
 
 		//	3.4	Generate a Line object and add it to the vector<Line *> lines.
-		Line* line = generateLine(s, tokens, instructions, current_address);
+		Line* line = generateLine(line_count + 1, s, tokens, instructions, directives,
+			current_address);
 
 		//	Print line found
 
@@ -163,7 +165,6 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 			throwError("Line " + std::to_string(line_count + 1) 
 				+ " is invalid.");
 		}
-
 
 		lines.push_back(line);
 	}
@@ -180,7 +181,7 @@ Token Parser::stringToToken(std::string w,
 
 	if (isTEXTString(w)) {
 		if (instructions.find(w) != instructions.end()) {
-			//	TODO: Check whether w is an instruction (need Assembler's
+			//	Check whether w is an instruction (need Assembler's
 			//	std::string -> std::vector<Instruction> hashmap to exist)
 			type = TokenType::INSTRUCTION;
 		}
@@ -208,9 +209,11 @@ Token Parser::stringToToken(std::string w,
 		//	w is an immediate
 		type = TokenType::IMMEDIATE;
 	}
-	else if (w.length() >= 2 && w[0] == DIRECTIVE_PREFIX 
-		&& isTEXTString(w.substr(1))) {
-		//	w is a preprocessor directive
+	/*else if (w.length() >= 2 && w[0] == DIRECTIVE_PREFIX 
+		&& isTEXTString(w.substr(1))) {*/
+	else if (isDirectiveString(w)) {
+		//	w appears to be a preprocessor directive (mark it as such - whether
+		//	the directive exists will be checked in generateLine())
 		type = TokenType::DIRECTIVE;
 	}
 	//else if (w.length() >= 2 && w[0] == LABEL_PREFIX 
@@ -277,8 +280,10 @@ std::string TokenToString(Token t) {
 		+ t.token_string + "}";
 }
 
-Line* Parser::generateLine(std::string s, std::vector<Token> tokens,
+Line* Parser::generateLine(unsigned int line_number, std::string s, 
+	std::vector<Token> tokens,
 	std::unordered_map<std::string, std::vector<AssemblyInstruction>> & instructions,
+	std::unordered_map<std::string, Directive> & directives,
 	uint16_t & current_address) {
 	//	Given vector<Token> tokens, allocate and return a Line object.
 	Line* line = nullptr;
@@ -286,7 +291,7 @@ Line* Parser::generateLine(std::string s, std::vector<Token> tokens,
 	//	Identify line type
 	if (tokens.size() == 0) {
 		//	Line has no tokens - type is Empty
-		return new Line(LineType::EMPTY, s, tokens, current_address);
+		return new Line(line_number, LineType::EMPTY, s, tokens, current_address);
 	}
 
 	//	Line has at least one token
@@ -302,27 +307,51 @@ Line* Parser::generateLine(std::string s, std::vector<Token> tokens,
 				//	Update next line's address
 				uint16_t instruction_address = current_address;
 				current_address = getNextLineAddress(current_address, instruction);
-				return new InstructionLine(s, tokens, instruction_address, &instruction);
+				return new InstructionLine(line_number, s, tokens, instruction_address, &instruction);
 			}
 		}
 
 		//	No valid instruction found
-		throwError("Incorrect arguments for instruction '"
+		throwErrorLine(line_number, "Incorrect arguments for instruction '"
 			+ tokens[0].token_string + "'.");
+	}
+	if (tokens[0].type == TokenType::DIRECTIVE) {
+		//	Line may be a Preprocessor directive - verify that the name of the
+		//	directive matches a directive that exists, and that the rest of the
+		//	tokens match the expected argument sequence of the directive found.
+		std::string directiveName = tokens[0].token_string.substr(1);
+		if (directives.find(directiveName) == directives.end()) {
+			//	No directive with the given name found - throw an error
+			throwErrorLine(line_number, "Unknown directive '" 
+				+ directiveName + "'.");
+		}
+
+		Directive& directive = directives[directiveName];
+
+		//	Ensure that rest of tokens match directive
+		if (matchesDirectiveArgs(tokens, directive)) {
+			return new DirectiveLine(line_number, s, tokens, current_address, &directive);
+		}
+
+		//	Directive exists, but given token arguments do not match its 
+		//	expected arguments.
+		throwErrorLine(line_number, 
+			"Incorrect arguments for preprocessor directive '" + directive.name 
+			+ "'.");
 	}
 	//	TODO: Add checks for Preprocessor directives and label definitions here
 	else {
 		//	Invalid line
-		return new Line(LineType::INVALID, s, tokens, current_address);
+		return new Line(line_number, LineType::INVALID, s, tokens, current_address);
 	}
 }
 
 bool Parser::matchesInstructionArgs(std::vector<Token> tokens, AssemblyInstruction& instruction) {
 	//	Check whether token types match the instruction's expected arguments
 	//	For this to be true:
-	//	1.	tokens.size() - 1 == instruction->expected_param_types.size().
+	//	1.	tokens.size() - 1 == instruction.expected_param_types.size().
 	//	2.	tokens[0].type == TokenType::INSTRUCTION.
-	//	3.	for i = 0 to instruction->expected_param_types.size():
+	//	3.	for i = 0 to instruction.expected_param_types.size():
 	//			tokens[i + 1].type matches expected_param_type[i]
 
 	if (tokens.size() - 1 != instruction.expected_param_types.size())
@@ -356,6 +385,32 @@ bool Parser::matchesInstructionArgs(std::vector<Token> tokens, AssemblyInstructi
 			//	found arguments that don't match in type
 			return false;
 		}
+	}
+
+	return true;
+}
+
+bool Parser::matchesDirectiveArgs(std::vector<Token> tokens, Directive& directive) {
+	//	Check whether the TokenTypes of the directive tokens match the
+	//	directive's expected TokenTypes argument sequence.
+	//	For this to be true:
+	//	1.	tokens.size() - 1 == directive.expected_param_types.size().
+	//	2.	tokens[0].type == TokenType::DIRECTIVE.
+	//	3.	for i = 0 to directive.expected_param_types.size():
+	//			tokens[i + 1].type matches expected_param_type[i]
+
+	if (tokens.size() - 1 != directive.expected_param_types.size())
+		return false;
+
+	if (tokens[0].type != TokenType::DIRECTIVE)
+		return false;
+
+	//	Note: No notion of "quantity types" for preprocessor directive 
+	//	arguments, as these arguments will not be replaced by something else
+	//	(such as the preprocessor or the label handler!)
+	for (int i = 0; i < directive.expected_param_types.size(); i++) {
+		if (tokens[i + 1].type != directive.expected_param_types[i])
+			return false;
 	}
 
 	return true;

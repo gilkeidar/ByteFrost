@@ -1,7 +1,8 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "parser.hpp"
+//#include "parser.hpp"
+#include "shared_types.hpp"
 #include "isa.hpp"
 
 /**

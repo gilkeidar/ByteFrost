@@ -108,6 +108,17 @@ bool isImmediateString(std::string s) {
 	return isNUMBERString(s.substr(1));
 }
 
+bool isDirectiveString(std::string s) {
+	//	In order for s to represent a preprocessor directive invocation:
+	//	1.	s.length() >= 2.
+	//	2.	s[0] is DIRECTIVE_PREFIX
+	//	3.	s[1:end] is in TEXT.
+	if (s.length() < 2)	return false;
+	if (s[0] != DIRECTIVE_PREFIX)	return false;
+
+	return isTEXTString(s.substr(1));
+}
+
 bool isFILEString(std::string s) {
 	std::cout << "isFILEString(" << s << ")" << std::endl;
 	//	In order for s to be in FILE:
@@ -334,6 +345,15 @@ void throwError(std::string error_string) {
 	exit(1);
 }
 
+void throwErrorLine(unsigned int line_number, std::string error_string) {
+	std::cerr << "Error: Line " << std::to_string(line_number) << ": " << error_string << std::endl;
+	exit(1);
+}
+
 void throwWarning(std::string warning_string) {
 	std::cerr << "Warning: " << warning_string << std::endl;
+}
+
+void throwWarningLine(unsigned int line_number, std::string warning_string) {
+	std::cerr << "Warning: Line " << std::to_string(line_number) << ": " << warning_string << std::endl;
 }

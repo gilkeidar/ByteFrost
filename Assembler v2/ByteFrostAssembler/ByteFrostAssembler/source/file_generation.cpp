@@ -5,7 +5,7 @@
 #include <fstream>
 #include <iostream>
 
-void OutputFileGenerator::run(std::vector<Line*> lines, CommandLineArguments& clArgs) {
+void OutputFileGenerator::run(std::vector<Line*> & lines, CommandLineArguments& clArgs) {
 	std::cout << "=== Stage 4: OutputFileGenerator.run() ===" << std::endl;
 	
 	//	Store lines vector

@@ -1,6 +1,9 @@
 #pragma once
 #include <string>
 #include "isa.hpp"
+//#include "parser.hpp"
+#include "shared_types.hpp"
+//#include "preprocessor.hpp"
 
 //	Parsing Utilities
 
@@ -77,9 +80,18 @@ bool isNUMBERString(std::string s);
 /**
  * @brief Determines whether a given string represents an immediate.
  * @param s string to check
- * @return true if s represents an immeidate and false otherwise.
+ * @return true if s represents an immediate and false otherwise.
  */
 bool isImmediateString(std::string s);
+
+/**
+ * @brief Determines whether a given string represents a preprocessor directive
+ * invocation.
+ * @param s string to check
+ * @return true if s represents a preprocessor directive invocation and false
+ * otherwise.
+ */
+bool isDirectiveString(std::string s);
 
 /**
  * @brief Determines whether a given string represents a file name (i.e.,
@@ -202,8 +214,25 @@ bool fitsArgumentRange(int imm_value, int argument_size, ArgumentRepresentation 
 void throwError(std::string error_string);
 
 /**
+ * @brief Prints the given error string to stderr, then exits the program with
+ * exit code 1.
+ * @param line_number Line number at which error was detected
+ * @param error_string Error string message
+ */
+void throwErrorLine(unsigned int line_number, std::string error_string);
+
+/**
  * @brief Prints the given warning string to stderr, but does not exit the
  * program.
  * @param warning_string Warning string massage
  */
 void throwWarning(std::string warning_string);
+
+/**
+ * @brief Prints the given warning string to stderr, but does not exit the
+ * program.
+ * @param line_number Line number at which warning was detected.
+ * @param warning_string Warning string message
+ */
+void throwWarningLine(unsigned int line_number, std::string warning_string);
+

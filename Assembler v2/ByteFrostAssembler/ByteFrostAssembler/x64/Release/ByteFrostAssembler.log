@@ -1,7 +1,18 @@
-﻿  assembly_instructions.cpp
+﻿  assembler.cpp
+  assembly_instructions.cpp
+  clap.cpp
+  file_generation.cpp
+  isa.cpp
+  main.cpp
+  parser.cpp
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\parser.cpp(447,24): warning C4267: 'initializing': conversion from 'size_t' to 'uint16_t', possible loss of data
+  utility.cpp
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(177,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(193,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(225,15): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   Generating code
-  169 of 1983 functions ( 8.5%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    115 functions had inline decision re-evaluated but remain unchanged
+  100 of 2200 functions ( 4.5%) were compiled, the rest were copied from previous compilation.
+    4 functions were new in current compilation
+    133 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   ByteFrostAssembler.vcxproj -> C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\x64\Release\ByteFrostAssembler.exe

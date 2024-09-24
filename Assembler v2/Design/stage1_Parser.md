@@ -242,6 +242,15 @@ A `vector<Token> tokens` vector is mapped to `LineType::DIRECTIVE` if
     list, and the number of tokens (i.e., `tokenss.size() - 1`) must match the
     number of expected token arguments of the directive.
 
+The `DirectiveLine` struct inherits from `Line` and is defined as follows,
+containing a pointer to the `Directive` the `Line` contains.
+
+```cpp
+struct DirectiveLine : Line {
+    Directive * directive;
+}
+```
+
 ####    `LABEL_DEFINITION`
 
 A `vector<Token> tokens` vector is mapped to `LineType::LABEL_DEFINITION` if

@@ -145,3 +145,12 @@ const std::string COMMENT_START = "//";
 #define	RAM_END_ADDRESS		0xDFFF
 #define	ROM_SIZE_BYTES	(8 * 1024)
 #define	RAM_SIZE_BYTES	(48 * 1024)
+
+//	Preprocessor
+
+//	A PreprocessorConstant may at most be 8 bytes in size, as the value is
+//	stored in a long.
+//	e.g., .define 16 VERY_LARGE_CONST	1701
+//	should result in an error in Preprocessor.handleDefineDirective() as the
+//	constant size is specified as 16 bytes.
+#define	PREPROCESSOR_CONSTANT_MAX_SIZE	8

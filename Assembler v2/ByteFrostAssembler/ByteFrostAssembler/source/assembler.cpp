@@ -8,6 +8,9 @@ Assembler::Assembler(int argc, char** argv) : clap(argc, argv) {
 
 	//	Initialize assembly instructions list
 	initializeAssemblyInstructions();
+
+	//	Initialize Preprocessor Directives list
+	initializePreprocessorDirectives();
 }
 
 void Assembler::run() {
@@ -19,9 +22,11 @@ void Assembler::run() {
 	this->commandLineArguments = clap.run();
 
 	//	Stage 1: Parser
-	this->lines = parser.run(this->commandLineArguments, this->instructions);
+	this->lines = parser.run(this->commandLineArguments, this->instructions,
+		this->directives);
 
 	//	Stage 2: Preprocessor
+	preprocessor.run(this->lines, *(this->commandLineArguments));
 
 	//	Stage 3: Label Handler
 
@@ -34,5 +39,13 @@ void Assembler::initializeAssemblyInstructions() {
 		std::cout << "Adding " << instruction.name 
 			+ " instruction to assembler..." << std::endl;
 		this->instructions[instruction.name].push_back(instruction);
+	}
+}
+
+void Assembler::initializePreprocessorDirectives() {
+	for (const Directive& directive : preprocessor_directives) {
+		std::cout << "Adding " << directive.name
+			+ " preprocessor directive to assembler..." << std::endl;
+		this->directives[directive.name] = directive;
 	}
 }
