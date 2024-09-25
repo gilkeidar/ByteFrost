@@ -102,6 +102,64 @@ std::vector<uint16_t> AssemblyInstruction::generateCode(InstructionLine& line) {
 					}
 					break;
 				}
+				case ArgumentSource::TokenLabelHigh: {
+					//	This argument's value is an index of the token in the
+					//	InstructionLine that contains the value. The token
+					//	value is an immediate from a Label, and we want the
+					//	High byte from it.
+					if (assemblyArg.argument.value >= line.tokens.size()) {
+						throwError(
+							"AssemblyArgument from TokenLabelHigh expects value from token of index "
+							+ std::to_string(assemblyArg.argument.value)
+							+ ", but only have "
+							+ std::to_string(line.tokens.size())
+							+ " tokens available in line."
+						);
+					}
+					int label_immediate = getTokenIntValue(line.tokens[assemblyArg.argument.value]);
+					arg.value = getByteFromInt(label_immediate, 1);
+					//	Verify that the argument value can fit in the Argument's
+					//	specified range (based on the Argument's acceptable
+					//	representations - signed, unsigned, or either).
+					if (!fitsArgumentRange(arg.value, arg.size, this->instruction_sequence[i]->expected_arguments[j].rep)) {
+						throwError("Value " + std::to_string(arg.value)
+							+ " cannot fit in "
+							+ ArgumentRepresentationToString(this->instruction_sequence[i]->expected_arguments[j].rep)
+							+ " as expected by instruction with opcode "
+							+ std::to_string(this->instruction_sequence[i]->opcode)
+							+ ".");
+					}
+					break;
+				}
+				case ArgumentSource::TokenLabelLow: {
+					//	This argument's value is an index of the token in the
+					//	InstructionLine that contains the value. The token
+					//	value is an immediate from a Label, and we want the
+					//	Low byte from it.
+					if (assemblyArg.argument.value >= line.tokens.size()) {
+						throwError(
+							"AssemblyArgument from TokenLabelLow expects value from token of index "
+							+ std::to_string(assemblyArg.argument.value)
+							+ ", but only have "
+							+ std::to_string(line.tokens.size())
+							+ " tokens available in line."
+						);
+					}
+					int label_immediate = getTokenIntValue(line.tokens[assemblyArg.argument.value]);
+					arg.value = getByteFromInt(label_immediate, 0);
+					//	Verify that the argument value can fit in the Argument's
+					//	specified range (based on the Argument's acceptable
+					//	representations - signed, unsigned, or either).
+					if (!fitsArgumentRange(arg.value, arg.size, this->instruction_sequence[i]->expected_arguments[j].rep)) {
+						throwError("Value " + std::to_string(arg.value)
+							+ " cannot fit in "
+							+ ArgumentRepresentationToString(this->instruction_sequence[i]->expected_arguments[j].rep)
+							+ " as expected by instruction with opcode "
+							+ std::to_string(this->instruction_sequence[i]->opcode)
+							+ ".");
+					}
+					break;
+				}
 				case ArgumentSource::Constant: {
 					//	No need to do anything; arg value is already correct
 					break;

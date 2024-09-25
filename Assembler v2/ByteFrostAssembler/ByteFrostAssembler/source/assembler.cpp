@@ -29,6 +29,7 @@ void Assembler::run() {
 	preprocessor.run(this->lines, *(this->commandLineArguments));
 
 	//	Stage 3: Label Handler
+	label_handler.run(this->lines, *(this->commandLineArguments));
 
 	//	Stage 4: Output File Generation
 	file_generator.run(this->lines, *(this->commandLineArguments));

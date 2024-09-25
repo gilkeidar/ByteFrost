@@ -349,6 +349,57 @@ int getConstantIndexFromByteConstant(std::string byte_constant_string) {
 	return getNumberValue(indexString);
 }
 
+std::string getLabelName(std::string label_string) {
+	//	First, ensure that this string is a label
+	if (!isLABELString(label_string)) {
+		throwError("Given string '" + label_string + "' is not in LABEL.");
+	}
+
+	return label_string.substr(1);
+}
+
+std::string getLabelNameFromByteLabel(std::string byte_label_string) {
+	//	First, check that the given string is in BYTE_LABEL. If it is not,
+	//	throw an error.
+	if (!isBYTE_LABELString(byte_label_string)) {
+		throwError("Given string '" + byte_label_string
+			+ "' is not in BYTE_LABELT.");
+	}
+
+	//	In order for a string s to be in BYTE_LABEL:
+	//	1. s.length() >= 2.
+	//	2. s = uv such that u is a label and v is in BYTE_SELECT.
+
+	int byteSelectIndex = byte_label_string.find_first_of(BYTE_SELECT_START);
+
+	return byte_label_string.substr(1, byteSelectIndex - 1);
+}
+
+int getLabelIndexFromByteLabel(std::string byte_label_string) {
+	//	First, check that the given string is in BYTE_LABEL. If it is not,
+	//	throw an error.
+	if (!isBYTE_LABELString(byte_label_string)) {
+		throwError("Given string '" + byte_label_string
+			+ "' is not in BYTE_LABEL.");
+	}
+
+	//	Get integer index string
+	int byteSelectIndex = byte_label_string.find_first_of(BYTE_SELECT_START);
+
+	//	Index number string is a substring of byte_label_string from index s
+	//	to e, inclusive, defined as:
+	//	s = index of BYTE_SELECT_START + 1
+	//	e = index of BYTE_SELECT_END = byte_label_string.size() - 2
+	//	so length of number string is:
+	//	e - s + 1 = byte_label_string.size() - 2 - (byteSelectIndex + 1) + 1
+	//		= byte_label_size.size() - 2 - byteSelectIndex - 1 + 1
+	//		= byte_label_size.size() - byteSelectIndex - 2
+	std::string indexString = byte_label_string.substr(byteSelectIndex + 1,
+		byte_label_string.size() - byteSelectIndex - 2);
+
+	return getNumberValue(indexString);
+}
+
 //	Extract value from integers
 
 uint8_t getByteFromInt(long long integer, int byte) {

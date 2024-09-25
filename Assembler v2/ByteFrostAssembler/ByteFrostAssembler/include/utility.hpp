@@ -196,14 +196,44 @@ int getImmediateValue(std::string immediate_string);
 std::string getConstantNameFromByteConstant(std::string byte_constant_string);
 
 /**
- * @brief Givne a string that is in BYTE_CONSTANT, this function returns the
+ * @brief Given a string that is in BYTE_CONSTANT, this function returns the
  * integer index in the byte selection array syntax.
  * @param byte_constant_string string that is in BYTE_CONSTANT
  * @return integer index in the byte selection array syntax.
  * @note This function throws an error if the given string is not in 
- * BYTE_COSNTANT.
+ * BYTE_CONSTANT.
  */
 int getConstantIndexFromByteConstant(std::string byte_constant_string);
+
+/**
+ * @brief Given a label string, this function returns the label name string.
+ * @param label_string Label string from which to extract the label name.
+ * @return Label name string from given label string.
+ * @note This function throws an error if the given string is not a label
+ * string.
+ */
+std::string getLabelName(std::string label_string);
+
+/**
+ * @brief Given a string that is in BYTE_LABEL, this function returns the 
+ * label's name.
+ * @param byte_label_string string that is in BYTE_LABEL
+ * @return name of label (substring of given string before byte selection array
+ * syntax)
+ * @note This function throws an error if the given string is not in 
+ * BYTE_LABEL.
+ */
+std::string getLabelNameFromByteLabel(std::string byte_label_string);
+
+/**
+ * @brief Given a string that is in BYTE_LABEL, this function returns the
+ * integer index in the byte selection array syntax.
+ * @param byte_label_string string that is in BYTE_LABEL
+ * @return integer index in the byte selection array syntax.
+ * @note This function throws an error if the given string is not in 
+ * BYTE_LABEL.
+ */
+int getLabelIndexFromByteLabel(std::string byte_label_string);
 
 //	Extract value from int
 

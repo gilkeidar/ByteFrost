@@ -340,6 +340,10 @@ Line* Parser::generateLine(unsigned int line_number, std::string s,
 			+ "'.");
 	}
 	//	TODO: Add checks for Preprocessor directives and label definitions here
+	else if (tokens[0].type == TokenType::LABEL && tokens.size() == 1) {
+		//	Line is a label definition.
+		return new Line(line_number, LineType::LABEL_DEFINITION, s, tokens, current_address);
+	}
 	else {
 		//	Invalid line
 		return new Line(line_number, LineType::INVALID, s, tokens, current_address);

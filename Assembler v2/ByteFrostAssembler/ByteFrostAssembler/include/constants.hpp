@@ -54,6 +54,20 @@ const std::string COMMENT_START = "//";
 #define	ADC_FUNC_BITS	0xe
 #define	SBC_FUNC_BITS	0xf
 
+//	Branch Condition Bit Values
+#define JMP_COND_BITS	0
+#define	BMI_COND_BITS	1	//	Branch on Minus (negative flag)
+#define	BCS_COND_BITS	2	//	Branch on Carry Set (carry flag)
+#define	BEQ_COND_BITS	3	//	Branch Equal (zero flag)
+#define	BPL_COND_BITS	5	//	Branch on Plus (nonnegative) (negative flag not set)
+#define	BCC_COND_BITS	6	//	Branch on Carry Clear (carry flag not set)
+#define	BNE_COND_BITS	7	//	Branch Not Equal (zero flag not set)
+
+//	Special Register Values
+#define	DHPC_BITS		0
+#define	HDP_BITS		1
+#define	HSP_BITS		2
+
 //	Assembly Instructions
 
 //	ISA Instructions
@@ -154,3 +168,8 @@ const std::string COMMENT_START = "//";
 //	should result in an error in Preprocessor.handleDefineDirective() as the
 //	constant size is specified as 16 bytes.
 #define	PREPROCESSOR_CONSTANT_MAX_SIZE	8
+
+//	Label Handler
+
+//	Each label stores a 16-bit (2-byte) address. Hence, its size is 2 bytes.
+#define	LABEL_SIZE_BYTES	2

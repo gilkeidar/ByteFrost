@@ -4,6 +4,7 @@
 #include "file_generation.hpp"
 #include "assembly_instructions.hpp"
 #include "preprocessor.hpp"
+#include "label_handler.hpp"
 
 /**
  * @brief Assembler class. Contains all objects that handle software pipeline,
@@ -64,6 +65,7 @@ private:
 	Preprocessor preprocessor;
 
 	//	Pipeline Stage 3: Label Handler
+	LabelHandler label_handler;
 
 	//	Pipeline Stage 4: Output File Generation
 	OutputFileGenerator file_generator;

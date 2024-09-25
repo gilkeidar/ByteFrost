@@ -18,7 +18,7 @@
  */
 int getTokenIntValue(Token t);
 
-enum class ArgumentSource {Token, Constant};
+enum class ArgumentSource {Token, Constant, TokenLabelHigh, TokenLabelLow};
 
 struct AssemblyArgument {
 	ArgumentSource source;
@@ -384,21 +384,214 @@ const AssemblyInstruction assembly_instructions[] = {
 			}
 		}
 	},
-	//{	//	Branch 
-	//	"MOV",
-	//	{TokenType::GREGISTER, TokenType::GREGISTER},
-	//	{&isa[MOV_OPCODE]},
-	//	{
-	//		{
-	//			{
-	//				ArgumentSource::Token,
-	//				{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
-	//			},
-	//			{
-	//				ArgumentSource::Token,
-	//				{ArgumentType::Rs1, GREGISTER_SIZE, SECOND_TOKEN}
-	//			},
-	//		}
-	//	}
-	//},
+	{	//	JMP :label
+		"JMP",
+		{TokenType::LABEL},
+		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelHigh,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				}
+			},
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::BranchCondition, BRANCH_COND_SIZE, JMP_COND_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelLow,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	BMI :label
+		"BMI",
+		{TokenType::LABEL},
+		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelHigh,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				}
+			},
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::BranchCondition, BRANCH_COND_SIZE, BMI_COND_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelLow,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	BCS :label
+		"BCS",
+		{TokenType::LABEL},
+		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelHigh,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				}
+			},
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::BranchCondition, BRANCH_COND_SIZE, BCS_COND_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelLow,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	BEQ :label
+		"BEQ",
+		{TokenType::LABEL},
+		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelHigh,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				}
+			},
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::BranchCondition, BRANCH_COND_SIZE, BEQ_COND_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelLow,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	BPL :label
+		"BPL",
+		{TokenType::LABEL},
+		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelHigh,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				}
+			},
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::BranchCondition, BRANCH_COND_SIZE, BPL_COND_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelLow,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	BCC :label
+		"BCC",
+		{TokenType::LABEL},
+		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelHigh,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				}
+			},
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::BranchCondition, BRANCH_COND_SIZE, BCC_COND_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelLow,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	BNE :label
+		"BNE",
+		{TokenType::LABEL},
+		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelHigh,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				}
+			},
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::BranchCondition, BRANCH_COND_SIZE, BNE_COND_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelLow,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	OR Rd, Immediate
+		"OR",
+		{TokenType::GREGISTER, TokenType::IMMEDIATE},
+		{&isa[ALU_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, OR_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 4, SECOND_TOKEN}
+				},
+			}
+		}
+	},
 };

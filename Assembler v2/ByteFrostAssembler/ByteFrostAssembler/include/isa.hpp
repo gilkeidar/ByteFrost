@@ -187,7 +187,7 @@ const ISAInstruction isa[] = {
 			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 4, 12}
 		}
 	},
-	{	//	Test Immediate
+	{	//	Load Special Register Immediate
 		LSP_IMM_OPCODE,
 		{
 			{ArgumentType::SpecialRegister, ArgumentRepresentation::Unsigned, SREGISTER_SIZE, 6},
