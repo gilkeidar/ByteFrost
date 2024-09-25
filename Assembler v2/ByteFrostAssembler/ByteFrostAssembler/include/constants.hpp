@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <unordered_map>
 
 //	Command-Line Arguments
 const std::string UNSET_FILE_NAME = "UNSET";
@@ -77,6 +78,12 @@ const std::string INTEGER_PRINT_TYPE = "I";
 #define	DHPC_BITS		0
 #define	HDP_BITS		1
 #define	HSP_BITS		2
+
+const std::unordered_map<std::string, uint8_t> special_register_bits({
+	{"DHPC", DHPC_BITS},
+	{"HDP", HDP_BITS},
+	{"HSP", HSP_BITS}
+	});
 
 //	OUT Print Type Values
 #define	ASCII_PRINT_TYPE_BIT	0

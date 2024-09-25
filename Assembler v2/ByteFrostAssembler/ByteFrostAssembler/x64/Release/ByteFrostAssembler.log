@@ -1,26 +1,12 @@
-﻿  assembly_instructions.cpp
-  clap.cpp
+﻿  assembler.cpp
+  assembly_instructions.cpp
   file_generation.cpp
-  isa.cpp
-  label_handler.cpp
+  main.cpp
   parser.cpp
-C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\parser.cpp(457,24): warning C4267: 'initializing': conversion from 'size_t' to 'uint16_t', possible loss of data
-  preprocessor.cpp
-C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\preprocessor.cpp(90,33): warning C4244: '=': conversion from '__int64' to 'long', possible loss of data
-  utility.cpp
-C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(179,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(195,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(233,15): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(313,23): warning C4244: 'return': conversion from '__int64' to 'int', possible loss of data
-C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(328,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(342,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(355,23): warning C4244: 'return': conversion from '__int64' to 'int', possible loss of data
-C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(379,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(393,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(406,23): warning C4244: 'return': conversion from '__int64' to 'int', possible loss of data
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\parser.cpp(459,24): warning C4267: 'initializing': conversion from 'size_t' to 'uint16_t', possible loss of data
   Generating code
-  4 of 2488 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
-    1 functions were new in current compilation
-    2 functions had inline decision re-evaluated but remain unchanged
+  160 of 2654 functions ( 6.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    32 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   ByteFrostAssembler.vcxproj -> C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\x64\Release\ByteFrostAssembler.exe

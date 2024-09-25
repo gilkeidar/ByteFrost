@@ -19,3 +19,4 @@ OR R2, #14
 OUT R3, A
 CALL :label2
 BRK
+LSP %DHPC, #1

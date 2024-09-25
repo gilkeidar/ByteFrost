@@ -867,6 +867,48 @@ const AssemblyInstruction assembly_instructions[] = {
 			}
 		}
 	},
+	{	//	DEC Rd
+		"DEC",
+		{TokenType::GREGISTER},
+		{&isa[ALU_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, SUB_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Immediate, 4, 1}
+				},
+			}
+		}
+	},
+	{	//	INC Rd
+		"INC",
+		{TokenType::GREGISTER},
+		{&isa[ALU_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, ADD_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Immediate, 4, 1}
+				},
+			}
+		}
+	},
 	{	//	OUT Rs1, OUT_PRINT_TYPE
 		"OUT",
 		{TokenType::GREGISTER, TokenType::OUT_PRINT_TYPE},
@@ -1047,6 +1089,24 @@ const AssemblyInstruction assembly_instructions[] = {
 		{},
 		{&isa[RTS_OPCODE]},
 		{{}}
+	},
+	//	TODO: Add Test Reg and Test Immediate instructions
+	{	//	LSP SREGISTER, #Immediate
+		"LSP",
+		{TokenType::SREGISTER, TokenType::IMMEDIATE},
+		{&isa[LSP_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::SpecialRegister, SREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 8, SECOND_TOKEN}
+				},
+			}
+		}
 	},
 
 };

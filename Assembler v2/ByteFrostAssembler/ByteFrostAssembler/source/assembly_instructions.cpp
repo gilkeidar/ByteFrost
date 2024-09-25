@@ -43,12 +43,19 @@ int getTokenIntValue(Token t) {
 				throwError("Unknown "
 					+ TokenTypeToString(TokenType::OUT_PRINT_TYPE) 
 					+ " '" + t.token_string + "'.");
-		case TokenType::SREGISTER:
+		case TokenType::SREGISTER: {
 			//	TODO: Return integer value for each special register
-			throwError("SREGISTER CONVERSION NOT IMPLEMENTED");
+			//throwError("SREGISTER CONVERSION NOT IMPLEMENTED");
+			std::string sregister_name = t.token_string.substr(1);
+			if (special_register_bits.find(sregister_name) == special_register_bits.end()) {
+				throwError("Token string '" + t.token_string + "' is not a valid special register string.");
+			}
+
+			return special_register_bits.find(sregister_name)->second;
+		}
 		case TokenType::IMMEDIATE: {
 			//	Return integer value after initial "#", e.g., from "#0x1" -> 1
-			throwWarning("IMMEDIATE CONVERSION MAY NOT WORK PROPERLY");
+			//throwWarning("IMMEDIATE CONVERSION MAY NOT WORK PROPERLY");
 			//int immediateValue = std::stoi(t.token_string.substr(1));
 			int immediateValue = getImmediateValue(t.token_string);
 			if (immediateValue < 0) {

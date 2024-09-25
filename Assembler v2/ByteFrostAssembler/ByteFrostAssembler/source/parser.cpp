@@ -21,9 +21,11 @@ Parser::Parser() {
 	this->general_registers.insert("R3");
 
 	//	Initialize special purpose registers set
-	this->special_registers.insert("DPCH");	//	Dummy PC High Byte
-	this->special_registers.insert("SPH");	//	SP High Byte
-	this->special_registers.insert("DPH");	//	DP High Byte
+	//	TODO: Remove - these are replaced by the string -> uint8_t hashmap in
+	//	the constants.hpp file
+	this->special_registers.insert("DHPC");	//	Dummy PC High Byte
+	this->special_registers.insert("HDP");	//	DP High Byte
+	this->special_registers.insert("HSP");	//	SP High Byte
 }
 
 std::vector<Line*> Parser::run(CommandLineArguments* arguments,
