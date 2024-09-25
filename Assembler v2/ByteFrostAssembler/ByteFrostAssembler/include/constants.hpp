@@ -16,7 +16,11 @@ const std::string ASSEMBLY_FILE_ENDING = "asm";
 #define	LABEL_PREFIX			':'
 #define	BYTE_SELECT_START		'['
 #define	BYTE_SELECT_END			']'
+
 const std::string COMMENT_START = "//";
+//	Print types (used by OUT instruction)
+const std::string ASCII_PRINT_TYPE = "A";
+const std::string INTEGER_PRINT_TYPE = "I";
 
 //	Instruction Arguments
 
@@ -67,6 +71,10 @@ const std::string COMMENT_START = "//";
 #define	DHPC_BITS		0
 #define	HDP_BITS		1
 #define	HSP_BITS		2
+
+//	OUT Print Type Values
+#define	ASCII_PRINT_TYPE_BIT	0
+#define	INTEGER_PRINT_TYPE_BIT	1
 
 //	Assembly Instructions
 

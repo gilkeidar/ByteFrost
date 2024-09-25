@@ -212,7 +212,11 @@ const AssemblyInstruction assembly_instructions[] = {
 				{
 					ArgumentSource::Token,
 					{ArgumentType::Rs1, GREGISTER_SIZE, SECOND_TOKEN}
-				}
+				},
+				{	//	Argument ignored by ASL
+					ArgumentSource::Constant,
+					{ArgumentType::Rs2, GREGISTER_SIZE, 0}
+				},
 			}
 		}
 	},
@@ -233,6 +237,10 @@ const AssemblyInstruction assembly_instructions[] = {
 				{
 					ArgumentSource::Token,
 					{ArgumentType::Rs1, GREGISTER_SIZE, SECOND_TOKEN}
+				},
+				{	//	Argument ignored by ROL
+					ArgumentSource::Constant,
+					{ArgumentType::Rs2, GREGISTER_SIZE, 0}
 				},
 			}
 		}
@@ -255,6 +263,10 @@ const AssemblyInstruction assembly_instructions[] = {
 					ArgumentSource::Token,
 					{ArgumentType::Rs1, GREGISTER_SIZE, SECOND_TOKEN}
 				},
+				{	//	Argument ignored by LSR
+					ArgumentSource::Constant,
+					{ArgumentType::Rs2, GREGISTER_SIZE, 0}
+				},
 			}
 		}
 	},
@@ -275,7 +287,11 @@ const AssemblyInstruction assembly_instructions[] = {
 				{
 					ArgumentSource::Token,
 					{ArgumentType::Rs1, GREGISTER_SIZE, SECOND_TOKEN}
-				}
+				},
+				{	//	Argument ignored by ASR
+					ArgumentSource::Constant,
+					{ArgumentType::Rs2, GREGISTER_SIZE, 0}
+				},
 			}
 		}
 	},
@@ -296,6 +312,10 @@ const AssemblyInstruction assembly_instructions[] = {
 				{
 					ArgumentSource::Token,
 					{ArgumentType::Rs1, GREGISTER_SIZE, SECOND_TOKEN}
+				},
+				{	//	Argument ignored by ROR
+					ArgumentSource::Constant,
+					{ArgumentType::Rs2, GREGISTER_SIZE, 0}
 				},
 			}
 		}
@@ -591,6 +611,275 @@ const AssemblyInstruction assembly_instructions[] = {
 					ArgumentSource::Token,
 					{ArgumentType::Immediate, 4, SECOND_TOKEN}
 				},
+			}
+		}
+	},
+	{	//	AND Rd, Immediate
+		"AND",
+		{TokenType::GREGISTER, TokenType::IMMEDIATE},
+		{&isa[ALU_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, AND_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 4, SECOND_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	XOR Rd, Immediate
+		"XOR",
+		{TokenType::GREGISTER, TokenType::IMMEDIATE},
+		{&isa[ALU_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, XOR_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 4, SECOND_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	NOT Rd, Immediate
+		"NOT",
+		{TokenType::GREGISTER, TokenType::IMMEDIATE},
+		{&isa[ALU_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, NOT_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 4, SECOND_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	ADD Rd, Immediate
+		"ADD",
+		{TokenType::GREGISTER, TokenType::IMMEDIATE},
+		{&isa[ALU_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, ADD_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 4, SECOND_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	SUB Rd, Immediate
+		"SUB",
+		{TokenType::GREGISTER, TokenType::IMMEDIATE},
+		{&isa[ALU_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, SUB_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 4, SECOND_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	ASL Rd	(Rd = Rd << 1 (arithmetic shift left of Rd) )
+		"ASL",
+		{TokenType::GREGISTER},
+		{&isa[ALU_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, ASL_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{	//	This immediate is ignored by ASL (shifts left by 1)
+					ArgumentSource::Constant,
+					{ArgumentType::Immediate, 4, 0}
+				},
+			}
+		}
+	},
+	{	//	ROL Rd	(Rd = Rd rotated left by 1)
+		"ROL",
+		{TokenType::GREGISTER},
+		{&isa[ALU_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, ROL_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{	//	This immediate is ignored by ROL
+					ArgumentSource::Constant,
+					{ArgumentType::Immediate, 4, 0}
+				},
+			}
+		}
+	},
+	{	//	LSR Rd	(Rd = Rd >> 1 (logical shift right of Rd) )
+		"LSR",
+		{TokenType::GREGISTER},
+		{&isa[ALU_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, LSR_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{	//	This immediate is ignored by LSR
+					ArgumentSource::Constant,
+					{ArgumentType::Immediate, 4, 0}
+				},
+			}
+		}
+	},
+	{	//	ASR Rd	(Rd = Rd >> 1 (arithmetic shift right of Rd) )
+		"ASR",
+		{TokenType::GREGISTER},
+		{&isa[ALU_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, ASR_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{	//	This immediate is ignored by ASR
+					ArgumentSource::Constant,
+					{ArgumentType::Immediate, 4, 0}
+				},
+			}
+		}
+	},
+	{	//	ROR Rd	(Rd = Rd rotated right by 1 bit)
+		"ROR",
+		{TokenType::GREGISTER},
+		{&isa[ALU_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, ROR_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{	//	This immediate is ignored by ROR
+					ArgumentSource::Constant,
+					{ArgumentType::Immediate, 4, 0}
+				},
+			}
+		}
+	},
+	{	//	ADC Rd, Immediate
+		"ADC",
+		{TokenType::GREGISTER, TokenType::IMMEDIATE},
+		{&isa[ALU_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, ADC_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 4, SECOND_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	SBC Rd, Immediate
+		"SBC",
+		{TokenType::GREGISTER, TokenType::IMMEDIATE},
+		{&isa[ALU_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, SBC_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 4, SECOND_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	OUT Rs1, OUT_PRINT_TYPE
+		"OUT",
+		{TokenType::GREGISTER, TokenType::OUT_PRINT_TYPE},
+		{&isa[OUT_REG_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rs1, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::OUTDisplayType, 1, SECOND_TOKEN}
+				}
 			}
 		}
 	},

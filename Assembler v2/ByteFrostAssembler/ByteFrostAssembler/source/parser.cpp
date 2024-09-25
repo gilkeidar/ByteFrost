@@ -189,6 +189,10 @@ Token Parser::stringToToken(std::string w,
 			//	Check whether w is a general purpose register
 			type = TokenType::GREGISTER;
 		}
+		else if (isOUT_PRINT_TYPEString(w)) {
+			//	w is an OUT_PRINT_TYPE string
+			type = TokenType::OUT_PRINT_TYPE;
+		}
 		else {
 			//	Otherwise, w is TEXT
 			type = TokenType::TEXT;
@@ -250,6 +254,8 @@ std::string TokenTypeToString(TokenType t) {
 		return "INSTRUCTION";
 	case TokenType::GREGISTER:
 		return "GREGISTER";
+	case TokenType::OUT_PRINT_TYPE:
+		return "OUT_PRINT_TYPE";
 	case TokenType::TEXT:
 		return "TEXT";
 	case TokenType::SREGISTER:

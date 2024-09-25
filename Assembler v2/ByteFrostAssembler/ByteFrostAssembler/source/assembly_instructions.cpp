@@ -33,6 +33,16 @@ int getTokenIntValue(Token t) {
 		case TokenType::GREGISTER:
 			//	Return integer value after initial "R", e.g. from "R1" -> 1
 			return std::stoi(t.token_string.substr(1));
+		case TokenType::OUT_PRINT_TYPE:
+			//	Return 1 bit value of OUT_PRINT_TYPE
+			if (t.token_string == ASCII_PRINT_TYPE)
+				return ASCII_PRINT_TYPE_BIT;
+			else if (t.token_string == INTEGER_PRINT_TYPE)
+				return INTEGER_PRINT_TYPE_BIT;
+			else
+				throwError("Unknown "
+					+ TokenTypeToString(TokenType::OUT_PRINT_TYPE) 
+					+ " '" + t.token_string + "'.");
 		case TokenType::SREGISTER:
 			//	TODO: Return integer value for each special register
 			throwError("SREGISTER CONVERSION NOT IMPLEMENTED");

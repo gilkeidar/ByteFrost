@@ -15,4 +15,6 @@ LDR R1, :label[0]
 :label2
 JMP :label
 JMP :label2
+OR R2, #14
+OUT R3, A
 BRK

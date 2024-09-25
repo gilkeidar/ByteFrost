@@ -134,6 +134,14 @@ bool isBYTE_CONSTANTString(std::string s);
  */
 bool isBYTE_LABELString(std::string s);
 
+/**
+ * @brief Determines whether a given string is an OUT print type string
+ * (i.e., whether s is ASCII_PRINT_TYPE or INTEGER_PRINT_TYPE).
+ * @param s string to check
+ * @return true if s is an OUT_PRINT_TYPE string and false otherwise.
+ */
+bool isOUT_PRINT_TYPEString(std::string s);
+
 //	String parsing
 
 /**

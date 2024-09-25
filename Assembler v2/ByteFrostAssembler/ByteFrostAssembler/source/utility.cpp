@@ -201,6 +201,12 @@ bool isBYTE_LABELString(std::string s) {
 		&& isBYTE_SELECTString(s.substr(byteSelectIndex));
 }
 
+bool isOUT_PRINT_TYPEString(std::string s) {
+	//	In order for s to be an OUT_PRINT_TYPE string:
+	//	1.	s is ASCII_PRINT_TYPE or INTEGER_PRINT_TYPE.
+	return (s == ASCII_PRINT_TYPE || s == INTEGER_PRINT_TYPE);
+}
+
 //	String parsing
 
 bool stringEndsWith(std::string s, std::string ending) {
