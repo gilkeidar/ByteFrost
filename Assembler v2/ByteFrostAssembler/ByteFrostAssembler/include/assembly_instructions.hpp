@@ -18,7 +18,8 @@
  */
 int getTokenIntValue(Token t);
 
-enum class ArgumentSource {Token, Constant, TokenLabelHigh, TokenLabelLow};
+enum class ArgumentSource {Token, Constant, TokenLabelHigh, TokenLabelLow,
+	CurrentAddressHighOffset};
 
 struct AssemblyArgument {
 	ArgumentSource source;
@@ -883,4 +884,169 @@ const AssemblyInstruction assembly_instructions[] = {
 			}
 		}
 	},
+	{	//	LMA Rd, #Immediate
+		"LMA",
+		{TokenType::GREGISTER, TokenType::IMMEDIATE},
+		{&isa[LMA_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 8, SECOND_TOKEN}
+				}
+			}
+		}
+	},
+	{	//	SMA Rd, #Immediate
+		"SMA",
+		{TokenType::GREGISTER, TokenType::IMMEDIATE},
+		{&isa[SMA_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 8, SECOND_TOKEN}
+				}
+			}
+		}
+	},
+	{	//	LMR Rd, Rs1
+		"LMR",
+		{TokenType::GREGISTER, TokenType::GREGISTER},
+		{&isa[LMR_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rs1, GREGISTER_SIZE, SECOND_TOKEN}
+				}
+			}
+		}
+	},
+	{	//	SMR Rd, Rs1
+		"SMR",
+		{TokenType::GREGISTER, TokenType::GREGISTER},
+		{&isa[SMR_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rs1, GREGISTER_SIZE, SECOND_TOKEN}
+				}
+			}
+		}
+	},
+	{	//	OUT #Immediate, OUT_DISPLAY_TYPE
+		"OUT",
+		{TokenType::IMMEDIATE, TokenType::OUT_PRINT_TYPE},
+		{&isa[OUT_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::OUTDisplayType, 1, SECOND_TOKEN}
+				}
+			}
+		}
+	},
+	{	//	PUSH Rs1
+		"PUSH",
+		{TokenType::GREGISTER},
+		{&isa[PUSH_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rs1, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	POP Rd
+		"POP",
+		{TokenType::GREGISTER},
+		{&isa[POP_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+			}
+		}
+	},
+	{	//	A: CALL :label
+		//	Implemented as:
+		//	A: LSP %DHPC, :label[1]
+		//	A + 2: LDR R0, (A + 8)[1]
+		//	A + 4: PUSH R0
+		//	A + 6: JSR :label[0]
+		//	A + 8: ...
+		//	NOTE: CALL overrides the value in R0!
+		"CALL",
+		{TokenType::LABEL},
+		{&isa[LSP_IMM_OPCODE], &isa[LDR_OPCODE], &isa[PUSH_OPCODE], 
+			&isa[JSR_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelHigh,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				},
+			},
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Rd, GREGISTER_SIZE, R0_BITS}
+				},
+				{
+					ArgumentSource::CurrentAddressHighOffset,
+					{ArgumentType::Immediate, 8, 4 * ISA_INSTRUCTION_SIZE_BYTES}
+				},
+			},
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Rs1, GREGISTER_SIZE, R0_BITS}
+				},
+			},
+			{
+				{
+					ArgumentSource::TokenLabelLow,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				},
+			},
+		}
+	},
+	{	//	RTS
+		"RTS",
+		{},
+		{&isa[RTS_OPCODE]},
+		{{}}
+	},
+
 };

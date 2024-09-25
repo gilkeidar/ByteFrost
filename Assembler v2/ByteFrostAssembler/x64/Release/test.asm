@@ -17,4 +17,5 @@ JMP :label
 JMP :label2
 OR R2, #14
 OUT R3, A
+CALL :label2
 BRK

@@ -339,3 +339,13 @@ void throwWarning(std::string warning_string);
  */
 void throwWarningLine(unsigned int line_number, std::string warning_string);
 
+//	Misc.
+
+/**
+ * @brief Logical shifts the given integer x right by the specified shift
+ * amount.
+ * @param x integer to logically shift right
+ * @param shift_amt number of bits to logically shift x by
+ * @return x >> shift_amt, where >> is a logical shift right.
+ */
+int logicalShiftRight(int x, int shift_amt);

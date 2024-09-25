@@ -170,6 +170,27 @@ std::vector<uint16_t> AssemblyInstruction::generateCode(InstructionLine& line) {
 					}
 					break;
 				}
+				case ArgumentSource::CurrentAddressHighOffset: {
+					//	This is a special case (currently only used for the
+					//	CALL instruction).
+					//	The value here is the high byte of 
+					//	((this line's address + offset) >> 1), and the offset is 
+					//	stored in the argument value.
+					arg.value = logicalShiftRight(getByteFromInt(line.line_address + arg.value, 1), 1);
+
+					//	Verify that the argument value can fit in the Argument's
+					//	specified range (based on the Argument's acceptable
+					//	representations - signed, unsigned, or either).
+					if (!fitsArgumentRange(arg.value, arg.size, this->instruction_sequence[i]->expected_arguments[j].rep)) {
+						throwError("Value " + std::to_string(arg.value)
+							+ " cannot fit in "
+							+ ArgumentRepresentationToString(this->instruction_sequence[i]->expected_arguments[j].rep)
+							+ " as expected by instruction with opcode "
+							+ std::to_string(this->instruction_sequence[i]->opcode)
+							+ ".");
+					}
+					break;
+				}
 				case ArgumentSource::Constant: {
 					//	No need to do anything; arg value is already correct
 					break;

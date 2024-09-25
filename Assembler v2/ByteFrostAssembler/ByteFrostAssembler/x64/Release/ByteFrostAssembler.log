@@ -1,10 +1,8 @@
-﻿  assembler.cpp
-  assembly_instructions.cpp
+﻿  assembly_instructions.cpp
   clap.cpp
   file_generation.cpp
   isa.cpp
   label_handler.cpp
-  main.cpp
   parser.cpp
 C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\parser.cpp(457,24): warning C4267: 'initializing': conversion from 'size_t' to 'uint16_t', possible loss of data
   preprocessor.cpp
@@ -21,8 +19,8 @@ C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembl
 C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(393,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(406,23): warning C4244: 'return': conversion from '__int64' to 'int', possible loss of data
   Generating code
-  154 of 2487 functions ( 6.2%) were compiled, the rest were copied from previous compilation.
-    41 functions were new in current compilation
-    74 functions had inline decision re-evaluated but remain unchanged
+  4 of 2488 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+    1 functions were new in current compilation
+    2 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   ByteFrostAssembler.vcxproj -> C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\x64\Release\ByteFrostAssembler.exe

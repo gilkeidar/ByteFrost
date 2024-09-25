@@ -118,7 +118,7 @@ const ISAInstruction isa[] = {
 		LMA_OPCODE,
 		{
 			Rd,
-			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned,  8, 8}
+			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 8, 8}
 		}
 	},
 	{	//	Store Memory Absolute

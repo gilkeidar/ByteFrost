@@ -549,3 +549,11 @@ void throwWarning(std::string warning_string) {
 void throwWarningLine(unsigned int line_number, std::string warning_string) {
 	std::cerr << "Warning: Line " << std::to_string(line_number) << ": " << warning_string << std::endl;
 }
+
+//	Misc.
+
+int logicalShiftRight(int x, int shift_amt) {
+	int mask = (1 << (sizeof(int) * 8 - shift_amt)) - 1;
+
+	return (x >> shift_amt) & mask;
+}

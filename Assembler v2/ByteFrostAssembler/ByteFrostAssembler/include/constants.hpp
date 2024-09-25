@@ -67,6 +67,12 @@ const std::string INTEGER_PRINT_TYPE = "I";
 #define	BCC_COND_BITS	6	//	Branch on Carry Clear (carry flag not set)
 #define	BNE_COND_BITS	7	//	Branch Not Equal (zero flag not set)
 
+//	General Register Values
+#define	R0_BITS			0
+#define	R1_BITS			1
+#define	R2_BITS			2
+#define	R3_BITS			3
+
 //	Special Register Values
 #define	DHPC_BITS		0
 #define	HDP_BITS		1
