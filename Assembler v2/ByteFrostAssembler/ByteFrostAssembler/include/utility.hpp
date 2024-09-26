@@ -1,11 +1,19 @@
 #pragma once
 #include <string>
+#include "constants.hpp"
 #include "isa.hpp"
-//#include "parser.hpp"
 #include "shared_types.hpp"
-//#include "preprocessor.hpp"
 
-//	Parsing Utilities
+/*	Debug Mode	*/
+
+/**
+ * @brief Prints the given string to stdout if the DEBUG_PRINTOUTS constant is
+ * set to true in constants.hpp.
+ * @param debug_printout debug string to print to stdout.
+ */
+void debug(std::string debug_printout);
+
+/*	Parsing Utilities	*/
 
 //	Character classification
 
@@ -265,32 +273,7 @@ uint8_t getByteFromInt(long long integer, int byte);
  */
 std::string generateImmediateString(long immediate_value);
 
-//	Size Checking
-
-///**
-// * @brief Determines whether the given integer value can be represented in a
-// * binary string of the specified length (bit_width).
-// * @param value integer value to check
-// * @param bit_width length of binary string
-// * @param unsigned_representation whether the binary string representation is
-// * unsigned (true) or two's complement signed (false)
-// * @return true if value can be represented in a binary string of the specified
-// * length, and false otherwise.
-// * @deprecated (not implemented properly - use unsigned-only version)
-// */
-//bool fitsInBitWidth(int value, int bit_width, bool unsigned_representation);
-//
-///**
-// * @brief Determines whether the given integer value can be represented in a
-// * binary string of the specified length (max_bit_width).
-// * @param unsigned_value integer value to check (value is treated as unsigned).
-// * @param max_bit_width length of binary string.
-// * @note  If the unsigned_value integer is negative, this function will throw
-// * a warning as the computation may be inaccurate.
-// * @return true if the value can be represented in a binary string of the
-// * specified length, and false otherwise.
-// */
-//bool fitsInBitWidth(int unsigned_value, int max_bit_width);
+/*	Size Checking	*/
 
 /**
  * @brief Determines whether the given integer value can be represented in a
@@ -307,7 +290,7 @@ std::string generateImmediateString(long immediate_value);
  */
 bool fitsArgumentRange(int imm_value, int argument_size, ArgumentRepresentation argument_rep);
 
-//	Error Handling
+/*	Error Handling	*/
 
 /**
  * @brief Prints the given error string to stderr, then exits the program with
@@ -339,7 +322,7 @@ void throwWarning(std::string warning_string);
  */
 void throwWarningLine(unsigned int line_number, std::string warning_string);
 
-//	Misc.
+/*	Misc.	*/
 
 /**
  * @brief Logical shifts the given integer x right by the specified shift

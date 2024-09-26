@@ -2,12 +2,22 @@
 #include <string>
 #include <unordered_map>
 
+/*	Debug Mode	*/
+//	Note to the Programmer: Use this constant as a toggle for debug print outs.
+//	Debug printouts must use the debug() function defined in utility.hpp to be
+//	affected by this debug toggle guard.
+#define	DEBUG_PRINTOUTS	false
+
+/*	Stage 0: CLAP Constants	*/
+
 //	Command-Line Arguments
 const std::string UNSET_FILE_NAME = "UNSET";
 const std::string ASSEMBLY_FILE_ENDING = "asm";
 
 #define	BINARY_FLAG_NAME		"b"
 #define OUTPUT_FILE_FLAG_NAME	"o"
+
+/*	Stage 1: Parser Constants	*/
 
 //	Parsing
 #define	UNDERSCORE				'_'
@@ -19,6 +29,7 @@ const std::string ASSEMBLY_FILE_ENDING = "asm";
 #define	BYTE_SELECT_END			']'
 
 const std::string COMMENT_START = "//";
+
 //	Print types (used by OUT instruction)
 const std::string ASCII_PRINT_TYPE = "A";
 const std::string INTEGER_PRINT_TYPE = "I";

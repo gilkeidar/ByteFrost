@@ -31,7 +31,7 @@ Parser::Parser() {
 std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 	std::unordered_map<std::string, std::vector<AssemblyInstruction>> & instructions,
 	std::unordered_map<std::string, Directive>& directives) {
-	std::cout << "=== Stage 1: Parser.run() ===" << std::endl;
+	debug("=== Stage 1: Parser.run() ===");
 
 	//	1.	Open the input file
 	std::ifstream input_file;
@@ -43,7 +43,7 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 			+ "' for reading.");
 	}
 
-	std::cout << "file is opened for reading\n";
+	debug("file is opened for reading");
 
 	//	2.	Generate a std::vector<std::string> line_strings vector from the
 	//		input file.
@@ -69,10 +69,10 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 
 	input_file.close();
 
-	std::cout << "file is closed\n";
+	debug("file is closed");
 
 	for (int i = 0; i < line_strings.size(); i++) {
-		std::cout << "Line " << std::to_string(i + 1) << ": " << line_strings[i] << std::endl;
+		debug("Line " + std::to_string(i + 1) + ": " + line_strings[i]);
 	}
 
 	//	3.	Generate a std::vector<Line *> lines vector
@@ -88,8 +88,8 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 	//for (std::string s : line_strings) {
 	for (unsigned int line_count = 0; line_count < line_strings.size(); line_count++) {
 		std::string s = line_strings[line_count];
-		std::cout << "== CONVERTING s to Line * ==" << std::endl;
-		std::cout << "s = " << s << std::endl;
+		debug("== CONVERTING s to Line * ==");
+		debug("s = " + s);
 
 		//	3.1	Generate a string line_string that contains no comments.
 		size_t indexComments = s.find(COMMENT_START);
@@ -105,7 +105,7 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 			line_string = s;
 		}
 
-		std::cout << "s' = " << line_string << std::endl;
+		debug("s' = " + line_string);
 
 		//	3.2	Generate a std::vector<string> token_strings vector.
 		std::vector<std::string> token_strings;
@@ -134,7 +134,7 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 		}
 
 		for (std::string s : token_strings) {
-			std::cout << "Token string: '" << s << "'" << std::endl;
+			debug("Token string: '" + s + "'");
 		}
 
 		//	3.3	Generate a std::vector<Token> tokens vector.
@@ -151,7 +151,7 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 		}
 
 		for (Token t : tokens) {
-			std::cout << "Token: " << TokenToString(t) << std::endl;
+			debug("Token: " + TokenToString(t));
 		}
 
 		//	3.4	Generate a Line object and add it to the vector<Line *> lines.
@@ -160,7 +160,7 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 
 		//	Print line found
 
-		std::cout << "Line: " << LineToString(line) << std::endl;
+		debug("Line: " + LineToString(line));
 
 		//	Check that line isn't invalid
 		if (line->type == LineType::INVALID) {

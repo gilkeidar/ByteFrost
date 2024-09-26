@@ -4,9 +4,10 @@
 #include "assembly_instructions.hpp"
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 void OutputFileGenerator::run(std::vector<Line*> & lines, CommandLineArguments& clArgs) {
-	std::cout << "=== Stage 4: OutputFileGenerator.run() ===" << std::endl;
+	debug("=== Stage 4: OutputFileGenerator.run() ===");
 	
 	//	Store lines vector
 	this->lines = lines;
@@ -17,7 +18,7 @@ void OutputFileGenerator::run(std::vector<Line*> & lines, CommandLineArguments& 
 
 	bool binaryFlag = clArgs.flags[BINARY_FLAG_NAME].is_set;
 
-	std::cout << "binary flag is set? " << binaryFlag << std::endl;
+	debug("binary flag is set? " + binaryFlag);
 
 	if (clArgs.flags[OUTPUT_FILE_FLAG_NAME].is_set) {
 		//	If output file flag is set (-o flag), then set the output file name
@@ -52,7 +53,7 @@ void OutputFileGenerator::run(std::vector<Line*> & lines, CommandLineArguments& 
 			+ "' for writing.");
 	}
 
-	std::cout << "file is opened for writing\n";
+	debug("file is opened for writing");
 
 	//	2.	Write to the output file
 
@@ -66,17 +67,17 @@ void OutputFileGenerator::run(std::vector<Line*> & lines, CommandLineArguments& 
 	//	3.	Close the output file
 	output_file.close();
 
-	std::cout << "Output file is closed." << std::endl;
+	debug("Output file is closed.");
 }
 
 void OutputFileGenerator::createBINFile(std::ofstream& output_file) {
-	std::cout << "Creating binary file..." << std::endl;
+	debug("Creating binary file...");
 	//	Write to a binary file
 	for (Line* line : this->lines) {
 		if (line->type == LineType::INSTRUCTION) {
 			InstructionLine* instructionLine = (InstructionLine*)line;
 
-			std::cout << "Instruction: " << instructionLine->instruction->name << std::endl;
+			debug("Instruction: " + instructionLine->instruction->name);
 
 			std::vector<uint16_t> instruction_code =
 				instructionLine->instruction->generateCode(*instructionLine);
@@ -84,9 +85,16 @@ void OutputFileGenerator::createBINFile(std::ofstream& output_file) {
 			for (uint16_t code : instruction_code) {
 				char lowByte = code & 0xff;
 				char highByte = (code >> 8) & 0xff;
-				std::cout << "Instruction code: Low: " 
-					<< std::hex << (code & 0xff)
-					<< " High: " << std::hex << ((code >> 8) & 0xff) << std::endl;
+
+				std::stringstream converter;
+				converter << std::hex << (code & 0xff);
+				std::string lowByteString = converter.str();
+				converter.clear();
+				converter << std::hex << ((code >> 8) & 0xff);
+				std::string highByteString = converter.str();
+				debug("Instruction code: Low: " + lowByteString + " High: " 
+					+ highByteString);
+
 				output_file.write(&lowByte, 1);
 				output_file.write(&highByte, 1);
 			}

@@ -1,7 +1,7 @@
+#include <iostream>
 #include "clap.hpp"
 #include "constants.hpp"
 #include "utility.hpp"
-#include <iostream>
 
 CLAP::CLAP(int argc, char** argv) {
 	this->argc = argc;
@@ -9,7 +9,7 @@ CLAP::CLAP(int argc, char** argv) {
 }
 
 CommandLineArguments * CLAP::run() {
-	std::cout << "=== Stage 0: CLAP.run() ===" << std::endl;
+	debug("=== Stage 0: CLAP.run() ===");
 	
 	//	Convert each command-line argument from a char * (string) w to a
 	//	CLToken and add it to a vector<CLToken> tokens
@@ -17,11 +17,10 @@ CommandLineArguments * CLAP::run() {
 
 	for (int i = 1; i < argc; i++) {
 		std::string tokenString = argv[i];
-		std::cout << "argv[" << std::to_string(i) << "] = " << tokenString 
-			<< std::endl;
+		debug("argv[" + std::to_string(i) + "] = " + tokenString);
 		CLToken token = stringToCLToken(tokenString);
 
-		std::cout << "TokenType: " << CLTokenTypeToString(token.type) << std::endl;
+		debug("TokenType: " + CLTokenTypeToString(token.type));
 
 		//	Check for invalid token type
 		if (token.type == CLTokenType::INVALID) {
@@ -123,7 +122,7 @@ CLToken stringToCLToken(std::string w) {
 	//	Given a string w, match it with a CLTokenType, and return a CLToken
 	//	containing w and the matched CLTokenType.
 
-	CLTokenType type = CLTokenType::INVALID;
+	CLTokenType type;
 	
 	//	CLTokenTypes to match with w:
 	//	1.	FLAG
@@ -141,23 +140,18 @@ CLToken stringToCLToken(std::string w) {
 
 	//	Map w to a CLTokenType
 	if (w.length() >= 2 && w[0] == '-' && isTEXTString(w.substr(1))) {
-		//std::cout << "FLAG" << std::endl;
 		type = CLTokenType::FLAG;
 	}
 	else if (isNUMBERString(w)) {
-		//std::cout << "NUMBER" << std::endl;
 		type = CLTokenType::NUMBER;
 	}
 	else if (isFILEString(w)) {
-		//std::cout << "FILE_NAME" << std::endl;
 		type = CLTokenType::FILE_NAME;
 	}
 	else if (isTEXTString(w)) {
-		//std::cout << "TEXT" << std::endl;
 		type = CLTokenType::TEXT;
 	}
-	else if (type == CLTokenType::INVALID) {
-		//std::cout << "INVALID" << std::endl;
+	else {
 		type = CLTokenType::INVALID;
 	}
 
@@ -190,6 +184,7 @@ CommandLineArguments::CommandLineArguments() {
 	//	Add Binary Flag "-b"
 	CLFlag binary_flag = { BINARY_FLAG_NAME, {}, {}, false };
 	this->flags.insert({ BINARY_FLAG_NAME, binary_flag });
+
 	//	Add Output File Name Flag "-o"
 	CLFlag output_file_name_flag = { OUTPUT_FILE_FLAG_NAME, {CLTokenType::FILE_NAME}, {}, false };
 	this->flags.insert({ OUTPUT_FILE_FLAG_NAME, output_file_name_flag });

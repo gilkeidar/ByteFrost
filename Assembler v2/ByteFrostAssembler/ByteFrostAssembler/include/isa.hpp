@@ -53,6 +53,7 @@ const ExpectedArgument Rd = { ArgumentType::Rd, ArgumentRepresentation::Unsigned
 const ExpectedArgument Rs1 = { ArgumentType::Rs1, ArgumentRepresentation::Unsigned, GREGISTER_SIZE, RS1_DEF_POSITION };
 const ExpectedArgument Rs2 = { ArgumentType::Rs2, ArgumentRepresentation::Unsigned, GREGISTER_SIZE, RS2_DEF_POSITION };
 
+//	ISA vector (index: opcode -> ISAInstruction)
 const ISAInstruction isa[] = {
 	{	//	NOP
 		NOP_OPCODE,

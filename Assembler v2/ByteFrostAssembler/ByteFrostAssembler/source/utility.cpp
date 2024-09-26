@@ -6,22 +6,26 @@
 #include <sstream>
 #include <stdlib.h>
 
+void debug(std::string debug_printout) {
+	if (DEBUG_PRINTOUTS)
+		std::cout << debug_printout << std::endl;
+}
 
 bool isAlpha(char c) {
 	bool result = ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z');
-	std::cout << "isAlpha(" << c << "):" << result << std::endl;
+	debug("isAlpha(" + (std::string() + c) + "):" + std::to_string(result));
 	return result;
 }
 
 bool isDigit(char c) {
 	bool result = ('0' <= c && c <= '9');
-	std::cout << "isDigit(" << c << "):" << result << std::endl;
+	debug("isDigit(" + (std::string() + c) + "):" + std::to_string(result));
 	return result;
 }
 
 bool isHexDigit(char c) {
 	bool result = isDigit(c) || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F');
-	std::cout << "isHexDigit(" << c << "):" << result << std::endl;
+	debug("isHexDigit(" + (std::string() + c) + "):" + std::to_string(result));
 	return result;
 }
 
@@ -45,7 +49,7 @@ bool isTEXTString(std::string s) {
 }
 
 bool isUnsignedDecimalString(std::string s) {
-	std::cout << "isUnsignedDecimalString(" << s << ")" << std::endl;
+	debug("isUnsignedDecimalString(" + s + ")");
 	//	In order for s to be in ND:
 	//	1. s must have length >= 1.
 	//	2. (s[0] == '0' AND s.length() == 1)
@@ -66,7 +70,7 @@ bool isUnsignedDecimalString(std::string s) {
 }
 
 bool isUnsignedHexadecimalString(std::string s) {
-	std::cout << "isUnsignedHexadecimalString(" << s << ")" << std::endl;
+	debug("isUnsignedHexadecimalString(" + s + ")");
 	//	In order for s to be in NH:
 	//	1. s must have length >= 3 (as every number must at least have "0x" as
 	//		a prefix, and the number cannot be empty)
@@ -83,14 +87,14 @@ bool isUnsignedHexadecimalString(std::string s) {
 }
 
 bool isUnsignedNumberString(std::string s) {
-	std::cout << "isUnsignedNumberString(" << s << ")" << std::endl;
+	debug("isUnsignedNumberString(" + s + ")");
 	//	In order for s to be in N:
 	//	1. s must be in ND or in NH.
 	return isUnsignedDecimalString(s) || isUnsignedHexadecimalString(s);
 }
 
 bool isNUMBERString(std::string s) {
-	std::cout << "isNUMBERString(" << s << ")" << std::endl;
+	debug("isNUMBERString(" + s + ")");
 	//	In order for s to be in NUMBER:
 	//	1. s is not empty (s.length >= 1)
 	//	2. (s[0] is '-' or '+' and s[1:end] is in N) || (s is in N)
@@ -122,7 +126,7 @@ bool isDirectiveString(std::string s) {
 }
 
 bool isFILEString(std::string s) {
-	std::cout << "isFILEString(" << s << ")" << std::endl;
+	debug("isFILEString(" + s + ")");
 	//	In order for s to be in FILE:
 	//	1.	s may not be empty.
 	//	2.	There exist strings u, v s.t. s = u.v, where u,v are in TEXT
@@ -131,13 +135,13 @@ bool isFILEString(std::string s) {
 
 	size_t dotIndex = s.find_first_of('.');
 
-	std::cout << "dot index: " << std::to_string(dotIndex) << std::endl;
+	debug("dot index: " + std::to_string(dotIndex));
 	
 	//	No dot character in s
 	if (dotIndex == s.npos)	return false;
 
-	std::cout << "u = " << s.substr(0, dotIndex) << std::endl;
-	std::cout << "v = " << s.substr(dotIndex + 1) << std::endl;
+	debug("u = " + s.substr(0, dotIndex));
+	debug("v = " + s.substr(dotIndex + 1));
 
 	return isTEXTString(s.substr(0, dotIndex))
 		&& isTEXTString(s.substr(dotIndex + 1));
@@ -287,8 +291,11 @@ long long getNumberValue(std::string number_string) {
 		std::cout << "number is in NH and has value " << std::hex << result << std::endl;
 		return multiplier * result;*/
 		long long result = strtoll(v.c_str(), nullptr, 16);
-		std::cout << "sizeof(long): " << std::to_string(sizeof(long)) << std::endl;
-		std::cout << "result: " << std::hex << result << std::endl;
+		debug("sizeof(long): " + std::to_string(sizeof(long)));
+
+		std::stringstream converter;
+		converter << std::hex << result;
+		debug("result: " + converter.str());
 		return multiplier * result;
 	}
 	else {
@@ -509,9 +516,9 @@ bool fitsArgumentRange(int imm_value, int argument_size, ArgumentRepresentation 
 	//	Case 3: argument_rep = ArgumentRepresentation::SignedOrUnsigned
 	//		Return true if x is within the range -2^(n - 1) to 2^n - 1.
 
-	std::cout << "fitsArgumentRange(value: " << std::to_string(imm_value)
-		<< " | n = " << std::to_string(argument_size) << " | rep: " 
-		<< ArgumentRepresentationToString(argument_rep) << std::endl;
+	debug("fitsArgumentRange(value: " + std::to_string(imm_value)
+		+ " | n = " + std::to_string(argument_size) + " | rep: "
+		+ ArgumentRepresentationToString(argument_rep));
 
 	int min_val_signed = (-1) << (argument_size - 1);		//	-2^(n - 1)
 	int max_val_signed = (1 << (argument_size - 1)) - 1;	//	2^(n - 1) - 1

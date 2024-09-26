@@ -18,7 +18,7 @@ LabelHandler::LabelHandler() {
 
 void LabelHandler::run(std::vector<Line*>& lines, 
 	CommandLineArguments& args) {
-	std::cout << "=== Stage 3: LabelHandler.run() ===" << std::endl;
+	debug("=== Stage 3: LabelHandler.run() ===");
 
 	//	First pass - populate the string -> Label labels hashmap in the 
 	//	LabelHandler

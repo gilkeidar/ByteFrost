@@ -1,10 +1,11 @@
-#include "assembler.hpp"
 #include <iostream>
 #include <string>
+#include "assembler.hpp"
+#include "utility.hpp"
 
 Assembler::Assembler(int argc, char** argv) : clap(argc, argv) {
 	//	Initialize Assembler state.
-	std::cout << "Assembler constructor." << std::endl;
+	debug("Assembler constructor.");
 
 	//	Initialize assembly instructions list
 	initializeAssemblyInstructions();
@@ -16,7 +17,7 @@ Assembler::Assembler(int argc, char** argv) : clap(argc, argv) {
 void Assembler::run() {
 	//	Run the Assembler pipeline to produce a machine language file from a
 	//	given .asm file.
-	std::cout << "Assembler run()" << std::endl;
+	debug("Assembler run()");
 
 	//	Stage 0: Command-Line Argument Parsing
 	this->commandLineArguments = clap.run();
@@ -37,16 +38,15 @@ void Assembler::run() {
 
 void Assembler::initializeAssemblyInstructions() {
 	for (const AssemblyInstruction & instruction : assembly_instructions) {
-		std::cout << "Adding " << instruction.name 
-			+ " instruction to assembler..." << std::endl;
+		debug("Adding " + instruction.name + "\tinstruction to assembler...");
 		this->instructions[instruction.name].push_back(instruction);
 	}
 }
 
 void Assembler::initializePreprocessorDirectives() {
 	for (const Directive& directive : preprocessor_directives) {
-		std::cout << "Adding " << directive.name
-			+ " preprocessor directive to assembler..." << std::endl;
+		debug("Adding " + directive.name 
+			+ "\tpreprocessor directive to assembler...");
 		this->directives[directive.name] = directive;
 	}
 }
