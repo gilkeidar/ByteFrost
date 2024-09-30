@@ -37,3 +37,55 @@ arguments with their corresponding memory addresses.
 At this point, all of the assembly instruction arguments have known values, and
 so the assembler begins to generate the assembled output file. With the output
 file generated, the assembler finishes running.
+
+##  Software Pipeline Implementation
+
+Every software pipeline stage has its corresponding class (e.g., there exists
+a `CLAP` class, a `Parser` class, etc.). Each class implements a `run()` method
+which performs the tasks for its pipeline stage.
+
+There is also an `Assembler` class which contains an instance of each pipeline
+stage class and which encapsulates the software pipeline with its `run()` 
+method, which runs each of the pipeline stages one after another by calling 
+their corresponding class' `run()` methods.
+
+Hence, the `Assembler::run()` method is quite simple; its implementation
+is essentially as follows:
+
+```cpp
+void Assembler::run() {
+    //  Run the ByteFrost Assembler pipeline to produce a machine language file
+    //  from a given .asm file.
+    //  Stage 0: Command-Line Argument Parsing (CLAP)
+    //  CLAP generates a commandLineArguments object
+    this->commandLineArguments = clap.run();
+
+    //  Stage 1: Parser
+    //  Parser fills the Assembler's empty std::vector<Line *> vector
+    parser.run(this->lines, this->commandLineArguments, this->instructions, 
+        this->directives);
+
+    //  Stage 2: Preprocessor
+    preprocessor.run(this->lines, this->commandLineArguments);
+
+    //  Stage 3: Label Handler
+    label_handler.run(this->lines, this->commandLineArguments);
+
+    //  Stage 4: Output File Generation
+    file_generator.run(this->lines, this->commandLineArguments);
+}
+```
+
+The `Assembler` class is initialized with command-line arguments in `main()`
+in `main.cpp`, which also calls the `Assembler::run()` method:
+
+```cpp
+//  main.cpp
+int main(int argc, char ** argv) {
+    //  Create Assembler
+    Assembler assembler(argc, argv);
+
+    //  Assemble input file
+    assembler.run();
+}
+```

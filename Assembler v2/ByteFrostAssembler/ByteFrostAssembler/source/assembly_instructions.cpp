@@ -58,11 +58,11 @@ int getTokenIntValue(Token t) {
 			//throwWarning("IMMEDIATE CONVERSION MAY NOT WORK PROPERLY");
 			//int immediateValue = std::stoi(t.token_string.substr(1));
 			int immediateValue = getImmediateValue(t.token_string);
-			if (immediateValue < 0) {
+			/*if (immediateValue < 0) {
 				throwWarning("Negative immediate value "
 					+ std::to_string(immediateValue)
 					+ " detected. Negative integer values are not uniformly supported - unintended effects may occur.");
-			}
+			}*/
 			return immediateValue;
 		}
 		case TokenType::NUMBER:

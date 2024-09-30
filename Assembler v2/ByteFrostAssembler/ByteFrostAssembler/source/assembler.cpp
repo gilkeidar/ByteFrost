@@ -23,7 +23,7 @@ void Assembler::run() {
 	this->commandLineArguments = clap.run();
 
 	//	Stage 1: Parser
-	this->lines = parser.run(this->commandLineArguments, this->instructions,
+	parser.run(this->lines, *(this->commandLineArguments), this->instructions,
 		this->directives);
 
 	//	Stage 2: Preprocessor

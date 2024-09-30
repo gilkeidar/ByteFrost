@@ -10,25 +10,12 @@
 
 Parser::Parser() {
 	//	Initialize delimiter set to {' ', '\t', ','}
-	this->delimiters.insert(' ');
-	this->delimiters.insert('\t');
-	this->delimiters.insert(',');
-
-	//	Initialize general purpose registers set
-	this->general_registers.insert("R0");
-	this->general_registers.insert("R1");
-	this->general_registers.insert("R2");
-	this->general_registers.insert("R3");
-
-	//	Initialize special purpose registers set
-	//	TODO: Remove - these are replaced by the string -> uint8_t hashmap in
-	//	the constants.hpp file
-	this->special_registers.insert("DHPC");	//	Dummy PC High Byte
-	this->special_registers.insert("HDP");	//	DP High Byte
-	this->special_registers.insert("HSP");	//	SP High Byte
+	this->delimiters.insert(TOKEN_DELIMITER_SPACE);
+	this->delimiters.insert(TOKEN_DELIMITER_TAB);
+	this->delimiters.insert(TOKEN_DELIMITER_COMMA);
 }
 
-std::vector<Line*> Parser::run(CommandLineArguments* arguments,
+void Parser::run(std::vector<Line *> & lines, CommandLineArguments & arguments,
 	std::unordered_map<std::string, std::vector<AssemblyInstruction>> & instructions,
 	std::unordered_map<std::string, Directive>& directives) {
 	debug("=== Stage 1: Parser.run() ===");
@@ -36,10 +23,10 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 	//	1.	Open the input file
 	std::ifstream input_file;
 
-	input_file.open(arguments->input_file_name, std::ifstream::in);
+	input_file.open(arguments.input_file_name, std::ifstream::in);
 
 	if (!input_file.is_open()) {
-		throwError("Could not open file '" + arguments->input_file_name
+		throwError("Could not open file '" + arguments.input_file_name
 			+ "' for reading.");
 	}
 
@@ -50,21 +37,10 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 	std::vector<std::string> line_strings;
 
 	std::string currentString;
-	//int i = 1;
 	while (input_file.good()) {
-		//std::cout << "line number: " << std::to_string(i++) << std::endl;
-		//currentString = "";
 		std::getline(input_file, currentString);
 
-		/*for (int j = 0; j < currentString.length(); j++) {
-			int asciiValue = currentString[j];
-			std::cout << "character: " << currentString[j] << "\t|\tvalue: " << std::to_string(asciiValue) << std::endl;
-		}*/
-
-		//std::cout << "Read: " << currentString << std::endl;
-		if (currentString.length() > 0) {
-			line_strings.push_back(currentString);
-		}
+		line_strings.push_back(currentString);
 	}
 
 	input_file.close();
@@ -75,9 +51,7 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 		debug("Line " + std::to_string(i + 1) + ": " + line_strings[i]);
 	}
 
-	//	3.	Generate a std::vector<Line *> lines vector
-	
-	std::vector<Line*> lines;
+	//	3.	Populate the Assembler's std::vector<Line *> lines vector
 
 	//	The Parser assumes that the address of the first instruction will be 0.
 	//	This value may end up being shifted by the Preprocessor if the user
@@ -85,7 +59,6 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 	//	elsewhere.
 	uint16_t current_address = 0;
 
-	//for (std::string s : line_strings) {
 	for (unsigned int line_count = 0; line_count < line_strings.size(); line_count++) {
 		std::string s = line_strings[line_count];
 		debug("== CONVERTING s to Line * ==");
@@ -170,8 +143,6 @@ std::vector<Line*> Parser::run(CommandLineArguments* arguments,
 
 		lines.push_back(line);
 	}
-
-	return lines;
 }
 
 Token Parser::stringToToken(std::string w, 
@@ -187,7 +158,7 @@ Token Parser::stringToToken(std::string w,
 			//	std::string -> std::vector<Instruction> hashmap to exist)
 			type = TokenType::INSTRUCTION;
 		}
-		else if (this->general_registers.find(w) != this->general_registers.end()) {
+		else if (general_register_bits.find(w) != general_register_bits.end()) {
 			//	Check whether w is a general purpose register
 			type = TokenType::GREGISTER;
 		}
@@ -201,7 +172,7 @@ Token Parser::stringToToken(std::string w,
 		}
 	}
 	else if (w.length() >= 2 && w[0] == SPECIAL_REGISTER_PREFIX &&
-			this->special_registers.find(w.substr(1)) != this->special_registers.end()) {
+			special_register_bits.find(w.substr(1)) != special_register_bits.end()) {
 		//	w is a special register
 		type = TokenType::SREGISTER;
 	}
@@ -209,27 +180,15 @@ Token Parser::stringToToken(std::string w,
 		//	w is a number
 		type = TokenType::NUMBER;
 	}
-	/*else if (w.length() >= 2 && w[0] == IMMEDIATE_PREFIX &&
-		isNUMBERString(w.substr(1))) {*/
 	else if (isImmediateString(w)) {
 		//	w is an immediate
 		type = TokenType::IMMEDIATE;
 	}
-	/*else if (w.length() >= 2 && w[0] == DIRECTIVE_PREFIX 
-		&& isTEXTString(w.substr(1))) {*/
 	else if (isDirectiveString(w)) {
 		//	w appears to be a preprocessor directive (mark it as such - whether
 		//	the directive exists will be checked in generateLine())
 		type = TokenType::DIRECTIVE;
 	}
-	//else if (w.length() >= 2 && w[0] == LABEL_PREFIX 
-	//	&& isTEXTString(w.substr(1))) {
-	//	//	w is a label
-	//	type = TokenType::LABEL;
-	//}
-	/*else if (w.length() >= 3) {
-
-	}*/
 	else if (isLABELString(w)) {
 		//	w is a label
 		type = TokenType::LABEL;
@@ -347,7 +306,6 @@ Line* Parser::generateLine(unsigned int line_number, std::string s,
 			"Incorrect arguments for preprocessor directive '" + directive.name 
 			+ "'.");
 	}
-	//	TODO: Add checks for Preprocessor directives and label definitions here
 	else if (tokens[0].type == TokenType::LABEL && tokens.size() == 1) {
 		//	Line is a label definition.
 		return new Line(line_number, LineType::LABEL_DEFINITION, s, tokens, current_address);
@@ -475,7 +433,8 @@ uint16_t Parser::getNextLineAddress(uint16_t current_address, AssemblyInstructio
 	uint16_t address_of_last_byte = next_address - 1;
 
 	//	if last byte address < current_address, classic overflow occurred
-	//	if last byte address >= RAM_SIZE_BYTES, then 
+	//	if last byte address >= RAM_SIZE_BYTES, then program is too big to be
+	//	stored in the RAM (and therefore also too big for the ROM).
 	if (address_of_last_byte < current_address
 		|| address_of_last_byte > RAM_SIZE_BYTES) {
 		throwError("Program is too big to store in either the RAM or the ROM.");

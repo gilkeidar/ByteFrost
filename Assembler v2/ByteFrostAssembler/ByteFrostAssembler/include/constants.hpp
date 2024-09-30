@@ -1,12 +1,19 @@
 #pragma once
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 /*	Debug Mode	*/
 //	Note to the Programmer: Use this constant as a toggle for debug print outs.
 //	Debug printouts must use the debug() function defined in utility.hpp to be
 //	affected by this debug toggle guard.
 #define	DEBUG_PRINTOUTS	false
+
+//	TODO: Maybe add a void verbose(std::string) function in utility.hpp for
+//	printouts that are only printed when a -verbose flag is set.
+
+//	TODO: Maybe add a RUN_TEST_SUITE #define here and add a test suite that
+//	would be run at the start of main() if it is set to true.
 
 /*	Stage 0: CLAP Constants	*/
 
@@ -18,6 +25,13 @@ const std::string ASSEMBLY_FILE_ENDING = "asm";
 #define OUTPUT_FILE_FLAG_NAME	"o"
 
 /*	Stage 1: Parser Constants	*/
+
+//	Parser (Stage 1) Delimiters (.asm line delimiters)
+//	Note: These are added by the Parser to its delimiters set in its 
+//	constructor
+#define	TOKEN_DELIMITER_SPACE	' '
+#define	TOKEN_DELIMITER_TAB		'\t'
+#define	TOKEN_DELIMITER_COMMA	','
 
 //	Parsing
 #define	UNDERSCORE				'_'
@@ -33,6 +47,17 @@ const std::string COMMENT_START = "//";
 //	Print types (used by OUT instruction)
 const std::string ASCII_PRINT_TYPE = "A";
 const std::string INTEGER_PRINT_TYPE = "I";
+
+//	General Register Strings
+const std::string GREGISTER_R0_NAME = "R0";
+const std::string GREGISTER_R1_NAME = "R1";
+const std::string GREGISTER_R2_NAME = "R2";
+const std::string GREGISTER_R3_NAME = "R3";
+
+//	Special Register Strings
+const std::string SREGISTER_DHPC_NAME = "DHPC";
+const std::string SREGISTER_HDP_NAME = "HDP";
+const std::string SREGISTER_HSP_NAME = "HSP";
 
 //	Instruction Arguments
 
@@ -90,10 +115,21 @@ const std::string INTEGER_PRINT_TYPE = "I";
 #define	HDP_BITS		1
 #define	HSP_BITS		2
 
+
+const std::unordered_map<std::string, uint8_t> general_register_bits({
+	{GREGISTER_R0_NAME, R0_BITS},
+	{GREGISTER_R1_NAME, R1_BITS},
+	{GREGISTER_R2_NAME, R2_BITS},
+	{GREGISTER_R3_NAME, R3_BITS}
+	});
+
+/**
+ * @brief Special register name (string) -> bit values (uint8_t)
+ */
 const std::unordered_map<std::string, uint8_t> special_register_bits({
-	{"DHPC", DHPC_BITS},
-	{"HDP", HDP_BITS},
-	{"HSP", HSP_BITS}
+	{SREGISTER_DHPC_NAME, DHPC_BITS},
+	{SREGISTER_HDP_NAME, HDP_BITS},
+	{SREGISTER_HSP_NAME, HSP_BITS}
 	});
 
 //	OUT Print Type Values

@@ -7,7 +7,7 @@ uint16_t Label::getPCAddress() {
 	//	NOTE - this assumes that the C++ compiler will implement this as a
 	//	logical shift right. Since the shifted type is unsigned though, this is
 	//	precisely what should occur.
-	throwWarning("getPCAddress() - ensure this implements logical shift right!");;
+	//throwWarning("getPCAddress() - ensure this implements logical shift right!");;
 	//return this->address >> 1;
 	return logicalShiftRight(this->address, 1);
 }

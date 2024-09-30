@@ -165,7 +165,7 @@ To add a `CLTokenType`, do the following:
 1.  Add the new `CLTokenType` value to the enum declaration in `clap.hpp`.
 2.  Update the `stringToCLToken()` function to correctly map token strings that
     should be understood as the new `CLTokenType` to that `CLTokenType`.
-3.  Update the `CLTokenTypeToString()` method with the new `CLTokenType`.
+3.  Update the `CLTokenTypeToString()` function with the new `CLTokenType`.
     (this is for debug completeness).
 
 ### How to Add New Flags (`CLFlag`s)
