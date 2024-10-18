@@ -49,8 +49,44 @@ stage class and which encapsulates the software pipeline with its `run()`
 method, which runs each of the pipeline stages one after another by calling 
 their corresponding class' `run()` methods.
 
-Hence, the `Assembler::run()` method is quite simple; its implementation
-is essentially as follows:
+The `Assembler` class is defined as follows:
+
+```cpp
+class Assembler {
+public:
+    Assembler(int argc, char ** argv);
+    void run();
+private:
+    //  Global data
+    CommandLineArguments * commandLineArguments;
+
+    //  Lines vector
+    std::vector<Line *> lines;
+
+    //  other global data...
+
+    //  Instances of each pipeline stage encapsulation class
+
+    //  Stage 0 - Command-Line Argument Processing
+    CLAP clap;
+
+    //  Stage 1 - Parser
+    Parser parser;
+
+    //  Stage 2 - Preprocessor
+    Preprocessor preprocessor;
+
+    //  Stage 3 - Label Handler
+    LabelHandler label_handler;
+
+    //  Stage 4 - Output File Generation
+    OutputFileGenerator file_generator;
+}
+```
+
+Due to the encapsulation of eaach pipeline stage's tasks in its corresponding 
+class' `run()` method, the `Assembler::run()` method is quite simple; its
+implementation is essentially as follows:
 
 ```cpp
 void Assembler::run() {
