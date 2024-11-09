@@ -113,4 +113,5 @@ INC R2		// R2 = board[row] + 1
 SMR R2, R0	// board[row] = board[row] + 1
 :end
 OUT #0x2E, A // Print '.'
+OUT #0x2E, A // Print '.'
 BRK
