@@ -53,7 +53,7 @@
 .define 1 _x				0x78
 .define 1 EQUALS			0x3d
 
-.define	2 device0			0xE000
+.define	2 sdcard 			0xE000
 .define	2 device1			0xE200
 .define	2 device2			0xE400
 .define	2 device3			0xE600
@@ -68,21 +68,37 @@
 //	1.	Read 0xE000
 
 //		1.	Print "*(0xE000) ="
-LSP %HDP, device0[1]
+LSP %HDP, sdcard[1]
 
 OUT ASTERISK, A
 OUT LEFT_PAR, A
 OUT #0, A
 OUT _x, A
-OUT device0[1], I
-OUT device0[0], I
+OUT sdcard[1], I
+OUT sdcard[0], I
 OUT RIGHT_PAR, A
 OUT SPACE, A
 OUT EQUALS, A
 OUT SPACE, A
 
-//		2. R0 = *(0xE000)
-LMA R0, device0[0]
+//		2. Set SDcard command
+//  Byte 0: Page
+//  Byte 1: Sector High ( 3 lsb)
+//  Byte 2: Sector Low
+//  Byte 3: Go          (how do we tell to read or write?)
+LDR R0, #0
+LDR R1, #0x17 
+SMR R1, R0 // Set Page to be 0x17
+INC R0
+LDR R1, #0x03  
+SMR R1, R0 // Set Sector High = 0x03
+INC R0
+LDR R1, #0x45  
+SMR R1, R0 // Set Sector Low = 0x45
+INC R0
+SMR R1, R0 // GO (R1 is ignored)
+      
+LMA R0, sdcard[0]   // Now check for completion status...
 
 //		3. Print R0
 OUT R0, I
