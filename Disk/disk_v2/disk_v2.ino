@@ -271,6 +271,8 @@ void setup() {
 
     Serial.println("MKRZero SD Card Driver");
   #endif
+
+  initialize();
 }
 
 /**************************************************
@@ -519,8 +521,8 @@ void loop()
         #if DEBUG
           Serial.print("SR Command: 0x");
           Serial.println(sr_cmd, HEX);
-          delay(2000);
-          Serial.println("Release the bus");
+          // delay(2000);
+          // Serial.println("Release the bus");
         #endif
         
                 
@@ -534,7 +536,7 @@ void loop()
 
         #if DEBUG
           Serial.println("SR Command ======");
-          Serial.print("Reading from Disk? ");
+          Serial.print("Writing to Disk? ");
           Serial.println(writeToDisk);
           Serial.print("Sector ID: ");
           Serial.println(sectorID);
