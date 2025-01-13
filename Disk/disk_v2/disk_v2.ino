@@ -174,6 +174,14 @@ int cardInfo() {
 }
 
 /**
+ *  Opens ByteFrost disk file (if not yet open).
+ *
+ */
+// void openDiskFile() {
+//   disk = SD.open("disk");
+// }
+
+/**
  *  Prints contents of the given file to the Serial Monitor, if it exists.
  *
  *  @param filename Name of the file to print to the Serial Monitor
@@ -271,10 +279,10 @@ void setup() {
 /*    o    setBusDirection                        *
 /*    o    writeToBus                             *
 /*    o    readFromBus                            *
-/*    o    readSector2Beffer                      *
-/*    o    writeBeffer2Sector                     *
+/*    o    readSector2Buffer                      *
+/*    o    writeBuffer2Sector                     *
 /*    o    readMem2Buffer                         *
-/*    o    writeBeffer2Mem                        *
+/*    o    writeBuffer2Mem                        *
 /**************************************************/
 
 void setBusDirection(int mode) 
@@ -320,16 +328,56 @@ uint8_t readFromBus() {
 }
 
 /**
- * readSector2Beffer() Read sector sectorId into sectorDataBuffer
+ * readSector2Buffer() Read sector sectorId into sectorDataBuffer
  */
-uint16_t readSector2Beffer(uint16_t sectorId)
+uint16_t readSector2Buffer(uint16_t sectorID)
 {
+  #if DEBUG
+    Serial.print("Reading sector ");
+    Serial.print(sectorID);
+    Serial.println(" from disk...");
+  #endif
 
+  //  Open ByteFrost disk file. (Assuming the disk file is not currently open (based on
+  //  the SD card library's documentation for SD.open(), only one file may be open at
+  //  one time)).
+  if (!SD.exists("disk")) {
+    #if DEBUG
+      Serial.println("Error! No file 'disk' exists on the SD card!");
+    #endif
+
+    //  Stop working (ByteFrost will be stuck since the SD card driver won't send
+    //  a bus release signal to the bus arbiter)
+    while (1)
+      ;
+  }
+
+  File disk = SD.open("disk");
+
+  //  Move to the correct sector. (Assuming an 11-bit sector ID!)
+  if (!disk.seek(sectorID * SECTOR_SIZE)) {
+    #if DEBUG
+      Serial.print("Error! Couldn't seek disk file to sector ");
+      Serial.print(sectorID);
+      Serial.println("!");
+    #endif
+
+    //  Stop working (ByteFrost will be stuck since the SD card driver won't send
+    //  a bus release signal to the bus arbiter)
+    while (1)
+      ;
+  }
+
+  //  Copy sector contents to the sector buffer
+  disk.read(sectorDataBuffer, SECTOR_SIZE);
+
+  //  Close disk file
+  disk.close();
 }
 /**
- * writeBeffer2Sector() Write sectorDataBuffer into sector sectorId  
+ * writeBuffer2Sector() Write sectorDataBuffer into sector sectorId  
  */
-uint16_t writeBeffer2Sector(uint16_t sectorId)
+uint16_t writeBuffer2Sector(uint16_t sectorID)
 {
 
 }
@@ -364,9 +412,9 @@ uint16_t readMem2Buffer(uint16_t address)
  
 }
 /**
- * writeBeffer2Mem() Write sectorDataBuffer into memory starting with adress.  
+ * writeBuffer2Mem() Write sectorDataBuffer into memory starting with adress.  
  */
-uint16_t writeBeffer2Mem(uint16_t address)
+uint16_t writeBuffer2Mem()
 {
     uint16_t i;
     //  Disable Read and Write
@@ -476,7 +524,27 @@ void loop()
         #endif
         
                 
-        // Handle the command
+        //  Handle the command
+        //  Disk Command Format:  16 bits-long command
+        //  15  14  13  12  11  10 - 0
+        //  R/W ?   ?   ?   ?   Sector pointer / ID
+
+        uint16_t sectorID = sr_cmd & (0x07FF);
+        bool readFromDisk = (sr_cmd & (0x8000)) == 0x8000;
+
+        #if DEBUG
+          Serial.println("SR Command ======");
+          Serial.print("Reading from Disk? ");
+          Serial.println(readFromDisk);
+          Serial.print("Sector ID: ");
+          Serial.println(sectorID);
+        #endif
+
+        if (readFromDisk) {
+          readSector2Buffer(sectorID);
+
+          writeBuffer2Mem();
+        }
 
         // Release the flag for another interrupt  
         interruptHappenedFlag = 0; // Be ready for interupt.
@@ -496,3 +564,10 @@ void BusGrant()
 {
     interruptHappenedFlag = 1; // Flag interrupt.
 }
+
+
+
+
+
+
+
