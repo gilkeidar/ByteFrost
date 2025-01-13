@@ -530,17 +530,21 @@ void loop()
         //  R/W ?   ?   ?   ?   Sector pointer / ID
 
         uint16_t sectorID = sr_cmd & (0x07FF);
-        bool readFromDisk = (sr_cmd & (0x8000)) == 0x8000;
+        bool writeToDisk = (sr_cmd & (0x8000)) == 0x8000;
 
         #if DEBUG
           Serial.println("SR Command ======");
           Serial.print("Reading from Disk? ");
-          Serial.println(readFromDisk);
+          Serial.println(writeToDisk);
           Serial.print("Sector ID: ");
           Serial.println(sectorID);
         #endif
 
-        if (readFromDisk) {
+        if (writeToDisk) {
+          //  Write page (256 bytes) to a sector (256 bytes) in disk
+        }
+        else {
+          //  Read a sector (256 bytes) from disk to a page (256 bytes) in RAM
           readSector2Buffer(sectorID);
 
           writeBuffer2Mem();
