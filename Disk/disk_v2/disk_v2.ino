@@ -381,12 +381,52 @@ uint16_t readSector2Buffer(uint16_t sectorID)
  */
 uint16_t writeBuffer2Sector(uint16_t sectorID)
 {
+  #if DEBUG
+    Serial.print("Writing to sector ");
+    Serial.print(sectorID);
+    Serial.println("...");
+  #endif
 
+  //  Open ByteFrost disk file. (Assuming the disk file is not currently open (based on
+  //  the SD card library's documentation for SD.open(), only one file may be open at
+  //  one time)).
+  if (!SD.exists("disk")) {
+    #if DEBUG
+      Serial.println("Error! No file 'disk' exists on the SD card!");
+    #endif
+
+    //  Stop working (ByteFrost will be stuck since the SD card driver won't send
+    //  a bus release signal to the bus arbiter)
+    while (1)
+      ;
+  }
+
+  File disk = SD.open("disk");
+
+  //  Move to the correct sector. (Assuming an 11-bit sector ID!)
+  if (!disk.seek(sectorID * SECTOR_SIZE)) {
+    #if DEBUG
+      Serial.print("Error! Couldn't seek disk file to sector ");
+      Serial.print(sectorID);
+      Serial.println("!");
+    #endif
+
+    //  Stop working (ByteFrost will be stuck since the SD card driver won't send
+    //  a bus release signal to the bus arbiter)
+    while (1)
+      ;
+  }
+
+  //  Copy buffer contents to sector
+  disk.write(sectorDataBuffer, SECTOR_SIZE);
+
+  //  Close disk file
+  disk.close();
 }
 /**
  * readMem2Buffer() Read memory from address into sectorDataBuffer
  */
-uint16_t readMem2Buffer(uint16_t address)
+uint16_t readMem2Buffer()
 {
     uint16_t i;
     //  Prepare for read, Enable SRAM Output   
@@ -411,7 +451,6 @@ uint16_t readMem2Buffer(uint16_t address)
     //  Finish memory read, Disable SRAM Output   
     REG_PORT_OUTSET1 = SRAM_OE_INV_PB03;
     return i;
- 
 }
 /**
  * writeBuffer2Mem() Write sectorDataBuffer into memory starting with adress.  
@@ -544,6 +583,9 @@ void loop()
 
         if (writeToDisk) {
           //  Write page (256 bytes) to a sector (256 bytes) in disk
+          readMem2Buffer();
+
+          writeBuffer2Sector(sectorID);
         }
         else {
           //  Read a sector (256 bytes) from disk to a page (256 bytes) in RAM
