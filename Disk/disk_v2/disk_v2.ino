@@ -38,8 +38,6 @@ void BusGrant();
 //        memoryWrite: Buffer -> Memory
 char sectorDataBuffer[SECTOR_SIZE] = { 0 };
 
-
-
 //  Digital pins for data bus (PORTD)
 pin_size_t dataBus[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
 
@@ -373,6 +371,16 @@ uint16_t readSector2Buffer(uint16_t sectorID)
   //  Copy sector contents to the sector buffer
   disk.read(sectorDataBuffer, SECTOR_SIZE);
 
+  #if DEBUG
+    Serial.println("Sector data:\n");
+    for (int i = 0; i < SECTOR_SIZE / 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        Serial.print(sectorDataBuffer[8*i + j]);
+      }
+      Serial.println();
+    }
+  #endif
+
   //  Close disk file
   disk.close();
 }
@@ -474,10 +482,16 @@ uint16_t writeBuffer2Mem()
       //  Set data to next value
 
       writeToBus(sectorDataBuffer[i]);
-
       //  Set write enable
       REG_PORT_OUTCLR1 = WE_INV_PB02;
       //  Finish write cycle (25 ns is enuogh)
+      delayMicroseconds(1);
+      #if DEBUG
+        Serial.print("Writing ");
+        Serial.print(sectorDataBuffer[i]);
+        Serial.println(" to bus.");
+        delay(50);
+      #endif
       REG_PORT_OUTSET1 = WE_INV_PB02;
 
       //  Increment address counter (rising edge)
