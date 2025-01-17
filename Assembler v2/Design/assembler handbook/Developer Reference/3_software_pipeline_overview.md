@@ -84,7 +84,7 @@ private:
 }
 ```
 
-Due to the encapsulation of eaach pipeline stage's tasks in its corresponding 
+Due to the encapsulation of each pipeline stage's tasks in its corresponding 
 class' `run()` method, the `Assembler::run()` method is quite simple; its
 implementation is essentially as follows:
 
