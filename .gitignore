@@ -9,3 +9,5 @@ Assembler/banana.mlg
 Programs/BIST.mlg
 Documentation/CPU - Copy.pptx
 *.bin
+/.vs
+/Assembler v2/ByteFrostAssembler/.vs
