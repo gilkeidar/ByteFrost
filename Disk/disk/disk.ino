@@ -282,9 +282,27 @@ int printFile(String filename) {
  */
 void go() {
 //  Received go interrupt
+    uint16_t sr_cmd;
+    uint8_t sr_bit;
+    sr_cmd = 0;
+
 #if DEBUG
   Serial.println("Go interupt handler.");
 #endif
+
+  for (int i = 0; i<16; i++)
+  {
+      sr_bit = digitalRead(SERIAL_IN);
+      sr_cmd  = (sr_cmd << 1) | sr_bit;
+      digitalWrite(SHIFT, HIGH);
+      digitalWrite(SHIFT, LOW);
+#if DEBUG
+      Serial.print("SR bit: ");
+      Serial.println(sr_bit);
+#endif
+  }
+  Serial.print("SR Command: 0x");
+  Serial.println(sr_cmd, HEX);
 }
 
 void setup() {
@@ -340,7 +358,7 @@ void setup() {
     while (1)
       ;
   }
-
+#if 0
   Serial.println("================================");
 
   //  Print README.txt
@@ -348,6 +366,7 @@ void setup() {
     while (1)
       ;
   }
+#endif
 
   Serial.println("================================");
 
@@ -628,7 +647,7 @@ uint16_t writeBeffer2Mem(uint16_t address)
 
     return i;
 }
-
+#if 0 // Test board only
 /**
  * writeCommandToSR() Write hiByte and loByte to Shift Register.  
  * This is a debug function only
@@ -661,9 +680,14 @@ void writeCommandToSR(uint8_t loByte, uint8_t hiByte)
     setBusDirection(INPUT);
     REG_PORT_OUTSET1 = WE_INV_PB02 | SRAM_OE_INV_PB03;
 }
+#endif
+
 int num_iterations = 0;
 void loop() 
 {
+
+#if 0 // test code
+
     // put your main code here, to run repeatedly:
     // Serial.println("Hello World from MKRZero!");
     // digitalWrite(SHIFT, HIGH);
@@ -752,4 +776,6 @@ void loop()
         Serial.print("SR Command: 0x");
         Serial.println(sr_cmd, HEX);
     }
+#endif
+    
 }
