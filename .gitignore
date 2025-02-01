@@ -11,3 +11,6 @@ Documentation/CPU - Copy.pptx
 *.bin
 /.vs
 /Assembler v2/ByteFrostAssembler/.vs
+*.exe
+*.obj
+*.sln
