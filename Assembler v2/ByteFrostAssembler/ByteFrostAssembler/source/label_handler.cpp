@@ -13,7 +13,13 @@ uint16_t Label::getPCAddress() {
 }
 
 LabelHandler::LabelHandler() {
+	//	Add hardcoded labels for ByteFrost RAM / ROM start
+	Label RAM_START {
+		"__RAM_START__",
+		0x2000
+	};
 
+	labels[RAM_START.name] = RAM_START;
 }
 
 void LabelHandler::run(std::vector<Line*>& lines, 
