@@ -4,7 +4,7 @@
 //  ===== CONSTANTS =====
 
 //  === CODE MODIFICATION ===
-#define DEBUG 1
+#define DEBUG 0
 
 #define SECTOR_SIZE 256
 
