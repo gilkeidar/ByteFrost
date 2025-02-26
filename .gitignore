@@ -13,3 +13,6 @@ Documentation/CPU - Copy.pptx
 *.exe
 *.obj
 *.sln
+/Assembler v2/ByteFrostAssembler/ByteFrostAssembler/x64
+*.pdb
+*.log

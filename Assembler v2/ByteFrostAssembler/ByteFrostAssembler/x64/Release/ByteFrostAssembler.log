@@ -1,1 +1,27 @@
-﻿
+﻿  assembler.cpp
+  assembly_instructions.cpp
+  clap.cpp
+  file_generation.cpp
+  isa.cpp
+  label_handler.cpp
+  main.cpp
+  parser.cpp
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\parser.cpp(417,24): warning C4267: 'initializing': conversion from 'size_t' to 'uint16_t', possible loss of data
+  preprocessor.cpp
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\preprocessor.cpp(91,33): warning C4244: '=': conversion from '__int64' to 'long', possible loss of data
+  utility.cpp
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(183,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(199,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(237,15): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(320,23): warning C4244: 'return': conversion from '__int64' to 'int', possible loss of data
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(335,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(349,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(362,23): warning C4244: 'return': conversion from '__int64' to 'int', possible loss of data
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(386,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(400,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(413,23): warning C4244: 'return': conversion from '__int64' to 'int', possible loss of data
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 2679 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  ByteFrostAssembler.vcxproj -> C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\x64\Release\ByteFrostAssembler.exe
