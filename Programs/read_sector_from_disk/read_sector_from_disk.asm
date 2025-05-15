@@ -83,8 +83,8 @@ OUT RIGHT_PAR, A
 //	15	14	13	12	11	10-0
 //	R/W	?	?	?	?	Sector ID
 LDR R0, #0
-LDR R1, #0x17 
-SMR R1, R0 // Set Page to be 0x17
+LDR R1, #0x25 
+SMR R1, R0 // Set Page to be 0x25
 INC R0
 //LDR R1, #0x03  
 LDR R1, #0x00
@@ -101,7 +101,7 @@ SMR R1, R0 // GO (R1 is ignored)
 OUT NEW_LINE, A
 
 //	2.	Print the contents of the page that was written to.
-LSP %HDP, #0x17		//	Set High Data Pointer to page 0x17
+LSP %HDP, #0x25		//	Set High Data Pointer to page 0x25
 
 //	R0 = 0;
 //	while (R0 <= 255) {
