@@ -125,8 +125,8 @@ this list and treat each token as a flag, a flag argument, or as the required
 input argument which is the input file name.
 
 The first argument that is of type `CLTokenType::FILE`, ends with the string
-`".asim"`, and is not na argument of a previous flag token, will be understood
-by the CLAP to be the required input file name argument.
+`".asm"`, and is not an argument of a previous flag token, will be understood by
+the CLAP to be the required input file name argument.
 
 When a flag argument is encountered, the CLAP will check whether the flag is
 recognized by the CLAP by checking whether the argument string exists as a key
@@ -137,7 +137,7 @@ object allocated by the CLAP.
 If the flag is not recognized (key doesn't exist), the CLAP will throw an error.
 If the flag does exist, then the corresponding `CLFlag` object's `is_set` field
 will be set to `true` and the object will contain a
-`vector<CLTokenType expected_pattern>` vector which details the number and types
+`vector<CLTokenType> expected_pattern` vector which details the number and types
 of the following expected `CLToken` arguments. If there aren't enough `CLToken`s
 after this one or if their types won't match, the CLAP will throw an error. The
 CLAP will also set the `CLFlag` argument value fields to the values in the

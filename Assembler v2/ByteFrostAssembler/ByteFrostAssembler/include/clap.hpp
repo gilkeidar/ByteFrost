@@ -79,6 +79,9 @@ public:
 
 	/**
 	 * @brief File name of the input .asm file (filled by CLAP).
+	 * TODO: Replace std::string with std::optional<std::string> since the
+	 * input_file_name may not be set; using a special value (UNSET_FILE_NAME)
+	 * is a less clean way of checking this in my opinion.
 	 */
 	std::string input_file_name;
 

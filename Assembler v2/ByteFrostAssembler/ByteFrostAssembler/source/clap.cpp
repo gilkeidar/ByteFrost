@@ -135,7 +135,7 @@ CLToken stringToCLToken(std::string w) {
 	//	3.	FILE_NAME
 	//		w is mapped to CLTokenType.FILE_NAME iff w is in FILE
 	//	4.	TEXT
-	//		w is mapepd to CLTokenType.TEXT iff w is in TEXT
+	//		w is mapped to CLTokenType.TEXT iff w is in TEXT
 	//	5.	INVALID (matched with s if s doesn't match any from 1 - 4)
 
 	//	Map w to a CLTokenType

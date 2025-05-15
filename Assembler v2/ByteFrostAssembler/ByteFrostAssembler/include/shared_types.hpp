@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-//	Shared types used accross the assembler code
+//	Shared types used across the assembler code
 
 //	Forward declaration of AssemblyInstruction struct
 struct AssemblyInstruction;

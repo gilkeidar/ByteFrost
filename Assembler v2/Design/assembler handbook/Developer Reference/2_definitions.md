@@ -33,6 +33,8 @@ string or substrings of it are members of some of these sets.
 
 ### String Sets
 
+**Note:** In this context, $\epsilon$ is used to mean the empty string.
+
 5.  $TEXT$ is the set of possible variable names.
     * A string $s$ is in $TEXT$ iff the first character of $s$ is an underscore
      or in $A$, and every character in $s$ after the first character may be an

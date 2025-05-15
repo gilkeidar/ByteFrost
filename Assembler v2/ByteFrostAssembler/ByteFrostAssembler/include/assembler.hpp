@@ -29,6 +29,8 @@ public:
 private:
 	//	Global data
 
+	//	TODO: Add Config object instance
+
 	//	Command-Line Arguments
 
 	/**
