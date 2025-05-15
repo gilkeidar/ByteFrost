@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "constants.hpp"
 //	Shared types used across the assembler code
 
 //	Forward declaration of AssemblyInstruction struct
@@ -8,6 +9,43 @@ struct AssemblyInstruction;
 
 //	Forward declaration of Preprocessor Directive struct
 struct Directive;
+
+/**
+ * @brief Struct containing property-value pairs of properties that affect the
+ * behavior of the Assembler and which can be set externally (i.e., from
+ * command-line arguments, from preprocessor directives, and perhaps in future
+ * from an external config file).
+ */
+struct Config {
+	//	Property-value pairs, grouped by the earliest entity that can set them
+	//	(i.e., properties whose values can be set with command-line arguments
+	//		and those that cannot be set with command-line arguments)
+
+	//	==	Command-Line Argument-Settable Properties	==
+
+	/**
+	 * @brief File name of the input .asm file (filled by CLAP).
+	 */
+	std::string input_file_name = UNSET_FILE_NAME;
+
+	/**
+	 * @brief File name of the output file (filled by CLAP if "-o" flag is set)
+	 */
+	std::string output_file_name = UNSET_FILE_NAME;
+
+	/**
+	 * @brief Whether the assembled output file should be a binary (.bin) file
+	 */
+	bool generateBinaryFile = false;
+
+	//	==	Other Properties
+
+	/**
+	 * @brief Start address of program (i.e., where the program should be
+	 * stored / loaded into in the ByteFrost memory address space)
+	 */
+	uint16_t start_address = 0x0000;
+};
 
 /**
  * @brief Parser-recognized Token types; a Token's token string is mapped to

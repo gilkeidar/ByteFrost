@@ -3,7 +3,10 @@
 #include "assembler.hpp"
 #include "utility.hpp"
 
-Assembler::Assembler(int argc, char** argv) : clap(argc, argv) {
+Assembler::Assembler(int argc, char** argv) : clap(argc, argv, config),
+	parser(config), preprocessor(config), label_handler(config), 
+	file_generator(config)
+{
 	//	Initialize Assembler state.
 	debug("Assembler constructor.");
 
@@ -20,20 +23,19 @@ void Assembler::run() {
 	debug("Assembler run()");
 
 	//	Stage 0: Command-Line Argument Parsing
-	this->commandLineArguments = clap.run();
+	clap.run();
 
 	//	Stage 1: Parser
-	parser.run(this->lines, *(this->commandLineArguments), this->instructions,
-		this->directives);
+	parser.run(this->lines, this->instructions, this->directives);
 
 	//	Stage 2: Preprocessor
-	preprocessor.run(this->lines, *(this->commandLineArguments));
+	preprocessor.run(this->lines);
 
 	//	Stage 3: Label Handler
-	label_handler.run(this->lines, *(this->commandLineArguments));
+	label_handler.run(this->lines);
 
 	//	Stage 4: Output File Generation
-	file_generator.run(this->lines, *(this->commandLineArguments));
+	file_generator.run(this->lines);
 }
 
 void Assembler::initializeAssemblyInstructions() {

@@ -37,9 +37,14 @@ struct PreprocessorConstant {
 
 class Preprocessor {
 public:
-	Preprocessor();
-	void run(std::vector<Line*>& lines, CommandLineArguments& args);
+	Preprocessor(Config& config) : config(config) {}
+	void run(std::vector<Line*>& lines);
 private:
+	/**
+	 * @brief Reference to the Assembler's Config instance.
+	 */
+	Config& config;
+
 	//	Hashmap of string -> PreprocessorConstant
 	std::unordered_map<std::string, PreprocessorConstant> constants;
 
@@ -47,6 +52,8 @@ private:
 
 	//	Directive handlers
 	void handleDefineDirective(DirectiveLine* line);
+
+	void handleStartDirective(DirectiveLine* line);
 };
 
 //	Directives array
@@ -55,5 +62,10 @@ const Directive preprocessor_directives[] = {
 		"define",
 		DirectiveType::define,
 		{TokenType::NUMBER, TokenType::TEXT, TokenType::NUMBER}
+	},
+	{	//	.start START_ADDRESS
+		"start",
+		DirectiveType::start,
+		{TokenType::NUMBER}
 	}
 };

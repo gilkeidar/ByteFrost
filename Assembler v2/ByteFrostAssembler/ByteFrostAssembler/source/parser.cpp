@@ -8,14 +8,14 @@
 #include <sstream>
 #include <iomanip>
 
-Parser::Parser() {
+Parser::Parser(Config & config) : config(config) {
 	//	Initialize delimiter set to {' ', '\t', ','}
 	this->delimiters.insert(TOKEN_DELIMITER_SPACE);
 	this->delimiters.insert(TOKEN_DELIMITER_TAB);
 	this->delimiters.insert(TOKEN_DELIMITER_COMMA);
 }
 
-void Parser::run(std::vector<Line *> & lines, CommandLineArguments & arguments,
+void Parser::run(std::vector<Line *> & lines,
 	std::unordered_map<std::string, std::vector<AssemblyInstruction>> & instructions,
 	std::unordered_map<std::string, Directive>& directives) {
 	debug("=== Stage 1: Parser.run() ===");
@@ -23,10 +23,10 @@ void Parser::run(std::vector<Line *> & lines, CommandLineArguments & arguments,
 	//	1.	Open the input file
 	std::ifstream input_file;
 
-	input_file.open(arguments.input_file_name, std::ifstream::in);
+	input_file.open(config.input_file_name, std::ifstream::in);
 
 	if (!input_file.is_open()) {
-		throwError("Could not open file '" + arguments.input_file_name
+		throwError("Could not open file '" + config.input_file_name
 			+ "' for reading.");
 	}
 

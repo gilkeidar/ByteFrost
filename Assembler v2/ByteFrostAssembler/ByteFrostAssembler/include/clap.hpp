@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include "shared_types.hpp"
 
 /**
  * @brief CLAP-recognized CLToken types; a CLToken's token string is mapped to
@@ -78,6 +79,14 @@ public:
 	CommandLineArguments();
 
 	/**
+	 * @brief Given a reference to a Config instance, this method sets the
+	 * values of command-line settable properties based on the input_file_name
+	 * string and all set flags.
+	 * @param config Reference to a Config instance.
+	 */
+	void updateConfig(Config& config);
+
+	/**
 	 * @brief File name of the input .asm file (filled by CLAP).
 	 * TODO: Replace std::string with std::optional<std::string> since the
 	 * input_file_name may not be set; using a special value (UNSET_FILE_NAME)
@@ -106,15 +115,17 @@ public:
 	 * @brief CLAP constructor
 	 * @param argc Number of command-line arguments
 	 * @param argv Command-line argument string array
+	 * @param config Reference to a Config instance
 	 */
-	CLAP(int argc, char ** argv);
+	CLAP(int argc, char ** argv, Config & config) : argc(argc), argv(argv),
+		config(config) {}
 
 	/**
 	 * @brief Runs the CLAP on the given command-line arguments, which
 	 *	generates a CommandLineArguments object.
 	 * @return CommandLineArguments object pointer.
 	 */
-	CommandLineArguments * run();
+	void run();
 private:
 	/**
 	 * @brief Number of command-line arguments (including assembler program
@@ -126,5 +137,10 @@ private:
 	 * @brief Command-line argument string array.
 	 */
 	char** argv;
+
+	/**
+	 * @brief Reference to the Assembler's Config instance.
+	 */
+	Config& config;
 };
 

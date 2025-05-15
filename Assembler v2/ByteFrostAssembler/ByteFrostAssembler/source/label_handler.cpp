@@ -2,6 +2,7 @@
 #include "utility.hpp"
 #include <iostream>
 #include <unordered_set>
+#include <sstream>
 
 uint16_t Label::getPCAddress() {
 	//	NOTE - this assumes that the C++ compiler will implement this as a
@@ -12,7 +13,7 @@ uint16_t Label::getPCAddress() {
 	return logicalShiftRight(this->address, 1);
 }
 
-LabelHandler::LabelHandler() {
+LabelHandler::LabelHandler(Config & config) : config(config) {
 	//	Add hardcoded labels for ByteFrost RAM / ROM start
 	Label RAM_START {
 		"__RAM_START__",
@@ -22,8 +23,7 @@ LabelHandler::LabelHandler() {
 	labels[RAM_START.name] = RAM_START;
 }
 
-void LabelHandler::run(std::vector<Line*>& lines, 
-	CommandLineArguments& args) {
+void LabelHandler::run(std::vector<Line*>& lines) {
 	debug("=== Stage 3: LabelHandler.run() ===");
 
 	//	First pass - populate the string -> Label labels hashmap in the 
@@ -36,8 +36,13 @@ void LabelHandler::run(std::vector<Line*>& lines,
 			//	Create new Label
 			Label newLabel {
 				getLabelName(line->tokens[0].token_string),
-				line->line_address
+				line->line_address + config.start_address
 			};
+
+			std::stringstream stream;
+			stream << std::hex << "0x" << newLabel.address;
+
+			debug("Label " + newLabel.name + " at address " + stream.str() + ".");
 
 			//	If label name already exists in labels hashmap, throw an error
 			if (this->labels.find(newLabel.name) != this->labels.end()) {

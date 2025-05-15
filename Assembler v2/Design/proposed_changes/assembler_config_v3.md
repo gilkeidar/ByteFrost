@@ -189,7 +189,8 @@ private:
 In `clap.cpp`:
 
 ```C++
-class 
+CLAP::CLAP(int argc, char ** argv, Config & config) : argc(argc), argv(argv),
+    config(config) {}
 ```
 
 In `assembler.cpp`:
@@ -203,7 +204,50 @@ Assembler::Assembler(int argc, char ** argv) : clap(argc, argv, config),
 }
 ```
 
-### Making `CommandLineArgument` Internal to the CLAP
+### Making `CommandLineArguments` Internal to the CLAP
+
+Modify the signature of `CLAP::run()` to return `void`:
+
+In `clap.hpp`:
+
+```C++
+class CLAP {
+public:
+    //  ...
+    void run();
+private:
+    //  ...
+}
+```
+
+In `clap.cpp`:
+
+```C++
+//  ...
+void CLAP::run() {
+    //  ...
+}
+```
+
+Remove `CommandLineArguments` field from `Assembler` and its `run()` method:
+
+In `assembler.cpp`:
+
+```C++
+//  ...
+void Assembler::run() {
+    //  ...
+    clap.run();
+    
+    parser.run(this->lines, this->instructions, this->directives);
+
+    preprocessor.run(this->lines);
+
+    label_handler.run(this->lines);
+
+    file_generator.run(this->lines);
+}
+```
 
 ####    Replacing external references to the `CommandLineArgument` with `Config`
 

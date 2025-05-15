@@ -1,5 +1,6 @@
 .define 8 PI -0xdeadbeef
 .define 2 PI2 0x2000
+.start	0x2000	//	RAM program
 //.banana
 ADD R1, R2, R3	//	this is a comment
 //ADD R1, :label[2]

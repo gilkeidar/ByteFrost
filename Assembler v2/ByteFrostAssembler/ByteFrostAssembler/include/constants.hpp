@@ -7,7 +7,7 @@
 //	Note to the Programmer: Use this constant as a toggle for debug print outs.
 //	Debug printouts must use the debug() function defined in utility.hpp to be
 //	affected by this debug toggle guard.
-#define	DEBUG_PRINTOUTS	false
+#define	DEBUG_PRINTOUTS	true
 
 //	TODO: Maybe add a void verbose(std::string) function in utility.hpp for
 //	printouts that are only printed when a -verbose flag is set.

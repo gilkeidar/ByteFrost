@@ -6,7 +6,7 @@
 #include <iostream>
 #include <sstream>
 
-void OutputFileGenerator::run(std::vector<Line*> & lines, CommandLineArguments& clArgs) {
+void OutputFileGenerator::run(std::vector<Line*> & lines) {
 	debug("=== Stage 4: OutputFileGenerator.run() ===");
 	
 	//	Store lines vector
@@ -16,28 +16,32 @@ void OutputFileGenerator::run(std::vector<Line*> & lines, CommandLineArguments& 
 	//	1.1	Determine output file name.
 	std::string output_file_name;
 
-	bool binaryFlag = clArgs.flags[BINARY_FLAG_NAME].is_set;
+	//bool binaryFlag = clArgs.flags[BINARY_FLAG_NAME].is_set;
 
-	debug("binary flag is set? " + binaryFlag);
+	//debug("binary flag is set? " + binaryFlag);
 
-	if (clArgs.flags[OUTPUT_FILE_FLAG_NAME].is_set) {
+	debug("binary flag is set? " + config.generateBinaryFile);
+
+	//if (clArgs.flags[OUTPUT_FILE_FLAG_NAME].is_set) {
+	if (config.output_file_name != UNSET_FILE_NAME) {
 		//	If output file flag is set (-o flag), then set the output file name
 		//	to the -o flag value
-		output_file_name = clArgs.flags[OUTPUT_FILE_FLAG_NAME].values[0].token_string;
+		//output_file_name = clArgs.flags[OUTPUT_FILE_FLAG_NAME].values[0].token_string;
+		output_file_name = config.output_file_name;
 	}
 	else {
 		//	Otherwise, set the output file name to the input file name
-		output_file_name = removeFileExtension(clArgs.input_file_name);
+		output_file_name = removeFileExtension(config.input_file_name);
 
 		//	Set output file extension to .bin if binary flag is set and .mlg
 		//	otherwise
-		output_file_name += (binaryFlag ? ".bin" : ".mlg");
+		output_file_name += (config.generateBinaryFile ? ".bin" : ".mlg");
 	}
 
 	//	1.2	Open file for writing
 	std::ofstream output_file;
 
-	if (binaryFlag) {
+	if (config.generateBinaryFile) {
 		//	Open output file for binary writing
 		//output_file.open(output_file_name, std::ofstream::out | std::ofstream::binary);
 		output_file.open(output_file_name, std::ios::binary | std::ios::out);
@@ -57,7 +61,7 @@ void OutputFileGenerator::run(std::vector<Line*> & lines, CommandLineArguments& 
 
 	//	2.	Write to the output file
 
-	if (binaryFlag) {
+	if (config.generateBinaryFile) {
 		this->createBINFile(output_file);
 	}
 	else {

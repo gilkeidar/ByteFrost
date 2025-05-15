@@ -18,7 +18,7 @@ public:
 	/**
 	 * @brief Parser constructor. Initializes Parser's delimiter character set.
 	 */
-	Parser();
+	Parser(Config & config);
 
 	/**
 	 * @brief Runs the Parser on the given input .asm file as specified in the
@@ -32,11 +32,16 @@ public:
 	 * @param Reference to the Assembler's directives string -> Directive
 	 * directives hashmap
 	 */
-	void run(std::vector<Line *> & lines, CommandLineArguments & arguments, 
+	void run(std::vector<Line *> & lines, 
 		std::unordered_map<std::string, 
 		std::vector<AssemblyInstruction>> & instructions,
 		std::unordered_map<std::string, Directive> & directives);
 private:
+	/**
+	 * @brief Reference to the Assembler's Config instance.
+	 */
+	Config& config;
+
 	/**
 	 * @brief Parser's set of delimiter characters. These are used to separate
 	 * token strings in the input .asm file. Consequently, token strings

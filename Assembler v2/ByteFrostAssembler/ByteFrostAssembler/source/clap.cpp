@@ -3,12 +3,7 @@
 #include "constants.hpp"
 #include "utility.hpp"
 
-CLAP::CLAP(int argc, char** argv) {
-	this->argc = argc;
-	this->argv = argv;
-}
-
-CommandLineArguments * CLAP::run() {
+void CLAP::run() {
 	debug("=== Stage 0: CLAP.run() ===");
 	
 	//	Convert each command-line argument from a char * (string) w to a
@@ -44,26 +39,27 @@ CommandLineArguments * CLAP::run() {
 	int currentFlagArgument = -1;
 	CLFlag * current_flag = nullptr;
 	//	Create a CommandLineArguments object
-	CommandLineArguments* arguments = new CommandLineArguments();
+	//CommandLineArguments* arguments = new CommandLineArguments();
+	CommandLineArguments arguments;
 
 	for (CLToken token : tokens) {
 		//	Check whether token is the required input file name argument
 		if (!flagArguments && token.type == CLTokenType::FILE_NAME
 			&& stringEndsWith(token.token_string, ASSEMBLY_FILE_ENDING)) {
-			arguments->input_file_name = token.token_string;
+			arguments.input_file_name = token.token_string;
 		}
 		//	Check whether token is a flag
 		else if (!flagArguments && token.type == CLTokenType::FLAG) {
 			//	Check that flag is recognized by the assembler
 			std::string flag_name = getFlagName(token.token_string);
 
-			if ((arguments->flags.find(flag_name)) == arguments->flags.end()) {
+			if ((arguments.flags.find(flag_name)) == arguments.flags.end()) {
 				//	Flag is not recognized by the assembler
 				throwError("'" + flag_name + "' is not a recognized command-line flag.");
 			}
 
 			//	Flag is recognized by the assembler; set current_flag field
-			current_flag = &(arguments->flags[flag_name]);
+			current_flag = &(arguments.flags[flag_name]);
 			//	Set flag
 			current_flag->is_set = true;
 
@@ -111,11 +107,13 @@ CommandLineArguments * CLAP::run() {
 	}
 
 	//	Check that the required input file name was set
-	if (arguments->input_file_name == UNSET_FILE_NAME) {
+	if (arguments.input_file_name == UNSET_FILE_NAME) {
 		throwError("Must pass a '.asm' input file.");
 	}
 
-	return arguments;
+	//	Now that the CommandLineArguments object has been created, update the
+	//	Assembler's Config instance fields appropriately.
+	arguments.updateConfig(config);
 }
 
 CLToken stringToCLToken(std::string w) {
@@ -188,4 +186,22 @@ CommandLineArguments::CommandLineArguments() {
 	//	Add Output File Name Flag "-o"
 	CLFlag output_file_name_flag = { OUTPUT_FILE_FLAG_NAME, {CLTokenType::FILE_NAME}, {}, false };
 	this->flags.insert({ OUTPUT_FILE_FLAG_NAME, output_file_name_flag });
+}
+
+void CommandLineArguments::updateConfig(Config& config) {
+	//	Set all command-line settable properties in config.
+	config.input_file_name = this->input_file_name;
+
+	for (auto& [flagName, flag] : this->flags) {
+		if (flag.is_set) {
+			if (flagName.compare(BINARY_FLAG_NAME) == 0) {
+				//	Binary flag is set.
+				config.generateBinaryFile = true;
+			}
+			else if (flagName.compare(OUTPUT_FILE_FLAG_NAME) == 0) {
+				//	Output file name flag is set.
+				config.output_file_name = flag.values[0].token_string;
+			}
+		}
+	}
 }

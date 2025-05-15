@@ -24,9 +24,14 @@ struct Label {
 
 class LabelHandler {
 public:
-	LabelHandler();
-	void run(std::vector<Line*>& lines, CommandLineArguments& args);
+	LabelHandler(Config & config);
+	void run(std::vector<Line*>& lines);
 private:
+	/**
+	 * @brief Reference to the Assembler's Config instance.
+	 */
+	Config& config;
+
 	/**
 	 * @brief Hashmap of string (label name) -> Label, populated in the first
 	 * pass through the lines vector in LabelHandler.run();
