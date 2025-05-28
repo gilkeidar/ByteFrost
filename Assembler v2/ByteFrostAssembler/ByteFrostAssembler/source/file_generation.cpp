@@ -84,7 +84,8 @@ void OutputFileGenerator::createBINFile(std::ofstream& output_file) {
 			debug("Instruction: " + instructionLine->instruction->name);
 
 			std::vector<uint16_t> instruction_code =
-				instructionLine->instruction->generateCode(*instructionLine);
+				instructionLine->instruction->generateCode(*instructionLine, 
+					config);
 
 			for (uint16_t code : instruction_code) {
 				char lowByte = code & 0xff;

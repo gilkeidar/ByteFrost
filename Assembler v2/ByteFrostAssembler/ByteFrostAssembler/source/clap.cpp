@@ -33,7 +33,7 @@ void CLAP::run() {
 	//	the required input file name argument.
 	//	When a flag token is encountered, the CLAP will check whether the flag
 	//	is a CLAP-recognized flag by checking whether the token_string exists
-	//	as a key of the flag name to CFLAG hashmap in the CommandLineArguments
+	//	as a key of the flag name to CLFLAG hashmap in the CommandLineArguments
 	//	object.
 	bool flagArguments = false;
 	int currentFlagArgument = -1;

@@ -1,7 +1,12 @@
-﻿  clap.cpp
+﻿  assembler.cpp
+  assembly_instructions.cpp
+  file_generation.cpp
+  main.cpp
+  parser.cpp
+C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\parser.cpp(417,24): warning C4267: 'initializing': conversion from 'size_t' to 'uint16_t', possible loss of data
   Generating code
-  75 of 2673 functions ( 2.8%) were compiled, the rest were copied from previous compilation.
+  9 of 2673 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
     1 functions were new in current compilation
-    26 functions had inline decision re-evaluated but remain unchanged
+    43 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   ByteFrostAssembler.vcxproj -> C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\x64\Release\ByteFrostAssembler.exe

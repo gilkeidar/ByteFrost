@@ -77,7 +77,8 @@ int getTokenIntValue(Token t) {
 	}
 }
 
-std::vector<uint16_t> AssemblyInstruction::generateCode(InstructionLine& line) {
+std::vector<uint16_t> AssemblyInstruction::generateCode(InstructionLine& line,
+	Config & config) {
 	//	Instruction strings that are equivalent to this AssemblyInstruction
 	std::vector<uint16_t> code;
 
@@ -183,7 +184,12 @@ std::vector<uint16_t> AssemblyInstruction::generateCode(InstructionLine& line) {
 					//	The value here is the high byte of 
 					//	((this line's address + offset) >> 1), and the offset is 
 					//	stored in the argument value.
-					arg.value = logicalShiftRight(getByteFromInt(line.line_address + arg.value, 1), 1);
+					//arg.value = logicalShiftRight(getByteFromInt(line.line_address + arg.value, 1), 1);
+
+					//	Updated to shift the line address with the start
+					//	address of the program specified in the Assembler's
+					//	Config instance
+					arg.value = logicalShiftRight(getByteFromInt(line.line_address + arg.value + config.start_address, 1), 1);
 
 					//	Verify that the argument value can fit in the Argument's
 					//	specified range (based on the Argument's acceptable

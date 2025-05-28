@@ -32,7 +32,7 @@ struct AssemblyInstruction {
 	std::vector<const ISAInstruction*> instruction_sequence;
 	std::vector<std::vector<AssemblyArgument>> instruction_sequence_arguments;
 	
-	std::vector<uint16_t> generateCode(InstructionLine& line);
+	std::vector<uint16_t> generateCode(InstructionLine& line, Config & config);
 };
 
 
