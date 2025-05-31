@@ -409,7 +409,7 @@ uint16_t writeBuffer2Sector(uint16_t sectorID)
       ;
   }
 
-  File disk = SD.open("disk");
+  File disk = SD.open("disk", O_WRITE);
 
   //  Move to the correct sector. (Assuming an 11-bit sector ID!)
   if (!disk.seek(sectorID * SECTOR_SIZE)) {
@@ -451,6 +451,14 @@ uint16_t readMem2Buffer()
     for ( i = 0; i < SECTOR_SIZE; i++) 
     {
       sectorDataBuffer[i] = readFromBus();
+
+      #if DEBUG
+        Serial.print("Reading ");
+        Serial.print(sectorDataBuffer[i]);
+        Serial.println(" from bus.");
+        delay(50);
+      #endif
+
       //  Increment address counter (rising edge)
       REG_PORT_OUTSET0 = CNT_PA17;
       REG_PORT_OUTCLR0 = CNT_PA17;
@@ -554,8 +562,10 @@ uint16_t readCommandFromSR(void)
         sr_cmd  = (sr_cmd << 1) | sr_bit;
         digitalWrite(SHIFT, HIGH);
         digitalWrite(SHIFT, LOW);
-        // Serial.print("SR bit: ");
-        // Serial.println(sr_bit);
+        #if DEBUG
+          Serial.print("SR bit: ");
+          Serial.println(sr_bit);
+        #endif DEBUG
     }
     // Serial.print("SR Command: 0x");
     // Serial.println(sr_cmd, HEX);
