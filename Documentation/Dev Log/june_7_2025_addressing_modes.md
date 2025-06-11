@@ -772,14 +772,18 @@ The proposal updates (renames) `2` control signals. They are:
 Implementing this proposal requires updating `5` of the combinational logic
 units of the ByteFrost:
 1.  Decode - `ARSrc` Operand
-2.  AR Data Bus Load Enable (Replaces the Load Special Pointer unit)
-3.  ARSelect (Replaces the Address Bus Arbiter)
-4.  AddressByteSelect
-5.  PC Loading (When `PC[L]` is loaded, set `PC[H]` to load from `DHPC`).
+2.  PC Loading (When `PC[L]` is loaded, set `PC[H]` to load from `DHPC`).
+3.  AR Data Bus Load Enable (Replaces the Load Special Pointer unit)
+4.  ARSelect (Replaces the Address Bus Arbiter)
+5.  AddressByteSelect
+
 
 ### 1.  Decode - `ARSrc` Operand
 
-**Inputs:** Opcode (`INSTR[4:0]`), `INSTR[5]`, `INSTR[9:8]`
+**Inputs:** 
+1.  Opcode (`INSTR[4:0]`)
+2.  `INSTR[5]`
+3.  `INSTR[9:8]`
 
 **Outputs:** `ARSrc` (2 bits).
 
@@ -791,70 +795,85 @@ units of the ByteFrost:
 
 **Implementation Diagram:** **TODO**
 
-### 2.  AR Data Bus Load Enable
+### 2.  PC Loading
 
-**Inputs:** *loadAR* (control signal), *loadARHorL* (control signal), 
-    Opcode (`INSTR[4:0]`), `(AR) L/H` instruction operand  (`INSTR[5]`),
-    `ARDest` instruction operand (`INSTR[7:6]`)
-    PC Load Low (Active Low)
-**Outputs:** {`None (No AR reads from Data Bus)`, `DHPC Load Enable`, 
-    `PC[L] Load Enable`, `DP[H] Load Enable`, `DP[L] Load Enable`, 
-    `SP[H] Load Enable`, `SP[L] Load Enable`, `BP[H] Load Enable`,
-    `BP[L] Load Enable`}
+Remove the `PC Ld Hi` active low signal, and rename the `PC Ld Lo` active low
+signal to `PC Ld Branch` (the signal generated in the Branch (v2.0) slide 26 in
+CPU v2).
 
-**Note:** Can't write to `PC[H]` from the Data Bus directly - `PC[H]` reads from
-the `DHPC` whenever `PC[L]` loads! When PC Load Low is active, we have the
-following semantics: `PC[L] = Data Bus, PC[H] = DHPC`. This means that when
-writing to the PC, we must first write to the `DHPC` and then to `PC[L]`.
+The `PC Ld Branch` signal is now sent as an input to the **AR Data Bus Load 
+Enable** unit described in the next section.
 
-**Logic:**
-1.  Identify AR to write to.
-2.  Identify AR Byte to write to.
+The DHPC load enable signal comes from the AR Data Bus Load Enable unit, named
+`DHPC Load Enable`.
 
-1.  If PC Load Low is active (active low):
-    *   We should write to the `PC`; but to which byte? 
-        (`DHPC` or `PC[L] = data bus, PC[H] = DHPC`)
-    *   This means that the *PC Load* control signal is definitely set. The
-        instruction being executed is a Branch Absolute, Branch Relative, `JSR`, 
-        or `RTS`.
-    *   If it's Branch Absolute or Relative, then *loadAR* is `0`; we should
-        definitely write to `PC[L]` 
-        (semantics: `PC[L] = data bus`, `PC[H] = DHPC`)
-    *   If it's `JSR` or `RTS`, then *loadAR* is `1`; we should write to the
-        byte specified by the `loadARHorL` control signal.
-    1.  If *loadAR* is `0`:
-        1.  Return `PC[L] Load Enable` (`PC[L] = data bus, PC[H] = DHPC`).
-    2.  Else:
-        1.  If *loadARHorL* is `0`:
-            1.  Return `PC[L] Load Enable` (`PC[L] = data bus, PC[H] = DHPC`).
-        2.  Else:
-            1.  Return `DHPC Load Enable`.
-2.  Else if *loadAR* is active (`1`):
-    *   This means that the current instruction being executed is `LDA`, `MGA`,
-        `MAA`, `JSR`, or `RTS`.
-    *   If it's one of the following instructions: `MAA`, `JSR`, or `RTS` (i.e.,
-        an instruction that writes to both bytes of an AR), then the byte must
-        be specified by the *loadARHorL* control signal. (However, note that
-        `JSR` and `RTS` only write to the `PC`, so that they are caught by the
-        first case (if PC Load Low is active); hence, it must be `MAA`).
-    *   If not (it's `LDA` or `MGA`), the byte is specified by the `(AR) L/H`
-        instruction operand.
-    *   In any of the possible instructions (`LDA`, `MGA,` and `MAA`), the AR is
-        specified by the `ARDest` instruction operand.
-    1.  If Opcode == `MAA_OPCODE`:
-        1.  Return `ARDest[loadARHorL control signal] Load Enable`.
-    2.  Else:
-        1.  Return `ARDest[(AR) L/H instruction operand] Load Enable`.
-3.  Else:
-    1.  Return `None`.
+The `PC[L]` and `PC[H]` load enable signals come from the AR Data Bus Load
+Enable unit, named `PC[L] + PC[H] = DHPC Load Enable`.
 
 **Implementation Diagram:** **TODO**
 
-### 3.  ARSelect
+### 3.  AR Data Bus Load Enable
 
-**Inputs:** *SP Out* (control signal), *TmpARWrite* (control signal), 
-    Bus Grant signal, FetchCycle signal, Opcode (`INSTR[4:0]`), `ARSrc` 
-    instruction operand
+**Inputs:** 
+1.  `PC Ld Branch` signal
+2.  *loadAR* control signal
+3.  *loadARHorL* control signal
+4.  Opcode (`INSTR[4:0]`)
+5.  `ARDest` instruction operand
+6.  `(AR) L/H` instruction operand
+
+**Outputs:** {`None (No AR reads from Data Bus)`, `DHPC Load Enable`, 
+    `PC[L] + PC[H] = DHPC Load Enable`, `DP[H] Load Enable`, 
+    `DP[L] Load Enable`, `SP[H] Load Enable`, `SP[L] Load Enable`, 
+    `BP[H] Load Enable`, `BP[L] Load Enable`}
+
+**Note:** There are two possible semantics when writing to the `PC`: Writing to
+the `DHPC` and writing to `PC[L]` in which case `PC[L]` loads from `DHPC`.
+(i.e., `DHPC = Data Bus` OR `PC[L] = Data Bus AND PC[H] = DHPC`).
+
+**Logic:**
+1.  If `PC Ld Branch` is active (low):
+*   A Data Bus write to the `PC` is requested by a branch instruction (Branch
+    Absolute or Branch Relative (deprecated)).
+    1.  Return `PC[L] + PC[H] = DHPC Load Enable`.
+2.  Else if the *loadAR* control signal is active (high):
+*   This means that the current instruction being executed is `LDA`, `MGA`, 
+    `MAA`, `JSR`, or `RTS`.
+    1.  If the *PC Load* control signal is active (high):
+    *   A Data Bus write to the `PC` is requested, but to which byte?
+    *   The request is made either by `JSR` or `RTS`; the byte is specified by 
+        the *loadARHorL* control signal.
+        1.  If *loadARHorL* (control signal) is `0` (L):
+            1.  Return `PC[L] + PC[H] = DHPC Load Enable`.
+        2.  Else:
+            1.  Return `DHPC Load Enable`.
+    2.  Else:
+    *   The request is made by the `LDA`, `MGA`, or `MAA` instruction, meaning
+        that the particular AR to write to is specified by the `ARDest`
+        instruction operand. Now we must identify whether the high or low byte
+        is specified.
+    *   If it's made by `MAA` (i.e., by an instruction that involves writing to
+        both bytes of an AR), then the byte MUST be specified by the
+        *loadARHorL* control signal.
+    *   Otherwise, the byte is specified by the `(AR) L/H` instruction operand.
+        1.  If Opcode == `MAA_OPCODE`:
+            1.  Return `{ARDest} {loadARHorL control signal} Load Enable`.
+        2.  Else:
+            1.  Return `{ARDest} {(AR) L/H instruction operand} Load Enable`.
+3.  Else:
+    1.  Return `None`.
+
+
+### 4.  ARSelect
+
+**Inputs:** 
+1.  *SP Out* (control signal)
+2.  *TmpARWrite* (control signal)
+3.  *PC Out* (control signal)
+4.  Bus Grant signal
+5.  FetchCycle signal
+6.  Opcode (`INSTR[4:0]`), 
+7.  `ARSrc` instruction operand
 
 **Outputs:** {`None` (Address Bus floats), `PC Output Enable`, 
     `DP Output Enable`, `SP Output Enable`, `BP Output Enable`, 
@@ -863,7 +882,7 @@ writing to the PC, we must first write to the `DHPC` and then to `PC[L]`.
 **Logic:**
 1.  If the Bus Grant signal is active:
     1.  Return `None`.
-2.  Else if the FetchCycle signal is active:
+2.  Else if the FetchCycle signal is active OR *PC Out* is active:
     1.  Return `PC Output Enable`.
 3.  Else if the *SP Out* control signal is active:
     1.  Return `SP Output Enable`.
@@ -879,15 +898,17 @@ writing to the PC, we must first write to the `DHPC` and then to `PC[L]`.
 
 **Implementation Diagram:** **TODO**
 
-### 4.  AddressByteSelect
+### 5.  AddressByteSelect
 
-**Inputs:** *AddressHorL* (control signal), `(AR) L/H` instruction operand,
-    Opcode (`INSTR[4:0]`)
+**Inputs:** 
+1.  *AddressHorL* (control signal)
+2.  `(AR) L/H` instruction operand
+3.  Opcode (`INSTR[4:0]`)
 
 **Outputs:** {`Address Bus High Register`, `Address Bus Low Register`}
 
 **Logic:**
-1.  If Opcode == `MAA_OPCODE`:
+1.  If Opcode == `MAA_OPCODE` OR Opcode == `JSR_OPCODE`:
     1.  If *AddressHorL* is active (High):
         1.  Return `Address Bus High Register`.
     2.  Else:
@@ -897,16 +918,340 @@ writing to the PC, we must first write to the `DHPC` and then to `PC[L]`.
 
 **Implementation Diagram:** **TODO**
 
-### 5.  PC Loading        
-
-Remove the `PC Ld Hi` active low signal, and set `PC[H]` to load whenever 
-`PC[L]` loads.
-
-I.e., send the active low `PC Load Low` signal to both `PC[L]` and `PC[H]`, so
-that in a cycle where `PC[L]` loads from the data bus, `PC[H]` loads from 
-`DHPC`.
-
 ##  Updated Instruction Microcode
 
 The microcode of `10` instructions will need to be updated to implement this
 proposal. The instructions and their new microcode follows:
+
+**Note:** In the last microinstruction of every instruction, the *PC Advance*
+control signal is set so that the Fetch State Machine will fetch the next
+instruction in the next cycle. As a result of *PC Advance* being active, the
+*FetchCycle* signal is high, meaning that the AR Select unit will set the `PC`
+to write to the Address Bus. As a result, in the last microinstruction of any
+instruction, no AR beside the `PC` may write to the Address Bus (this may cause
+some instructions to require an additional cycle just to fetch the next
+instruction).
+
+Control Signal List:
+
+| Bit  | Control Signal |
+| ---  | ---            |
+| `23` | Not Used.      |
+| `22` | *AddressHorL*  |
+| `21` | *AddressBusToDataBus* |
+| `20` | *TmpARWrite* |
+| `19` | *TmpARRead* |
+| `18` | *loadARHorL* |
+| `17` | *loadAR* |
+| `16` | *Stack Pointer Increment / Decrement* |
+| `15` | *Stack Pointer Count* |
+| `14` | *SP Out* |
+| `13` | *Use Rd as Source* |
+| `12` | *Lower Address Register Load* |
+| `11` | *Mem Write* |
+| `10` | *Mem Read* |
+| `9`  | *PC Out* |
+| `8`  | *PC Load* |
+| `7`  | *PC Advance* |
+| `6`  | *Program Register H Write to Bus* |
+| `5`  | *Register File Input Enable* |
+| `4`  | *Register File Output Enable* |
+| `3`  | *Register File Output Select* |
+| `2`  | *ALU output enable* |
+| `1`  | *ALU load register A* |
+| `0`  | *ALU load register B* |
+
+### `MAG` Instruction Microcode
+
+**`MAG` Semantics:** `Rd = ARSrc[L/H]`
+
+| Cycle | `23:20` | `19:16` | `15:12` | `11:8` | `7:4` | `3:0` | Result       |
+| ---   | ---     | ---     | ---     | ---    | ---   | ---   | ---          |
+| `1`   | `0`     | `0`     | `0`     | `0`    | `0`   | `0`   | `0x00_00_00` |
+| `2`   | `2`     | `0`     | `0`     | `0`    | `a`   | `0`   | `0x20_00_a0` |
+
+1.  *Cycle 1*.
+    1.  Write `ARSrc` to the Address Bus.
+        1.  **ARSelect** = `ARSrc`.
+        *   Guaranteed behavior since Bus Grant is `0`, FetchCycle is `0`,
+            *SP Out* is `0`, *TmpARWrite* is `0`, and opcode is of the `MAG`
+            instruction.
+2.  *Cycle 2*.
+    1.  Write Address Bus L/H Register to the Data Bus.
+        1.  **AddressByteSelect** = `(AR) L/H` instruction operand.
+        *   Guaranteed behavior since the instruction isn't `MAA`.
+        2.  *AddressBusToDataBus* = `1`.
+    2.  Set `Rd` to read from the Data Bus.
+        1.  *Register File Input Enable* = `1`.
+    3.  Advance `PC`.
+        1.  *PC Advance* = `1`.
+
+### `LDW` Instruction Microcode
+
+**`LDW` Semantics:** `Rd = *(ARSrc + Imm)`
+
+1.  *Cycle 1*.
+    1.  Write `Imm` to the Data Bus.
+        1.  *Program Register H Write to Bus* = `1`.
+    2.  Write `ARSrc` to the Address Bus.
+        1.  **ARSelect** = `ARSrc`.
+        *   Guaranteed behavior since opcode is of the `LDW` instruction.
+    3.  Set `TmpAR` to read (from the 16-bit adder).
+        1.  *TmpARRead* = `1`.
+2.  *Cycle 2*.
+    1.  Write `TmpAR` to the Address Bus.
+        1.  **ARSelect** = `TmpAR`.
+            1.  *TmpARWrite* = `1`.
+    2.  Write Memory data word to the Data Bus.
+        1.  *Mem Read* = `1`.
+    3.  Set `Rd` to read from the Data Bus.
+        1.  *Register File Input Enable* = `1`.
+3.  *Cycle 3*.
+    1.  Advance `PC`.
+        1.  *PC Advance* = `1`.
+
+### `SDW` Instruction Microcode
+
+**`SDW` Semantics:** `*(ARSrc + Imm) = Rs (Rd as source)`
+
+1.  *Cycle 1*.
+    1.  Write `Imm` to the Data Bus.
+        1.  *Program Register H Write to Bus* = `1`.
+    2.  Write `ARSrc` to the Address Bus.
+        1.  **ARSelect** = `ARSrc`.
+        *   Guaranteed behavior since opcode is of the `SDW` instruction.
+    3.  Set `TmpAR` to read.
+        1.  *TmpARRead* = `1`.
+2.  *Cycle 2*.
+    1.  Write `TmpAR` to the Address Bus.
+        1.  **ARSelect** = `TmpAR`.
+            1.  *TmpARWrite* = `1`.
+    2.  Write `Rs (Rd)` to the Data Bus.
+        1.  *Register File Output Enable* = `1`.
+        2.  *Use  Rd as a Source* = `1`.
+    3.  Set Memory to read from the Data Bus.
+        1.  *Mem Write* = `1`.
+3.  *Cycle 3*.
+    1.  Advance `PC`.
+        1.  *PC Advance* = `1`.
+
+### `LDA` Instruction Microcode
+
+**`LDA` Semantics:** `ARDest[L/H] = Imm`.
+
+1.  *Cycle 1*.
+    1.  Write `Imm` to the Data Bus.
+        1.  *Program Register H Write to Bus* = `1`.
+    2.  Set `ARDest[L/H]` to read from the Data Bus.
+        1.  **AR Data Bus Load Enable** = `ARDest[(AR) L/H operand]`.
+            1.  *loadAR* = `1`.
+    3.  Advance `PC`.
+        1.  *PC Advance* = `1`.
+
+### `MGA` Instruction Microcode
+
+**`MGA` Semantics:** `ARDest[L/H] = Rs1`.
+
+1.  *Cycle 1*.
+    1.  Write `Rs1` to the Data Bus.
+        1.  *Register File Output Enable* = `1`.
+        2.  *Register File Output Select* = `0` (Rs1).
+    2.  Set `ARDest[L/H]` to read from the Data Bus.
+        1.  **AR Data Bus Load Enable** = `ARDest[(AR) L/H operand]`.
+            1.  *loadAR* = `1`.
+    3.  Advance `PC`.
+        1.  *PC Advance* = `1`.
+
+### `MAA` Instruction Microcode
+
+**`MAA` Semantics:** `ARDest = ARSrc + Imm`.
+
+1.  *Cycle 1*.
+    1.  Write `Imm` to the Data Bus.
+        1.  *Program Register H Write to Bus* = `1`.
+    2.  Write `ARSrc` to the Address Bus.
+        1.  **ARSelect** = `ARSrc`.
+        *   Guaranteed behavior since opcode is of the `MAA` instruction.
+    3.  Set `TmpAR` to read.
+        1.  *TmpARRead* = `1`.
+2.  *Cycle 2*.
+    1.  Write `TmpAR` to the Address Bus.
+        1.  **ARSelect** = `TmpAR`.
+            1.  *TmpARWrite* = `1`.
+3.  *Cycle 3*.
+    1.  Write `TmpAR` to the Address Bus.
+        1.  **ARSelect** = `TmpAR`.
+            1.  *TmpARWrite* = `1`.
+    2.  Write Address Bus Low register to the Data Bus.
+        1.  **AddressByteSelect** = `L` (`0`).
+            1.  *AddressHorL* = `L` (`0`).
+            *   Guaranteed behavior since opcode is of the `MAA` instruction.
+        2.  *AddressBusToDataBus* = `1`.
+    3.  Set `ARDest[L]` to read from the Data Bus.
+        1.  **AR Data Bus Load Enable** = `ARDest[L]`.
+            1.  *loadAR* = `1`.
+            2.  *loadARHorL* = `L` (`0`).
+            *   Guaranteed behavior since opcode is of the `MAA` instruction.
+4.  *Cycle 4*.
+    1.  Write Address Bus High register to the Data Bus.
+        1.  **AddressByteSelect** = `H` (`1`).
+            1.  *AddressHorL* = `H` (`1`).
+        2.  *AddressBusToDataBus* = `1`.
+    2.  Set `ARDest[H]` to read from the Data Bus.
+        1.  **AR Data Bus Load Enable** = `ARDest[H]`.
+            1.  *loadAR* = `1`.
+            2.  *loadARHorL* = `H` (`1`).
+            *   Guaranteed behavior since opcode is of the `MAA` instruction.
+    3.  Advance `PC`.
+        1.  *PC Advance* = `1`.
+
+### `PUSH` Instruction Microcode
+
+**`PUSH` Semantics:** `SP--; *SP = Rs1`.
+
+1.  *Cycle 1*.  `SP--;`
+    1.  Decrement `SP`.
+        1.  *Stack Pointer Count* = `1`.
+        2.  *Stack Pointer Increment / Decrement* = `decrement` (`0`).
+2.  *Cycle 2*.  `*SP = Rs1;`
+    1.  Write `Rs1` to the Data Bus.
+        1.  *Register File Output Enable* = `1`.
+        2.  *Register File Output Select* = `Rs1` (`0`).
+    2.  Write `SP` to the Address Bus.
+        1.  **ARSelect** = `SP`.
+            1.  *SP Out* = `1`.
+    3.  Set Memory to read from the Data Bus.
+        1.  *Mem Write* = `1`.
+3.  *Cycle 3*.
+    1.  Advance `PC`.
+        1.  *PC Advance* = `1`.
+
+### `POP` Instruction Microcode
+
+**`POP` Semantics:** `Rd = *SP; SP++`.
+
+1.  *Cycle 1*.  `Rd = *SP; SP++;`
+    1.  Write `SP` to the Address Bus.
+        1.  **ARSelect** = `SP`.
+            1.  *SP Out* = `1`.
+    2.  Set Memory to write to the Data Bus.
+        1.  *Mem Read* = `1`.
+    3.  Set `Rd` to read from the Data Bus.
+        1.  *Register File Input Enable* = `1`.
+    4.  Increment `SP`.
+        1.  *Stack Pointer Count* = `1`.
+        2.  *Stack Pointer Increment / Decrement* = `increment` (`1`).
+2.  *Cycle 2*.
+    1.  Advance `PC`.
+        1.  *PC Advance* = `1`.
+
+### `JSR` Instruction Microcode
+
+**`JSR` Semantics:** `SP--; *SP = PC[H]; SP--; *SP = PC[L]; PC = DP`.
+
+1.  *Cycle 1*.  `SP--; Address Bus Register High = PC[H]`.
+    1.  Decrement `SP`.
+        1.  *Stack Pointer Count* = `1`.
+        2.  *Stack Pointer Increment / Decrement* = `decrement` (`0`).
+    2.  Write `PC` to the Address Bus.
+        1.  **ARSelect** = `PC`.
+            1.  *PC Out* = `1`.
+2.  *Cycle 2*.  `*SP = PC[H]; SP--;`
+    1.  Write `SP` to the Address Bus.
+        1.  **ARSelect** = `SP`.
+            1.  *SP Out* = `1`.
+    2.  Write Address Bus Register High to the Data Bus (`PC[H]`).
+        1.  **AddressByteSelect** = `H` (`1`).
+            1.  *AddressHorL* = `H` (`1`).
+        2.  *AddressBusToDataBus* = `1`.
+    3.  Set Memory to read from the Data Bus.
+        1.  *Mem Write* = `1`.
+    4.  Decrement `SP`.
+        1.  *Stack Pointer Count* = `1`.
+        2.  *Stack Pointer Increment / Decrement* = `decrement` (`0`).
+3.  *Cycle 3*.  `Address Bus Register Low = PC[L]`
+    1.  Write `PC` to the Address Bus.
+        1.  **ARSelect** = `PC`.
+            1.  *PC Out* = `1`.
+4.  *Cycle 4*.  `*SP = PC[L]`.
+    1.  Write `SP` to the Address Bus.
+        1.  **ARSelect** = `SP`.
+            1.  *SP Out* = `1`.
+    2.  Write Address Bus Register Low to the Data Bus (`PC[L]`).
+        1.  **AddressByteSelect** = `L` (`0`).
+            1.  *AddressHorL* = `L` (`0`).
+        2.  *AddressBusToDataBus* = `1`.
+    3.  Set Memory to read from the Data Bus.
+        1.  *Mem Write* = `1`.
+5.  *Cycle 5*.  `Address Bus Register High = DP[H]`.
+    1.  Write `DP` to the Address Bus.
+        1.  **ARSelect** = `DP`.
+        *   Default behavior of **ARSelect**.
+6.  *Cycle 6*.  `DHPC = DP[H]; Address Bus Register Low = DP[L]`.
+    1.  Write `DP` to the Address Bus.
+        1.  **ARSelect** = `DP`.
+        *   Default behavior of **ARSelect**.
+    2.  Write Address Bus Register High to the Data Bus (`DP[H]`).
+        1.  **AddressByteSelect** = `H` (`1`).
+            1.  *AddressHorL* = `H` (`1`).
+        2.  *AddressBusToDataBus* = `1`.
+    3.  Set `DHPC` to load from the Data Bus.
+        1.  **AR Data Bus Load Enable** = `DHPC`.
+            1.  *loadAR* = `1`.
+            2.  *PC Load* = `1`.
+            3.  *loadARHorL* = `H` (`1`).
+7.  *Cycle 7*.  `PC[L] = DP[L] (and PC[H] = DHPC)`.
+    1.  Write Address Bus Register Low to the Data Bus (`DP[L]`).
+        1.  **AddressByteSelect** = `L` (`0`).
+            1.  *AddressHorL* = `L` (`0`).
+        2.  *AddressBusToDataBus* = `1`.
+    2.  Set `PC[L]` to load from the Data Bus.
+        1.  **AR Data Bus Load Enable** = `PC[L] + PC[H] = DHPC`.
+            1.  *loadAR* = `1`.
+            2.  *PC Load* = `1`.
+            3.  *loadARHorL* = `L` (`0`).
+    3.  Advance `PC`.
+        1.  *PC Advance* = `1`.
+
+### `RTS` Instruction Microcode
+
+**`RTS` Semantics:** `SP++; DHPC = *SP; SP--; PC[L] = *SP, PC[H] = DHPC; SP++; SP++;`
+
+1.  *Cycle 1*.  `SP++;`
+    1.  Increment `SP`.
+        1.  *Stack Pointer Count* = `1`.
+        2.  *Stack Pointer Increment / Decrement* = `increment` (`1`).
+2.  *Cycle 2*.  `DHPC = *SP; SP--;`
+    1.  Write `SP` to the Address Bus.
+        1.  **ARSelect** = `SP`.
+            1.  *SP Out* = `1`.
+    2.  Set Memory to write to the Data Bus.
+        1.  *Mem Read* = `1`.
+    3.  Set `DHPC` to read from the Data Bus.
+        1.  **AR Data Bus Load Enable** = `DHPC`.
+            1.  *loadAR* = `1`.
+            2.  *PC Load* = `1`.
+            3.  *loadARHorL* = `H` (`1`).
+    4.  Decrement `SP`.
+        1.  *Stack Pointer Count* = `1`.
+        2.  *Stack Pointer Increment / Decrement* = `decrement` (`0`).
+3.  *Cycle 3*.  `PC[L] = *SP; SP++`.
+    1.  Write `SP` to the Address Bus.
+        1.  **ARSelect** = `SP`.
+            1.  *SP Out* = `1`.
+    2.  Set Memory to write to the Data Bus.
+        1.  *Mem Read* = `1`.
+    3.  Set `PC[L]` to read from the Data Bus (and `PC[H] = DHPC`).
+        1.  **AR Data Bus Load Enable** = `PC[L] + PC[H] = DHPC`.
+            1.  *loadAR* = `1`.
+            2.  *PC Load* = `1`.
+            3.  *loadARHorL* = `L` (`0`).
+    4.  Increment `SP`.
+        1.  *Stack Pointer Count* = `1`.
+        2.  *Stack Pointer Increment / Decrement* = `increment` (`1`).
+4.  *Cycle 4*.  `SP++;`
+    1.  Increment `SP`.
+        1.  *Stack Pointer Count* = `1`.
+        2.  *Stack Pointer Increment / Decrement* = `increment` (`1`).
+    2.  Advance `PC`.
+        1.  *PC Advance* = `1`.
