@@ -1,6 +1,6 @@
 #   ByteFrost Development Log - Addressing Modes Proposal (v2)
 
-June 7 - 9, 2025
+June 7 - 14, 2025
 
 ##  Overview
 
@@ -22,7 +22,7 @@ their names and semantics are shown below.
 | Instruction | Semantics | Example Usage | New or Modified? |
 | ---         | ---       | ---           | ---              |
 | `JSR` | `Push PC to the stack (SP--; *SP = PC[H]; SP--; *SP = PC[L]), jump to DP (PC = DP)` | `JSR` | Modified |
-| `RTS` | `Pop return address from the stack (PC[L] = *SP; SP++; PC[H] = *SP; SP++;)` | `RTS` | Modified |
+| `RTS` | `Pop return address from the stack (SP++; DHPC = *SP; SP--; PC[L] = *SP, PC[H] = DHPC; SP++; SP++;)` | `RTS` | Modified |
 | `MAG` | `Rd = ARSrc[L/H]` | `MAG R1, %SP[H]` | New |
 | `LDW` | `Rd = *(ARSrc + Imm)` | `LDW R2, 16(%BP)` | New |
 | `SDW` | `*(ARSrc + Imm) = Rs` | `SDW R3, -4(%DP)` | New |
@@ -156,12 +156,17 @@ This has the following issue:
 
 In the proposal, `RTS` has the following semantics:
 1.  Pop the return address from the stack and load it to the `PC`. (same)
-    1.  `PC[L] = *SP`.              (`SP` points at `ret[L]` and `PC[L]` is set 
-                                    to `ret[L]`)
-    2.  `SP++`.                     (`SP` now points at `ret[H]`)
-    3.  `DHPC = *SP, PC[H] = DHPC`. (`DHPC` is now set to `ret[H]`)
-    4.  `SP++`.                     (`SP` now points at the byte above `ret[H]`
-                                    (new last byte of the stack))
+    1.  `SP++, DHPC = *SP`.                 (`SP` points at `ret[H]` and `DHPC`
+                                            is set to `ret[H]`)
+    2.  `SP--, PC[L] = *SP, PC[H] = DHPC`.  (`SP` points at `ret[L]` and `PC[L]`
+                                            is set to `ret[L]` and `PC[H]` is
+                                            set to `DHPC`, which has `ret[H]`)
+    3.  `SP++, SP++`.                       (`SP` now points at the byte above
+                                            `ret[H]` (new last byte of the 
+                                            stack))
+**Note:** `DHPC` is loaded first since when writing to `PC[L]`, `PC[H]` reads
+    from `DHPC`; hence, `DHPC` must have the correct value (`ret[H]`) BEFORE
+    `PC[L]` reads `ret[L]`.
 
 This implementation resolves issue `1`.
 1.  **Issue 1:** `RTS` is implemented for an empty-ascending stack instead of a 
@@ -606,11 +611,19 @@ are false.
 | Instruction | Semantics | Example Usage | Number of Opcodes | Opcode Assignment |
 | ---         | ---       | ---           | ---               | ---               |
 | `MAG` | `Rd = ARSrc[L/H]` | `MAG R1, %SP[H]` | `1` | `0x1a` |
-| `LDW` | `Rd = *(ARSrc+ Imm)` | `LDW R2, 16(%BP)` | `2` | `0x14` and `0x15` |
-| `SDW` | `*(ARSrc + Imm) = Rs` | `SDW R3, -4(%DP)` | `2` | `0x16` and `0x17` |
+| `LDWL` and `LDWH` | `Rd = *(ARSrc+ Imm)` | `LDW R2, 16(%BP)` | `2` | `0x14` and `0x15` |
+| `SDWL` and `SWDH` | `*(ARSrc + Imm) = Rs` | `SDW R3, -4(%DP)` | `2` | `0x16` and `0x17` |
 | `LDA` | `ARDest[L/H] = Imm` | `LDA %DP[L], #0x54` | `1` | `0x1b` | 
 | `MGA` | `ARDest[L/H] = Rs1` | `MGA %BP[L], R2` | `1` | `0x1c` |
-| `MAA` | `ARDest = ARSrc + Imm` | `MAA %SP, %SP, #-1` | `2` | `0x18` and `0x19` |
+| `MAAL` and `MAAH` | `ARDest = ARSrc + Imm` | `MAA %SP, %SP, #-1` | `2` | `0x18` and `0x19` |
+
+**Note:** Instructions that require two opcodes (`LDW`, `SDW`, and `MAA`) will
+have each opcode named differently with a `L` or `H` suffix to distinguish the
+opcodes within the ISA (i.e., these will be implemented as two separate ISA
+instructions) but will be implemented as a single ByteFrost Assembly instruction
+(i.e., there will only be one `LDW` ByteFrost Assembly instruction that will be
+assembled into either `LDWL` or `LDWH` by the ByteFrost Assembler depending on
+the AR specified in the `ARSrc` operand).
 
 The new instructions have the following instruction strings:
 
@@ -781,7 +794,7 @@ units of the ByteFrost:
 ### 1.  Decode - `ARSrc` Operand
 
 **Inputs:** 
-1.  Opcode (`INSTR[4:0]`)
+1.  `Opcode_MAG` (active low signal from opcode decoder)
 2.  `INSTR[5]`
 3.  `INSTR[9:8]`
 
@@ -793,9 +806,18 @@ units of the ByteFrost:
 2.  Else:
     1.  `ARSrc = {INSTR[5], INSTR[0]}`.
 
-**Implementation Diagram:** **TODO**
+**Truth Table:**
 
-### 2.  PC Loading
+| `Opcode_MAG` (active low) | Output (2 bits) |
+| ---                       | ---             |
+| `0` (active)              | `INSTR[9:8]`    |
+| `1` (inactive)            | `{INSTR[5], INSTR[0]}` |
+
+**Implementation Diagram:**
+
+![`ARSrc` Decode Schematic](./AddressingModesSchematics/ARSrc%20Schematic.png)
+
+### 2.  PC Loading / Out Revision
 
 Remove the `PC Ld Hi` active low signal, and rename the `PC Ld Lo` active low
 signal to `PC Ld Branch` (the signal generated in the Branch (v2.0) slide 26 in
@@ -809,6 +831,11 @@ The DHPC load enable signal comes from the AR Data Bus Load Enable unit, named
 
 The `PC[L]` and `PC[H]` load enable signals come from the AR Data Bus Load
 Enable unit, named `PC[L] + PC[H] = DHPC Load Enable`.
+
+The `PC Out` control signal is now an input of the **ARSelect** unit described
+in a further section. The `74HC245` "Read PC Low" tristate IC can be removed, as
+the `PC` may only write to the Address Bus (writing the `PC` to the Data Bus
+involves first writing the `PC` to the Address Bus).
 
 **Implementation Diagram:** **TODO**
 
@@ -863,6 +890,124 @@ the `DHPC` and writing to `PC[L]` in which case `PC[L]` loads from `DHPC`.
 3.  Else:
     1.  Return `None`.
 
+**Truth Table:**
+
+| `PC Load Branch` (active low) | *loadAR* | *PC Load* | *loadARHorL* | `Opcode_MAA` (active low) | AR byte that loads from the Data Bus |
+| ---                           | ---      | ---       | ---          | ---                       | ---                                  |
+| `0`                           | `X`      | `X`       | `X`          | `X`                       | `PC[L] + PC[H] = DHPC Load Enable`   |
+| `1`                           | `0`      | `X`       | `X`          | `X`                       | `None`   |
+| `1`                           | `1`      | `1`       | `0`          | `X`                       | `PC[L] + PC[H] = DHPC Load Enable`   |        
+| `1`                           | `1`      | `1`       | `1`          | `X`                       | `DHPC Load Enable`   |        
+| `1`                           | `1`      | `0`       | `0`          | `0`                       | `ARDest[L] Load Enable`   |        
+| `1`                           | `1`      | `0`       | `1`          | `0`                       | `ARDest[H] Load Enable`   |        
+| `1`                           | `1`      | `0`       | `X`          | `1`                       | `ARDest[(AR) L/H instruction operand] Load Enable`   |        
+
+####    Implementation Using Look Up Table EEPROM
+
+For **AR Data Bus Load Enable**, there are `8` 1-bit inputs:
+1.  `PC Load Branch` (active low)
+2.  *loadAR*
+3.  *PC Load*
+4.  *loadARHorL*
+5.  `Opcode_MAA` (active low)
+6.  `ARDest[1]`
+7.  `ARDest[0]`
+8.  `(AR) L/H instruction operand`
+
+There are either `8` our `4` outputs, depending on if a `3:8` decoder is used:
+1.  `PC[L] + PC[H] = DHPC Load Enable` (active low)
+2.  `DHPC Load Enable` (active low)
+3.  `DP[L] Load Enable` (active low)
+4.  `DP[H] Load Enable` (active low)
+5.  `SP[L] Load Enable` (active low)
+6.  `SP[H] Load Enable` (active low)
+7.  `BP[L] Load Enable` (active low)
+8.  `BP[H] Load Enable` (active low)
+
+OR
+
+1.  `Decoder Address 2`
+2.  `Decoder Address 1`
+3.  `Decoder Address 0`
+4.  `Decoder Enable` (for `None` output)
+
+As there are `8` 1-bit inputs, there are `2^8 = 256` possible states, each
+requiring either `8` or `4` bits.
+
+Hence, this EEPROM would need to have at least `256` addresses (8 address
+inputs) each of which maps to a `8` bits or `4` bits.
+
+With a `4` bit output, the EEPROM would need to be 
+`256 * 4 = 1 Kbit (128 bytes)` in size.
+
+With an `8` bit output, the EEPROM would need to be 
+`256 * 8 = 2 Kbit (256 bytes)` in size.
+
+####    Implementation Using Decoder
+
+**Truth Table:**
+
+1.  Decoder Enable (active low)
+
+| `PC Load Branch` (active low) | *loadAR* | Decoder Enable (active low) |
+| ---                           | ---      | ---                         |
+| `0` (active)                  | `X`      | `0` (active)                |
+| `1` (inactive)                | `1`      | `0` (active)                |
+| `1` (inactive)                | `0`      | `1` (inactive)              |
+
+This truth table can be represented as the following boolean equation:
+
+```
+Decoder Enable (active low) = (PC Load Branch) AND (!loadAR).
+```
+
+2.  Target AR (`PC` (`PC[L] + PC[H] = DHPC` or `DHPC`), `DP`, `SP`, or `BP`)
+
+| `PC Load Branch` (active low) | *loadAR* | *PC Load* | Target AR |
+| ---                           | ---      | ---       | ---       |
+| `0` (active)                  | `X`      | `X`       | `PC`      |
+| `1` (inactive)                | `1`      | `0`       | `ARDest`  |
+| `1` (inactive)                | `1`      | `1`       | `PC`      |
+| `1` (inactive)                | `0`      | `X`       | `None` (`X` since decoder enable disabled) |
+
+This can be represented with the outputs being the 2 msbs of the 3-8 decoder
+address input:
+
+| `PC Load Branch` (active low) | *loadAR* | *PC Load* | Address Bit `2` | Address Bit `1` |
+| ---                           | ---      | ---       | ---             | ---             |
+| `0` (active)                  | `X`      | `X`       | `0`             | `0`             |
+| `1` (inactive)                | `1`      | `0`       | `ARDest[1]`     | `ARDest[0]`     |
+| `1` (inactive)                | `1`      | `1`       | `0`             | `0`             |
+| `1` (inactive)                | `0`      | `X`       | `X`             | `X`             |
+
+This truth table can be represented as the following boolean equations:
+
+```
+Address Bit 2 = (PC Load Branch) AND !((loadAR)(PC Load)) AND ARDest[1]
+Address Bit 1 = (PC Load Branch) AND !((loadAR)(PC Load)) AND ARDest[0]
+```
+
+3.  Target AR Byte (high / low)
+
+| `PC Load Branch` (active low) | *loadAR* | *PC Load* | `Opcode_MAA` (active low) | Target AR Byte |
+| ---                           | ---      | ---       | ---                       | ---            |
+| `0` (active)                  | `X`      | `X`       | `X`                       | `0` (`L`)      |
+| `1` (inactive)                | `1`      | `1`       | `X`                       | *loadARHorL*   |
+| `1` (inactive)                | `1`      | `0`       | `0`                       | *loadARHorL*   |
+| `1` (inactive)                | `1`      | `0`       | `1`                       | `(AR) L/H operand` |
+| `1` (inactive)                | `0`      | `X`       | `X`                       | `X` since decoder enable disabled |
+
+This truth table can be represented as the following boolean equation:
+
+```
+Address Bit 0 = (PC Load Branch)(loadAR)(
+    (loadARHorL)((PC Load) + !(MAA Opcode)) + !(PC Load)(MAA Opcode)(AR L/H)
+)
+```
+
+**Implementation Diagram:**
+
+![AR Data Bus Load Enable Schematic](./AddressingModesSchematics/AR%20Data%20Bus%20Load%20Enable%20Schematic.png)
 
 ### 4.  ARSelect
 
@@ -896,7 +1041,100 @@ the `DHPC` and writing to `PC[L]` in which case `PC[L]` loads from `DHPC`.
     *   Default behavior: write `DP` to the bus.
     1.  Return `DP Output Enable`.
 
-**Implementation Diagram:** **TODO**
+**Truth Table:**
+
+| `Bus Grant` | `FetchCycle` | *PC Out* | *SP Out* | *TmpARWrite* | `Opcode_MAG_LDW_SDW_MAA` (active low) | **ARSelect** |
+| ---         | ---          | ---      | ---      | ---          | ---                                   | ---          |
+| `1`         | `X`          | `X`      | `X`      | `X`          | `X`                                   | `None`       |
+| `0`         | `1`          | `X`      | `X`      | `X`          | `X`                                   | `PC Output Enable`       |
+| `0`         | `0`          | `1`      | `X`      | `X`          | `X`                                   | `PC Output Enable`       |
+| `0`         | `0`          | `0`      | `1`      | `X`          | `X`                                   | `SP Output Enable`       |
+| `0`         | `0`          | `0`      | `0`      | `1`          | `X`                                   | `TmpAR Output Enable`       |
+| `0`         | `0`          | `0`      | `0`      | `0`          | `0`                                   | `ARSrc Output Enable`       |
+| `0`         | `0`          | `0`      | `0`      | `0`          | `1`                                   | `DP Output Enable`       |
+
+####    Implementation Approach Using Look-up Table (EEPROM)
+
+Implementing the combinational logic of this table directly (using a decoder
+or even without) requires a high number of logic gates, which in turn requires
+a higher number of ICs, which is costly area-wise. A different approach could be
+to use an EEPROM as a LUT; the input signals would be used as part of the EEPROM
+address and the outputs stored as part of the 8-bit data words.
+
+This would take overall less area and be easier to fix (simply overwrite the
+EEPROM contents).
+
+For **ARSelect**, there are `8` 1-bit inputs:
+1.  `Bus Grant`
+2.  `FetchCycle`
+3.  *PC Out*
+4.  *SP Out*
+5.  *TmpARWrite*
+6.  `Opcode_MAG_LDW_SDW_MAA` (active low)
+7.  `ARSrc[1]`
+8.  `ARSrc[0]`
+
+There are also either `5` or `3` outputs, depending if a 3:8 decoder is used:
+1.  `PC Output Enable` (active low)
+2.  `DP Output Enable` (active low)
+3.  `SP Output Enable` (active low)
+4.  `BP Output Enable` (active low)
+5.  `TmpAR Output Enable` (active low)
+
+OR
+1.  `Decoder Address 2`
+2.  `Decoder Address 1`
+3.  `Decoder Address 0`
+(where outputs `0` through `4` of the decoder are used as output enables and
+`5`, `6`, and `7` are not connected to anything and thus can be used for the
+`None` output of **ARSelect**)
+
+In either case, since there are `8` 1-bit inputs, there are `2^8 = 256` possible
+input states, which can be stored in a 256-byte EEPROM.
+
+With a `3` bit output, the EEPROM would need to be 
+`256 * 3 = 768 bits (96 bytes)` in size.
+
+With a `5` bit output, the EEPROM would need to be 
+`256 * 5 = 1280 bits (160 bytes)` in size.
+
+####    Implementation Approach Using Decoder
+
+1.  Decoder Enable (Active Low)
+
+`Decoder Enable (active low) = Bus Grant`
+
+2.  Address Bits (`2:0`)
+
+| `FetchCycle` | *PC Out* | *SP Out* | *TmpARWrite* | `Opcode_MAG_LDW_SDW_MAA` (active low) | Address Bit `2` | Address Bit `1` | Address Bit `0` |
+| ---          | ---      | ---      | ---          | ---                                   | ---             | ---             | ---             |
+| `1`          | `X`      | `X`      | `X`          | `X`                                   | `0`             | `0`             | `0`             |
+| `0`          | `1`      | `X`      | `X`          | `X`                                   | `0`             | `0`             | `0`             |
+| `0`          | `0`      | `1`      | `X`          | `X`                                   | `0`             | `1`             | `0`             |
+| `0`          | `0`      | `0`      | `1`          | `X`                                   | `1`             | `0`             | `0`             |
+| `0`          | `0`      | `0`      | `0`          | `0`                                   | `0`             | `ARSrc[1]`      | `ARSrc[0]`      |
+| `0`          | `0`      | `0`      | `0`          | `1`                                   | `0`             | `0`             | `1`             |
+
+This truth table can be represented as the following boolean equations:
+
+```
+Address Bit 2 = !(FetchCycle)!(PC Out)!(SP Out)(TmpARWrite)
+    = !(FetchCycle + PC Out + SP Out)(TmpARWrite)
+
+Address Bit 1 = !(FetchCycle)!(PC Out)(SP Out + !(TmpARWrite)!(Opcode_MAG_LDW_SDW_MAA)ARSrc[1])
+    = !(FetchCycle + PC Out)(SP Out + !(TmpARWrite + Opcode_MAG_LDW_SDW_MAA)ARSrc[1])
+
+Address Bit 0 = !(FetchCycle)!(PC Out)!(SP Out)!(TmpARWrite)(Opcode_MAG_LDW_SDW_MAA + ARSrc[0])
+    = !(FetchCycle + PC Out + SP Out + TmpARWrite)(Opcode_MAG_LDW_SDW_MAA + ARSrc[0])
+```
+
+**Implementation Diagram:**
+
+![ARSelect Address Bits Schematic](./AddressingModesSchematics/ARSelect%20Address%20Bits%20Schematic.png)
+
+**Note:** that this can be improved further (removing some NOT gates):
+
+![ARSelect Address Bits Schematic Improved](./AddressingModesSchematics/ARSelect%20Schematic%20v2.png)
 
 ### 5.  AddressByteSelect
 
@@ -916,7 +1154,16 @@ the `DHPC` and writing to `PC[L]` in which case `PC[L]` loads from `DHPC`.
 2.  Else:
     1.  Return `Address Bus {(AR) L/H instruction operand} Register`.
 
-**Implementation Diagram:** **TODO**
+**Truth Table:**
+
+| `Opcode_MAA_JSR` (active low) | **AddressByteSelect** |
+| ---                           | ---                   |
+| `0`                           | *AddressHorL*         |
+| `1`                           | `(AR) L/H instruction operand` |
+
+**Implementation Diagram:**
+
+![AddressByteSelect Schematic](./AddressingModesSchematics/AddressByteSelect%20Schematic.png)
 
 ##  Updated Instruction Microcode
 
@@ -1255,3 +1502,39 @@ Control Signal List:
         2.  *Stack Pointer Increment / Decrement* = `increment` (`1`).
     2.  Advance `PC`.
         1.  *PC Advance* = `1`.
+
+##  Roadmap
+
+This proposal requires many hardware changes to implement; it is advisable
+therefore to not attempt to implement everything at once, but in an incremental
+approach (implement, test, fix / repeat with next piece).
+
+To recap, here is a list of everything that must be done to fully implement this
+proposal:
+
+1.  Hardware
+    1.  `ARSrc` Operand Decode Logic
+    2.  PC Loading / Out Revision
+    3.  AR Data Bus Load Enable (Look Up Table - EEPROM)
+    4.  ARSelect (Look Up Table - EEPROM)
+    5.  AddressByteSelect Logic
+2.  Microcode
+    1.  Update microcode for `PUSH`, `POP`, `JSR`, and `RTS`
+    2.  Overwrite microcode for `LSP` and add microcode for `MAG`, `LDWL`, 
+        `LDWH`, `SDWL`, `SDWH`, `LDA`, `MGA`, `MAAL`, and `MAAH`
+3.  Software
+    1.  ByteFrost Assembler v2
+        1.  Ensure all instructions in the ISA have a corresponding
+            representation in the assembler code.
+            1.  Remove `LSP`.
+            2.  Update `JSR`'s instruction string to take no operands.
+            3.  Add `MAG`, `LDWL`, `LDWH`, `SDWL`, `SDWH`, `LDA`, `MGA`, `MAAL`,
+                and `MAAH`.
+        2.  Update the set of ByteFrost Assembly instructions:
+            1.  Remove `LSP`.
+            2.  Add `MAG`, `LDW`, `SDW`, `LDA`, `MGA`, and `MAA`.
+            3.  Update `CALL` to work with the new `JSR` ISA instruction.
+        3.  Update the parser to recognize new syntax
+            1.  AR Offset token (`Imm(AR)`) used in `LDW` and `SDW`.
+    2.  **AR Data Bus Load Enable** and **ARSelect** Look Up Table Generators
+        1.  Write a program that generates the look up tables for these EEPROMs.
