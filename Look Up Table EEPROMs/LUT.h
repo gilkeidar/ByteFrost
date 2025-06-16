@@ -27,7 +27,8 @@
 //  EEPROM's address and data ports, respectively.
 //  Hence, the (16 - m) unused address bits must be the MSBs which are connected
 //  to ground (0) inputs.
-//  The (8 - n) unused data bits will be the MSBs and always contain 0s.
+//  The (8 - n) unused data bits will be the MSBs and may contain either 0s or
+//  1s.
 
 /**
  * @brief State of input bits of a LUT.
@@ -83,12 +84,14 @@ typedef struct LUT_t {
 
 /*  LUT definitions */
 
-/*  AR Data Bus Load Enable */
-
 OutputState ARDataBusLoadEnableGenerator(InputState state);
+OutputState ARSelectGenerator(InputState state);
 
 static LUT luts[] = {
     {   //  AR Data Bus Load Enable LUT
         8, 8, ARDataBusLoadEnableGenerator
+    },
+    {   //  ARSelect LUT
+        8, 5, ARSelectGenerator
     }
 };

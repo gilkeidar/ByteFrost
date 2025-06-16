@@ -1,6 +1,6 @@
 #   ByteFrost Development Log - Addressing Modes Proposal (v2)
 
-June 7 - 14, 2025
+June 7 - 16, 2025
 
 ##  Overview
 
@@ -914,7 +914,7 @@ For **AR Data Bus Load Enable**, there are `8` 1-bit inputs:
 7.  `ARDest[0]`
 8.  `(AR) L/H instruction operand`
 
-There are either `8` our `4` outputs, depending on if a `3:8` decoder is used:
+There are `8` outputs:
 1.  `PC[L] + PC[H] = DHPC Load Enable` (active low)
 2.  `DHPC Load Enable` (active low)
 3.  `DP[L] Load Enable` (active low)
@@ -924,90 +924,14 @@ There are either `8` our `4` outputs, depending on if a `3:8` decoder is used:
 7.  `BP[L] Load Enable` (active low)
 8.  `BP[H] Load Enable` (active low)
 
-OR
-
-1.  `Decoder Address 2`
-2.  `Decoder Address 1`
-3.  `Decoder Address 0`
-4.  `Decoder Enable` (for `None` output)
-
-As there are `8` 1-bit inputs, there are `2^8 = 256` possible states, each
-requiring either `8` or `4` bits.
+As there are `8` 1-bit inputs, there are `2^8 = 256` possible input states, each
+requiring `8` bits to store the corresponding output state.
 
 Hence, this EEPROM would need to have at least `256` addresses (8 address
-inputs) each of which maps to a `8` bits or `4` bits.
-
-With a `4` bit output, the EEPROM would need to be 
-`256 * 4 = 1 Kbit (128 bytes)` in size.
+inputs) each of which maps to `8` bits.
 
 With an `8` bit output, the EEPROM would need to be 
 `256 * 8 = 2 Kbit (256 bytes)` in size.
-
-####    Implementation Using Decoder
-
-**Truth Table:**
-
-1.  Decoder Enable (active low)
-
-| `PC Load Branch` (active low) | *loadAR* | Decoder Enable (active low) |
-| ---                           | ---      | ---                         |
-| `0` (active)                  | `X`      | `0` (active)                |
-| `1` (inactive)                | `1`      | `0` (active)                |
-| `1` (inactive)                | `0`      | `1` (inactive)              |
-
-This truth table can be represented as the following boolean equation:
-
-```
-Decoder Enable (active low) = (PC Load Branch) AND (!loadAR).
-```
-
-2.  Target AR (`PC` (`PC[L] + PC[H] = DHPC` or `DHPC`), `DP`, `SP`, or `BP`)
-
-| `PC Load Branch` (active low) | *loadAR* | *PC Load* | Target AR |
-| ---                           | ---      | ---       | ---       |
-| `0` (active)                  | `X`      | `X`       | `PC`      |
-| `1` (inactive)                | `1`      | `0`       | `ARDest`  |
-| `1` (inactive)                | `1`      | `1`       | `PC`      |
-| `1` (inactive)                | `0`      | `X`       | `None` (`X` since decoder enable disabled) |
-
-This can be represented with the outputs being the 2 msbs of the 3-8 decoder
-address input:
-
-| `PC Load Branch` (active low) | *loadAR* | *PC Load* | Address Bit `2` | Address Bit `1` |
-| ---                           | ---      | ---       | ---             | ---             |
-| `0` (active)                  | `X`      | `X`       | `0`             | `0`             |
-| `1` (inactive)                | `1`      | `0`       | `ARDest[1]`     | `ARDest[0]`     |
-| `1` (inactive)                | `1`      | `1`       | `0`             | `0`             |
-| `1` (inactive)                | `0`      | `X`       | `X`             | `X`             |
-
-This truth table can be represented as the following boolean equations:
-
-```
-Address Bit 2 = (PC Load Branch) AND !((loadAR)(PC Load)) AND ARDest[1]
-Address Bit 1 = (PC Load Branch) AND !((loadAR)(PC Load)) AND ARDest[0]
-```
-
-3.  Target AR Byte (high / low)
-
-| `PC Load Branch` (active low) | *loadAR* | *PC Load* | `Opcode_MAA` (active low) | Target AR Byte |
-| ---                           | ---      | ---       | ---                       | ---            |
-| `0` (active)                  | `X`      | `X`       | `X`                       | `0` (`L`)      |
-| `1` (inactive)                | `1`      | `1`       | `X`                       | *loadARHorL*   |
-| `1` (inactive)                | `1`      | `0`       | `0`                       | *loadARHorL*   |
-| `1` (inactive)                | `1`      | `0`       | `1`                       | `(AR) L/H operand` |
-| `1` (inactive)                | `0`      | `X`       | `X`                       | `X` since decoder enable disabled |
-
-This truth table can be represented as the following boolean equation:
-
-```
-Address Bit 0 = (PC Load Branch)(loadAR)(
-    (loadARHorL)((PC Load) + !(MAA Opcode)) + !(PC Load)(MAA Opcode)(AR L/H)
-)
-```
-
-**Implementation Diagram:**
-
-![AR Data Bus Load Enable Schematic](./AddressingModesSchematics/AR%20Data%20Bus%20Load%20Enable%20Schematic.png)
 
 ### 4.  ARSelect
 
@@ -1074,67 +998,18 @@ For **ARSelect**, there are `8` 1-bit inputs:
 7.  `ARSrc[1]`
 8.  `ARSrc[0]`
 
-There are also either `5` or `3` outputs, depending if a 3:8 decoder is used:
+There are `5` outputs:
 1.  `PC Output Enable` (active low)
 2.  `DP Output Enable` (active low)
 3.  `SP Output Enable` (active low)
 4.  `BP Output Enable` (active low)
 5.  `TmpAR Output Enable` (active low)
 
-OR
-1.  `Decoder Address 2`
-2.  `Decoder Address 1`
-3.  `Decoder Address 0`
-(where outputs `0` through `4` of the decoder are used as output enables and
-`5`, `6`, and `7` are not connected to anything and thus can be used for the
-`None` output of **ARSelect**)
-
-In either case, since there are `8` 1-bit inputs, there are `2^8 = 256` possible
-input states, which can be stored in a 256-byte EEPROM.
-
-With a `3` bit output, the EEPROM would need to be 
-`256 * 3 = 768 bits (96 bytes)` in size.
+Since there are `8` 1-bit inputs, there are `2^8 = 256` possible input states, 
+which can be stored in a 256-byte EEPROM.
 
 With a `5` bit output, the EEPROM would need to be 
 `256 * 5 = 1280 bits (160 bytes)` in size.
-
-####    Implementation Approach Using Decoder
-
-1.  Decoder Enable (Active Low)
-
-`Decoder Enable (active low) = Bus Grant`
-
-2.  Address Bits (`2:0`)
-
-| `FetchCycle` | *PC Out* | *SP Out* | *TmpARWrite* | `Opcode_MAG_LDW_SDW_MAA` (active low) | Address Bit `2` | Address Bit `1` | Address Bit `0` |
-| ---          | ---      | ---      | ---          | ---                                   | ---             | ---             | ---             |
-| `1`          | `X`      | `X`      | `X`          | `X`                                   | `0`             | `0`             | `0`             |
-| `0`          | `1`      | `X`      | `X`          | `X`                                   | `0`             | `0`             | `0`             |
-| `0`          | `0`      | `1`      | `X`          | `X`                                   | `0`             | `1`             | `0`             |
-| `0`          | `0`      | `0`      | `1`          | `X`                                   | `1`             | `0`             | `0`             |
-| `0`          | `0`      | `0`      | `0`          | `0`                                   | `0`             | `ARSrc[1]`      | `ARSrc[0]`      |
-| `0`          | `0`      | `0`      | `0`          | `1`                                   | `0`             | `0`             | `1`             |
-
-This truth table can be represented as the following boolean equations:
-
-```
-Address Bit 2 = !(FetchCycle)!(PC Out)!(SP Out)(TmpARWrite)
-    = !(FetchCycle + PC Out + SP Out)(TmpARWrite)
-
-Address Bit 1 = !(FetchCycle)!(PC Out)(SP Out + !(TmpARWrite)!(Opcode_MAG_LDW_SDW_MAA)ARSrc[1])
-    = !(FetchCycle + PC Out)(SP Out + !(TmpARWrite + Opcode_MAG_LDW_SDW_MAA)ARSrc[1])
-
-Address Bit 0 = !(FetchCycle)!(PC Out)!(SP Out)!(TmpARWrite)(Opcode_MAG_LDW_SDW_MAA + ARSrc[0])
-    = !(FetchCycle + PC Out + SP Out + TmpARWrite)(Opcode_MAG_LDW_SDW_MAA + ARSrc[0])
-```
-
-**Implementation Diagram:**
-
-![ARSelect Address Bits Schematic](./AddressingModesSchematics/ARSelect%20Address%20Bits%20Schematic.png)
-
-**Note:** that this can be improved further (removing some NOT gates):
-
-![ARSelect Address Bits Schematic Improved](./AddressingModesSchematics/ARSelect%20Schematic%20v2.png)
 
 ### 5.  AddressByteSelect
 
@@ -1516,7 +1391,9 @@ proposal:
     1.  `ARSrc` Operand Decode Logic
     2.  PC Loading / Out Revision
     3.  AR Data Bus Load Enable (Look Up Table - EEPROM)
+        1.  Replace current Data Bus -> AR Loading hardware (`LSP` hardware)
     4.  ARSelect (Look Up Table - EEPROM)
+        1.  Replace current Address Bus Arbitrator with ARSelect LUT
     5.  AddressByteSelect Logic
 2.  Microcode
     1.  Update microcode for `PUSH`, `POP`, `JSR`, and `RTS`
@@ -1538,3 +1415,4 @@ proposal:
             1.  AR Offset token (`Imm(AR)`) used in `LDW` and `SDW`.
     2.  **AR Data Bus Load Enable** and **ARSelect** Look Up Table Generators
         1.  Write a program that generates the look up tables for these EEPROMs.
+            (**DONE**)

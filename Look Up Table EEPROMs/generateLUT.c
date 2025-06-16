@@ -174,3 +174,70 @@ OutputState ARDataBusLoadEnableGenerator(InputState state) {
 
     return MAX_OUTPUT_STATE ^ selectedOutput;
 }
+
+OutputState ARSelectGenerator(InputState state) {
+    //  The ARSelect LUT has the following input and output configurations:
+    //  8 inputs with the following bit assignments:
+    //  7 - Bus Grant
+    //  6 - FetchCycle
+    //  5 - PC Out                          (control signal)
+    //  4 - SP Out                          (control signal)
+    //  3 - TmpARWrite                      (control signal)
+    //  2 - OPCODE_MAG_LDW_SDW_MAA          (ACTIVE LOW)
+    //  1 - ARSrc[1] instruction operand
+    //  0 - ARSrc[0] instruction operand
+    #define BUS_GRANT_OFFSET                    7
+    #define FETCH_CYCLE_OFFSET                  6
+    #define PC_OUT_OFFSET                       5
+    #define SP_OUT_OFFSET                       4
+    #define TMP_AR_WRITE_OFFSET                 3
+    #define OPCODE_MAG_LDW_SDW_MAA_OFFSET       2
+
+    //  5 outputs with the following bit assignments:
+    //  4 - TmpAR Output Enable             (ACTIVE LOW)
+    //  3 - BP Output Enable                (ACTIVE LOW)
+    //  2 - SP Output Enable                (ACTIVE LOW)
+    //  1 - DP Output Enable                (ACTIVE LOW)
+    //  0 - PC Output Enable                (ACTIVE LOW)
+    //
+    //  Note: at most, 1 of these outputs will be 0; all else will be 1.
+    #define TMP_AR_OUTPUT_ENABLE_OFFSET 4
+    #define BP_OUTPUT_ENABLE_OFFSET     3
+    #define SP_OUTPUT_ENABLE_OFFSET     2
+    #define DP_OUTPUT_ENABLE_OFFSET     1
+    #define PC_OUTPUT_ENABLE_OFFSET     0
+
+    if (InputStateBitIsHigh(state, BUS_GRANT_OFFSET)) {
+        //  This means that the Bus Grant signal is active.
+        return MAX_OUTPUT_STATE;
+    }
+    
+    //  If the Bus Grant signal is not active, then exactly one AR will be
+    //  selected to write to the Address Bus.
+
+    OutputState selectedOutput = 0;
+    if (InputStateBitIsHigh(state, FETCH_CYCLE_OFFSET) 
+        || InputStateBitIsHigh(state, PC_OUT_OFFSET)) {
+        //  This means that the FetchCycle signal or PC Out is active.
+        selectedOutput = 1 << PC_OUTPUT_ENABLE_OFFSET;
+    }
+    else if (InputStateBitIsHigh(state, SP_OUT_OFFSET)) {
+        //  This means that the SP Out control signal is active.
+        selectedOutput = 1 << SP_OUTPUT_ENABLE_OFFSET;
+    }
+    else if (InputStateBitIsHigh(state, TMP_AR_WRITE_OFFSET)) {
+        //  This means that the TmpARWrite control signal is active.
+        selectedOutput = 1 << TMP_AR_OUTPUT_ENABLE_OFFSET;
+    }
+    else if (!InputStateBitIsHigh(state, OPCODE_MAG_LDW_SDW_MAA_OFFSET)) {
+        //  This means that the instruction has the opcode of MAG, LDW, SDW, or
+        //  MAA instructions (i.e., that it has an ARSrc instruction operand).
+        selectedOutput = 1 << (state & 0x3);
+    }
+    else {
+        //  Default behavior: Write DP to the Address Bus.
+        selectedOutput = 1 << DP_OUTPUT_ENABLE_OFFSET;
+    }
+
+    return MAX_OUTPUT_STATE ^ selectedOutput;
+}
