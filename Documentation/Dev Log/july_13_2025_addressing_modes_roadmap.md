@@ -188,7 +188,7 @@ current instruction string (stored in the instruction registers).
 | `5` | *PC Out* (control signal `9`) |
 | `4` | *SP Out* (control signal `14`) |
 | `3` | *TmpARWrite* (control signal `20`) |
-| `2` | `Opcode_MAG_LDW_SDW_MAA` (**active low**) |
+| `2` | `Opcode_MAG_LDW_SDW_MAA` |
 | `1` | `ARSrc[1]` instruction operand |
 | `0` | `ARSrc[0]` instruction operand |
 
@@ -229,6 +229,9 @@ current instruction string (stored in the instruction registers).
 2.  Else:
     1.  Return `None`.
 
+**Schematic:**
+
+![AddressByteSelect Schematic](./AddressingModesSchematics/AddressByteSelect%20Schematic%20v2.png)
 
 
 ##  Control Signals

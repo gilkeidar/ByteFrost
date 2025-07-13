@@ -183,7 +183,7 @@ OutputState ARSelectGenerator(InputState state) {
     //  5 - PC Out                          (control signal)
     //  4 - SP Out                          (control signal)
     //  3 - TmpARWrite                      (control signal)
-    //  2 - OPCODE_MAG_LDW_SDW_MAA          (ACTIVE LOW)
+    //  2 - OPCODE_MAG_LDW_SDW_MAA
     //  1 - ARSrc[1] instruction operand
     //  0 - ARSrc[0] instruction operand
     #define BUS_GRANT_OFFSET                    7
@@ -229,7 +229,7 @@ OutputState ARSelectGenerator(InputState state) {
         //  This means that the TmpARWrite control signal is active.
         selectedOutput = 1 << TMP_AR_OUTPUT_ENABLE_OFFSET;
     }
-    else if (!InputStateBitIsHigh(state, OPCODE_MAG_LDW_SDW_MAA_OFFSET)) {
+    else if (InputStateBitIsHigh(state, OPCODE_MAG_LDW_SDW_MAA_OFFSET)) {
         //  This means that the instruction has the opcode of MAG, LDW, SDW, or
         //  MAA instructions (i.e., that it has an ARSrc instruction operand).
         selectedOutput = 1 << (state & 0x3);
