@@ -233,7 +233,133 @@ current instruction string (stored in the instruction registers).
 
 ![AddressByteSelect Schematic](./AddressingModesSchematics/AddressByteSelect%20Schematic%20v2.png)
 
-
 ##  Control Signals
 
+| Bit  | Control Signal |
+| ---  | ---            |
+| `23` | Not Used.      |
+| `22` | *AddressHorL*  |
+| `21` | *AddressBusToDataBus* |
+| `20` | *TmpARWrite* |
+| `19` | *TmpARRead* |
+| `18` | *loadARHorL* |
+| `17` | *loadAR* (formerly: Load Special Pointer) |
+| `16` | *Stack Pointer Increment / Decrement* (`0`: decrement / `1`: increment) |
+| `15` | *Stack Pointer Count* |
+| `14` | *SP Out* (formerly: RAM Address Select) |
+| `13` | *Use Rd as Source* |
+| `12` | *Lower Address Register Load* |
+| `11` | *Mem Write* |
+| `10` | *Mem Read* |
+| `9`  | *PC Out* |
+| `8`  | *PC Load* |
+| `7`  | *PC Advance* |
+| `6`  | *Program Register H Write to Bus* |
+| `5`  | *Register File Input Enable* |
+| `4`  | *Register File Output Enable* |
+| `3`  | *Register File Output Select* (`0`: Rs1 / `1` Rs2) |
+| `2`  | *ALU output enable* |
+| `1`  | *ALU load register A* |
+| `0`  | *ALU load register B* |
+
 ##  Implementation Roadmap
+
+To implement the proposal, the following things must be done:
+1.  Hardware
+    1.  **`ARSrc` Operand Decode Logic**
+    2.  PC Logic Revision
+    3.  **AR Data Bus Load Enable LUT**
+    4.  **ARSelect** LUT
+    5.  **AddressByteSelect** combinational logic and registers.
+2.  Microcode
+    1.  Update microcode for `PUSH`, `POP`, `JSR`, and `RTS`
+    2.  Overwrite microcode for `LSP` and add microcode for `LDWL`, `LDWH`,
+        `SDWL`, `SDWH`, `MAAL`, `MAAH`, `MAG`, `LDA`, and `MGA`.
+3.  Software
+    1.  ByteFrost Assembler v2:
+        1.  Ensure all instructions in the ISA have a corresponding
+            representation in the assembler code.
+            1.  Remove `LSP`.
+            2.  Update `JSR`'s ISA instruction to take no operands.
+            3.  Add `LDWL`, `LDWH`, `SDWL`, `SDWH`, `MAAL`, `MAAH`, `MAG`, 
+                `LDA`, and `MGA` ISA instructions.
+        2.  Update the set of ByteFrost Assembly instructions:
+            1.  Remove `LSP`.
+            2.  Add `LDW`, `SDW`, `MAA`, `MAG`, `LDA`, and `MGA`.
+            3.  Update `CALL` to work using the new `JSR` ISA instruction.
+        3.  Update the parser to recognize new syntax
+            1.  AR token (i.e., `%AR` -> `%PC`, `%DP`, `%SP`, and `%BP`)
+            2.  AR Offset token (`Imm(AR)`) used in `LDW` and `SDW`, e.g.,
+                `-5(%DP)` or `28(SP)`. --> Note that in this case the immediate
+                would not have a `#` in front, so perhaps the regular expression
+                would be `Number(AR)`
+    2.  LUT Generator.
+        1.  Write a program that generates the look up tables for the EEPROMs
+            for **AR Data Bus Load Enable** and **ARSelect**.
+
+### Dependency Graph
+
+####    **ARSelect** LUT Implementation Checklist
+
+Implementing the **ARSelect** LUT requires the following:
+1.  Address Bus Arbiter
+    1.  Remove the Address Bus Arbiter.
+    2.  Replace the Address Bus Arbiter with the **ARSelect** LUT EEPROM, and
+        ensure that all signals that were outputted by the Address Bus Arbiter
+        are replaced with those outputted by **ARSelect**:
+        1.  Replace `Data Pointer OE` (output of the Address Bus Arbiter) with
+            the **ARSelect** LUT's `DP Output Enable` signal.
+        2.  Replace `Stack Pointer OE` (output of the Address Bus Arbiter) with
+            the **ARSelect** LUT's `SP Output Enable`.
+        3.  Replace `Program Counter OE` (output of the Address Bus Arbiter)
+            with the **ARSelect** LUT's `PC Output Enable`.
+2.  New Registers
+    1.  Replace the `74HC574` `Stack Ptr Page` register with two `74HC169` U/D
+        counters.
+    *   **Note:** These counters have load enables. This means that instead of
+        using the current **Load Special Pointer** `Ld Stack Ptr Hi` signal that
+        serves as a load trigger, we can use the load enable signal generated
+        (eventually) by the **AR Data Bus Load Enable** LUT. However, until that
+        is implemented, it is fine to still use the `Ld Stack Ptr Hi` load
+        trigger signal, but eventually it should be removed.
+    2.  Add the Base Pointer (`BP`) AR.
+        1.  Connect the `BP Output Enable` output of **ARSelect** to this AR's
+            output enable.
+    3.  Add the TmpAR register.
+        1.  Connect the `TmpAR Output Enable` output of **ARSelect** to this
+            AR's output enable.
+3.  Input requirements
+    1.  Create the active high `Opcode_MAG_LDW_SDW_MAA` signal.
+    2.  Add the *TmpARWrite* control signal.
+    3.  Fully implement the **`ARSrc` Operand Decode Logic**.
+4.  Output requirements
+    1.  Ensure all used outputs of the **ARSelect** LUT are properly connected
+        as output enables for ARs `PC`, `DP`, `SP`, `BP`, and `TmpAR`.
+5.  PC Out Logic Revision
+    1.  Remove the `Read PC Low 74HC245` chip that allows writing `PC[L]` to the
+        Data Bus.
+    *   The *PC Out* control signal becomes an input of the **ARSelect** LUT; it
+        should **NOT** be used as an output enable directly.
+    *   **Note:** Doing this would break the `JSR` and Branch Relative
+        instructions as they are currently implemented.
+
+Once **ARSelect** is fully implemented, the following instructions will cease to
+work:
+1.  `JSR`.
+*   `JSR` will break because the `Read PC Low 74HC245` chip that allows writing
+    `PC[L]` to the Data Bus will be removed (repurposing of the *PC Out* control
+    signal).
+2.  Branch Relative.
+*   This is less important - Branch Relative is deprecated anyway, and the
+    ByteFrost Assembler doesn't use it (so no binary files generated by the
+    Assembler v2 will break).
+
+Once **ARSelect** is fully implemented, the following instructions will now work
+(with the new microcode):
+1.  `LDW` and `SDW`.
+*   `LDW` and `SDW` only require the **ARSelect** LUT to be implemented.
+2.  `PUSH` and `POP`.
+*   `PUSH` and `POP` only require the **ARSelect** LUT and updates to the `SP`
+    to be implemented.
+*   **Note:** Without an instruction to set `SP[L]` and `SP[H]`'s value, the
+    `SP` will begin with a garbage value (counters don't have a master reset).

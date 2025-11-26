@@ -83,7 +83,7 @@ std::vector<uint16_t> AssemblyInstruction::generateCode(InstructionLine& line,
 	std::vector<uint16_t> code;
 
 	for (int i = 0; i < this->instruction_sequence.size(); i++) {
-		//	Create std::vector<Argument> vector for the current ISAInstrcuction
+		//	Create std::vector<Argument> vector for the current ISAInstruction
 		//	in the AssemblyInstruction's instruction sequence
 		std::vector<Argument> arguments;
 

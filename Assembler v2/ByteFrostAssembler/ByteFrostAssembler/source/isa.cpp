@@ -55,6 +55,19 @@ uint16_t ISAInstruction::generateCode(std::vector<Argument> arguments) const {
 		//	For size = 2, size_mask = (1 << 2) - 1 = 100 - 1 = 11
 		//	for size = 3, size_mask = (1 << 3) - 1 = 1000 - 1 = 111
 		//	etc.
+
+		//	TODO: When handling ARSrc for LDW, SDW, or MAA instructions, check
+		//	the argument size (e.size) should be 1 for the top bit and the
+		//	second bit should set the opcode's lsb.
+		//	Not sure if ARSrc should have a size of 2 then, perhaps that would
+		//	make the most sense and just don't use the size_mask implementation
+		//	here (just do if opcode = LDW, SDW, or MAA then do ARSrc specific
+		//	logic; otherwise, do normal logic for contiguous arguments (i.e.,
+		//	whose values are contiguously represented in the instruction
+		//	string).
+		//	OR perhaps there should be two ARSrc arguments (ARSrc 1 and ARSrc
+		//	2) since they have different placements?
+
 		uint16_t size_mask = (1 << e.size) - 1;
 
 		instruction_string |= (arguments[i].value & size_mask) << e.position;
