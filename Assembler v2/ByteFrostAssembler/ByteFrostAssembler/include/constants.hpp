@@ -35,7 +35,8 @@ const std::string ASSEMBLY_FILE_ENDING = "asm";
 
 //	Parsing
 #define	UNDERSCORE				'_'
-#define	SPECIAL_REGISTER_PREFIX	'%'
+//#define	SPECIAL_REGISTER_PREFIX	'%'
+#define	ADDRESS_REGISTER_PREFIX	'%'
 #define	IMMEDIATE_PREFIX		'#'
 #define	DIRECTIVE_PREFIX		'.'
 #define	LABEL_PREFIX			':'
@@ -55,9 +56,19 @@ const std::string GREGISTER_R2_NAME = "R2";
 const std::string GREGISTER_R3_NAME = "R3";
 
 //	Special Register Strings
+//	TODO: WHEN LSP IS REMOVED, REMOVE THESE.
 const std::string SREGISTER_DHPC_NAME = "DHPC";
 const std::string SREGISTER_HDP_NAME = "HDP";
 const std::string SREGISTER_HSP_NAME = "HSP";
+
+//	Address Register Strings (as part of the memory addressing modes proposal
+//	that replaces the special registers (high bytes of three of the address
+//	registers (access from the data bus - e.g., DHPC = the dummy high PC
+//	register that can be accessed from the data bus but not the address bus))
+const std::string AREGISTER_PC_NAME = "PC";
+const std::string AREGISTER_DP_NAME = "DP";
+const std::string AREGISTER_SP_NAME = "SP";
+const std::string AREGISTER_BP_NAME = "BP";
 
 //	Instruction Arguments
 
@@ -71,7 +82,10 @@ const std::string SREGISTER_HSP_NAME = "HSP";
 
 //	Instruction Argument Sizes
 #define	GREGISTER_SIZE	2
+
+//	TODO: REMOVE THIS WHEN LSP IS REMOVED.
 #define	SREGISTER_SIZE	2
+#define	AREGISTER_SIZE	2
 #define	ALU_FUNC_SIZE	4
 #define	BRANCH_COND_SIZE	3
 
@@ -111,9 +125,16 @@ const std::string SREGISTER_HSP_NAME = "HSP";
 #define	R3_BITS			3
 
 //	Special Register Values
+//	TODO: WHEN LSP IS REMOVED, REMOVE THESE TOO.
 #define	DHPC_BITS		0
 #define	HDP_BITS		1
 #define	HSP_BITS		2
+
+//	Address Register Values
+#define		PC_BITS			0
+#define		DP_BITS			1
+#define		SP_BITS			2
+#define		BP_BITS			3
 
 
 const std::unordered_map<std::string, uint8_t> general_register_bits({
@@ -125,11 +146,22 @@ const std::unordered_map<std::string, uint8_t> general_register_bits({
 
 /**
  * @brief Special register name (string) -> bit values (uint8_t)
+ * TODO: WHEN LSP IS REMOVED, REMOVED THIS.
  */
 const std::unordered_map<std::string, uint8_t> special_register_bits({
 	{SREGISTER_DHPC_NAME, DHPC_BITS},
 	{SREGISTER_HDP_NAME, HDP_BITS},
 	{SREGISTER_HSP_NAME, HSP_BITS}
+});
+
+/**
+ * @brief Address register name (string) -> bit values (uint8_t)
+ */
+const std::unordered_map<std::string, uint8_t> address_register_bits({
+	{AREGISTER_PC_NAME, PC_BITS},
+	{AREGISTER_DP_NAME, DP_BITS},
+	{AREGISTER_SP_NAME, SP_BITS},
+	{AREGISTER_BP_NAME, BP_BITS}
 	});
 
 //	OUT Print Type Values
@@ -204,7 +236,23 @@ const std::unordered_map<std::string, uint8_t> special_register_bits({
 #define	TST_IMM_OPCODE	0x13
 
 //	Load Special Register Immediate
+//	TODO:	REMOVE THIS WHEN LSP IS REMOVED.
 #define	LSP_IMM_OPCODE	0x14
+
+//	LDW (LDWL technically, but LDWH is never used by any Assembly Instruction
+//	explicitly; LDWH is used effectively if a LDW instruction is used whose
+//	ARSrc value is DP or BP (i.e., the low bit of ARSrc is 1 which is the lsb
+//	of the opcode of LDWH))
+//	TODO: WHEN LSP IS REMOVED, SET THIS TO 0X14 AGAIN.
+#define	LDW_OPCODE		0x16
+
+//	LDWH opcode (don't use in Assembly instructions! The ARSrc operand won't be
+//	handled properly. This opcode is only included since the isa array uses
+//	opcode as index, so this is included for a dummy struct at index
+//	LDW_HIGH_DUMMY_OPCODE so that structs after it will have their proper
+//	indices).
+//	TODO: WHEN LSP IS REMOVED, SET THIS TO 0X15 AGAIN.
+#define	LDW_HIGH_DUMMY_OPCODE	0x17
 
 //	Address confinements
 //	Address space is 16-bit (64KB), and is divided as follows:

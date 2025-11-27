@@ -44,6 +44,8 @@ int getTokenIntValue(Token t) {
 					+ TokenTypeToString(TokenType::OUT_PRINT_TYPE) 
 					+ " '" + t.token_string + "'.");
 		case TokenType::SREGISTER: {
+			//	TODO: Remove this when LSP is removed.
+
 			//	TODO: Return integer value for each special register
 			//throwError("SREGISTER CONVERSION NOT IMPLEMENTED");
 			std::string sregister_name = t.token_string.substr(1);
@@ -52,6 +54,14 @@ int getTokenIntValue(Token t) {
 			}
 
 			return special_register_bits.find(sregister_name)->second;
+		}
+		case TokenType::AREGISTER: {
+			std::string aregister_name = t.token_string.substr(1);
+			if (address_register_bits.find(aregister_name) == address_register_bits.end()) {
+				throwError("Token string '" + t.token_string + "' is not a valid address register string.");
+			}
+
+			return address_register_bits.find(aregister_name)->second;
 		}
 		case TokenType::IMMEDIATE: {
 			//	Return integer value after initial "#", e.g., from "#0x1" -> 1

@@ -68,9 +68,20 @@ uint16_t ISAInstruction::generateCode(std::vector<Argument> arguments) const {
 		//	OR perhaps there should be two ARSrc arguments (ARSrc 1 and ARSrc
 		//	2) since they have different placements?
 
-		uint16_t size_mask = (1 << e.size) - 1;
+		if (e.type == ArgumentType::ARSrc && this->opcode == LDW_OPCODE) {
+			//	Need to expand later to include SDW_OPCODE and MAA_OPCODE
+			debug("SPECIAL CASE: Handling LDW instruction.");
 
-		instruction_string |= (arguments[i].value & size_mask) << e.position;
+			//	Set 0 bit to arguments[i].value's first bit.
+			instruction_string |= arguments[i].value & 1;
+
+			//	Set 5 bit to arguments[i].value's second bit.
+			instruction_string |= ((arguments[i].value >> 1) & 1) << 5;
+		}
+		else {
+			uint16_t size_mask = (1 << e.size) - 1;
+			instruction_string |= (arguments[i].value & size_mask) << e.position;
+		}
 	}
 
 	return instruction_string;

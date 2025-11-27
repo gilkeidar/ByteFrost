@@ -11,7 +11,10 @@ enum class ArgumentType {
 	Func,
 	BranchCondition,
 	OUTDisplayType,
-	SpecialRegister
+
+	//	TODO: Remove this when LSP is removed.
+	SpecialRegister,
+	ARSrc
 };
 
 /**
@@ -189,10 +192,36 @@ const ISAInstruction isa[] = {
 		}
 	},
 	{	//	Load Special Register Immediate
+		//	TODO: REMOVE THIS WHEN LSP IS REMOVED.
 		LSP_IMM_OPCODE,
 		{
 			{ArgumentType::SpecialRegister, ArgumentRepresentation::Unsigned, SREGISTER_SIZE, 6},
 			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 8, 8}
 		}
+	},
+	{
+		//	DUMMY STRUCT FOR OPCODE 0X15 SINCE LDWL IS MOVED TO 0X16 SINCE LSP
+		//	IS NOT REMOVED YET. WHEN LSP IS REMOVED, SEND LDW_L BACK TO 0X14
+		//	AS WELL AS ALL INSTRUCTIONS AFTER IT (SDW, MAA, MAG, ETC.)
+		0x15,
+		{}
+	},
+	{	//	LDWL
+		LDW_OPCODE,
+		{
+			{
+				Rd,
+				//	Position is set to -1 since ARSrc must be handled in a
+				//	non-contiguous manner (ARSrc in LDW is in bits 5 and 0)
+				//	Similar handling for SDW and MAA
+				{ArgumentType::ARSrc, ArgumentRepresentation::Unsigned, AREGISTER_SIZE, -1},
+				{ArgumentType::Immediate, ArgumentRepresentation::Signed, 8, 8}
+			}
+		}
+	},
+	{	//	LDWH (dummy struct - NEVER USE THIS STRUCT IN AN ASSEMBLY
+		//	INSTRUCTION SINCE THE ARSrc OPERAND WON'T BE PROPERLY HANDLED
+		LDW_HIGH_DUMMY_OPCODE,
+		{}
 	},
 };

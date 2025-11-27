@@ -171,10 +171,22 @@ Token Parser::stringToToken(std::string w,
 			type = TokenType::TEXT;
 		}
 	}
-	else if (w.length() >= 2 && w[0] == SPECIAL_REGISTER_PREFIX &&
+	else if (w.length() >= 2 && w[0] == ADDRESS_REGISTER_PREFIX &&
 			special_register_bits.find(w.substr(1)) != special_register_bits.end()) {
+		//	TODO: Remove this when LSP is deprecated.
+		//	NOTE: This may cause bugs if any special register names conflict
+		//	with address register names. However, special registers and address
+		//	registers are not meant to coexist for long since address registers
+		//	replace special registers. Hence, all special register logic should
+		//	be removed when LSP is removed (relevant sections in the code that
+		//	mention special registers are marked with TODOs).
 		//	w is a special register
 		type = TokenType::SREGISTER;
+	}
+	else if (w.length() >= 2 && w[0] == ADDRESS_REGISTER_PREFIX &&
+		address_register_bits.find(w.substr(1)) != address_register_bits.end()) {
+		//	w is an address register
+		type = TokenType::AREGISTER;
 	}
 	else if (isNUMBERString(w)) {
 		//	w is a number
@@ -219,8 +231,11 @@ std::string TokenTypeToString(TokenType t) {
 		return "OUT_PRINT_TYPE";
 	case TokenType::TEXT:
 		return "TEXT";
+	//	TODO: REMOVE THIS WHEN LSP IS REMOVED.
 	case TokenType::SREGISTER:
 		return "SREGISTER";
+	case TokenType::AREGISTER:
+		return "AREGISTER";
 	case TokenType::NUMBER:
 		return "NUMBER";
 	case TokenType::IMMEDIATE:

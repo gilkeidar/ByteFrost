@@ -406,6 +406,8 @@ const AssemblyInstruction assembly_instructions[] = {
 		}
 	},
 	{	//	JMP :label
+		//	TODO: REMOVE THIS IMPLEMENTATION OF JMP REPLACING LSP WITH LDA OR
+		//	ANOTHER INSTRUCTION WHEN LSP IS REMOVED.
 		"JMP",
 		{TokenType::LABEL},
 		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
@@ -433,6 +435,8 @@ const AssemblyInstruction assembly_instructions[] = {
 		}
 	},
 	{	//	BMI :label
+		//	TODO: REMOVE THIS IMPLEMENTATION OF BMI REPLACING LSP WITH LDA OR
+		//	ANOTHER INSTRUCTION WHEN LSP IS REMOVED.
 		"BMI",
 		{TokenType::LABEL},
 		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
@@ -460,6 +464,8 @@ const AssemblyInstruction assembly_instructions[] = {
 		}
 	},
 	{	//	BCS :label
+		//	TODO: REMOVE THIS IMPLEMENTATION OF BCS REPLACING LSP WITH LDA OR
+		//	ANOTHER INSTRUCTION WHEN LSP IS REMOVED.
 		"BCS",
 		{TokenType::LABEL},
 		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
@@ -487,6 +493,8 @@ const AssemblyInstruction assembly_instructions[] = {
 		}
 	},
 	{	//	BEQ :label
+		//	TODO: REMOVE THIS IMPLEMENTATION OF BEQ REPLACING LSP WITH LDA OR
+		//	ANOTHER INSTRUCTION WHEN LSP IS REMOVED.
 		"BEQ",
 		{TokenType::LABEL},
 		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
@@ -514,6 +522,8 @@ const AssemblyInstruction assembly_instructions[] = {
 		}
 	},
 	{	//	BPL :label
+		//	TODO: REMOVE THIS IMPLEMENTATION OF BPL REPLACING LSP WITH LDA OR
+		//	ANOTHER INSTRUCTION WHEN LSP IS REMOVED.
 		"BPL",
 		{TokenType::LABEL},
 		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
@@ -541,6 +551,8 @@ const AssemblyInstruction assembly_instructions[] = {
 		}
 	},
 	{	//	BCC :label
+		//	TODO: REMOVE THIS IMPLEMENTATION OF BCC REPLACING LSP WITH LDA OR
+		//	ANOTHER INSTRUCTION WHEN LSP IS REMOVED.
 		"BCC",
 		{TokenType::LABEL},
 		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
@@ -568,6 +580,8 @@ const AssemblyInstruction assembly_instructions[] = {
 		}
 	},
 	{	//	BNE :label
+		//	TODO: REMOVE THIS IMPLEMENTATION OF BNE REPLACING LSP WITH LDA OR
+		//	ANOTHER INSTRUCTION WHEN LSP IS REMOVED.
 		"BNE",
 		{TokenType::LABEL},
 		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
@@ -1045,6 +1059,13 @@ const AssemblyInstruction assembly_instructions[] = {
 		//	A + 6: JSR :label[0]
 		//	A + 8: ...
 		//	NOTE: CALL overrides the value in R0!
+		//	TODO: REMOVE THIS IMPLEMENTATION OF CALL WHEN LSP IS REMOVED. CALL
+		//	WILL BECOME A WRAPPER FOR JSR WHICH IS USED TO JUMP TO THE DP AR
+		//	ADDRESS.
+		//	TODO: REMOVE THIS IMPLEMENTATION OF CALL WHEN THE JSR ISA
+		//	INSTRUCTION BREAKS DUE TO THE PC[L] -> DB DIRECT CONNECTION BEING
+		//	REMOVED (JSR WILL BE UPDATED EVENTUALLY BUT REQUIRES NEW HARDWARE
+		//	SUPPORT, E.G. THE AR DATA BUS LOAD ENABLE LUT).	
 		"CALL",
 		{TokenType::LABEL},
 		{&isa[LSP_IMM_OPCODE], &isa[LDR_OPCODE], &isa[PUSH_OPCODE], 
@@ -1092,6 +1113,7 @@ const AssemblyInstruction assembly_instructions[] = {
 	},
 	//	TODO: Add Test Reg and Test Immediate instructions
 	{	//	LSP SREGISTER, #Immediate
+		//	TODO: Remove this when LSP is removed.
 		"LSP",
 		{TokenType::SREGISTER, TokenType::IMMEDIATE},
 		{&isa[LSP_IMM_OPCODE]},
@@ -1105,6 +1127,27 @@ const AssemblyInstruction assembly_instructions[] = {
 					ArgumentSource::Token,
 					{ArgumentType::Immediate, 8, SECOND_TOKEN}
 				},
+			}
+		}
+	},
+	{
+		"LDW",
+		{TokenType::GREGISTER, TokenType::AREGISTER, TokenType::IMMEDIATE},
+		{&isa[LDW_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN},
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::ARSrc, AREGISTER_SIZE, SECOND_TOKEN},		
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 8, THIRD_TOKEN}
+				}
 			}
 		}
 	},
