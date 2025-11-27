@@ -24,3 +24,5 @@ assigned and outputted from one of the EEPROM's data output bits.
 In order to set an EEPROM's LUT contents, we need to generate a binary file that
 contains the LUT. In this folder is the software for doing so and binary files
 for LUTs used by the ByteFrost.
+
+NOTE: Issues with programmer configuration - choose CAT28C16A
