@@ -254,6 +254,18 @@ const std::unordered_map<std::string, uint8_t> address_register_bits({
 //	TODO: WHEN LSP IS REMOVED, SET THIS TO 0X15 AGAIN.
 #define	LDW_HIGH_DUMMY_OPCODE	0x17
 
+//	SDW opcode (SDWL technically)
+//	TODO:	WHEN LSP IS REMOVED, SET THIS TO 0X16 AGAIN.
+#define	SDW_OPCODE		0x18
+
+//	SDWH opcode (don't use in Assembly instructions! The ARSrc operand won't be
+//	handled properly. This opcode is only included since the isa array uses
+//	opcode as index, so this is included for a dummy struct at index
+//	SDW_HIGH_DUMMY_OPCODE so that structs after it will have their proper
+//	indices).
+//	TODO:	WHEN LSP IS REMOVED, SET THIS TO 0X17 AGAIN.
+#define	SDW_HIGH_DUMMY_OPCODE	0x19
+
 //	Address confinements
 //	Address space is 16-bit (64KB), and is divided as follows:
 //	FFFF	MMIO

@@ -1130,7 +1130,8 @@ const AssemblyInstruction assembly_instructions[] = {
 			}
 		}
 	},
-	{
+	{	//	LDW Rd, %AR, #Imm
+		//	Rd = *(ARSrc + Imm)
 		"LDW",
 		{TokenType::GREGISTER, TokenType::AREGISTER, TokenType::IMMEDIATE},
 		{&isa[LDW_OPCODE]},
@@ -1151,5 +1152,26 @@ const AssemblyInstruction assembly_instructions[] = {
 			}
 		}
 	},
-
+	{	//	SDW Rs, %AR, #Imm
+		//	*(ARSrc + Imm) = Rs (Rd as source)
+		"SDW",
+		{TokenType::GREGISTER, TokenType::AREGISTER, TokenType::IMMEDIATE},
+		{&isa[SDW_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN},
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::ARSrc, AREGISTER_SIZE, SECOND_TOKEN},
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 8, THIRD_TOKEN}
+				}
+			}
+		}
+	},
 };

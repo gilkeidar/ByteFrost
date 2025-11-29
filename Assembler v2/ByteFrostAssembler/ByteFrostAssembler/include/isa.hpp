@@ -220,8 +220,26 @@ const ISAInstruction isa[] = {
 		}
 	},
 	{	//	LDWH (dummy struct - NEVER USE THIS STRUCT IN AN ASSEMBLY
-		//	INSTRUCTION SINCE THE ARSrc OPERAND WON'T BE PROPERLY HANDLED
+		//	INSTRUCTION SINCE THE ARSrc OPERAND WON'T BE PROPERLY HANDLED)
 		LDW_HIGH_DUMMY_OPCODE,
+		{}
+	},
+	{	//	SDWL
+		SDW_OPCODE,
+		{
+			{
+				Rd,
+				//	Position is set to -1 since ARSrc must be handled in a
+				//	non-contiguous manner (ARSrc in SDW is in bits 5 and 0)
+				//	Similar handling for LDW and MAA
+				{ArgumentType::ARSrc, ArgumentRepresentation::Unsigned, AREGISTER_SIZE, -1},
+				{ArgumentType::Immediate, ArgumentRepresentation::Signed, 8, 8}
+			}
+		}
+	},
+	{	//	SDWH (dummy struct - NEVER USE THIS STRUCT IN AN ASSEMBLY
+		//	INSTRUCTION SINCE THE ARSrc OPERAND WON'T BE PROPERLY HANDLED)
+		SDW_HIGH_DUMMY_OPCODE,
 		{}
 	},
 };
