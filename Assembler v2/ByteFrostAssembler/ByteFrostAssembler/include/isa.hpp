@@ -13,8 +13,10 @@ enum class ArgumentType {
 	OUTDisplayType,
 
 	//	TODO: Remove this when LSP is removed.
-	SpecialRegister,
-	ARSrc
+	//SpecialRegister,
+	ARSrc,
+	ARDest,
+	ARHorL
 };
 
 /**
@@ -191,21 +193,21 @@ const ISAInstruction isa[] = {
 			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 4, 12}
 		}
 	},
-	{	//	Load Special Register Immediate
-		//	TODO: REMOVE THIS WHEN LSP IS REMOVED.
-		LSP_IMM_OPCODE,
-		{
-			{ArgumentType::SpecialRegister, ArgumentRepresentation::Unsigned, SREGISTER_SIZE, 6},
-			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 8, 8}
-		}
-	},
-	{
-		//	DUMMY STRUCT FOR OPCODE 0X15 SINCE LDWL IS MOVED TO 0X16 SINCE LSP
-		//	IS NOT REMOVED YET. WHEN LSP IS REMOVED, SEND LDW_L BACK TO 0X14
-		//	AS WELL AS ALL INSTRUCTIONS AFTER IT (SDW, MAA, MAG, ETC.)
-		0x15,
-		{}
-	},
+	//{	//	Load Special Register Immediate
+	//	//	TODO: REMOVE THIS WHEN LSP IS REMOVED.
+	//	LSP_IMM_OPCODE,
+	//	{
+	//		{ArgumentType::SpecialRegister, ArgumentRepresentation::Unsigned, SREGISTER_SIZE, 6},
+	//		{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 8, 8}
+	//	}
+	//},
+	//{
+	//	//	DUMMY STRUCT FOR OPCODE 0X15 SINCE LDWL IS MOVED TO 0X16 SINCE LSP
+	//	//	IS NOT REMOVED YET. WHEN LSP IS REMOVED, SEND LDW_L BACK TO 0X14
+	//	//	AS WELL AS ALL INSTRUCTIONS AFTER IT (SDW, MAA, MAG, ETC.)
+	//	0x15,
+	//	{}
+	//},
 	{	//	LDWL
 		LDW_OPCODE,
 		{
@@ -242,4 +244,24 @@ const ISAInstruction isa[] = {
 		SDW_HIGH_DUMMY_OPCODE,
 		{}
 	},
+	{	//	TODO: MAAL
+		0x18,
+		{}
+	},
+	{	//	TODO: MAAH
+		0x19,
+		{}
+	},
+	{	//	TODO: MAG
+		0x1a,
+		{}
+	},
+	{	//	LDA ARDest, L/H, Immediate
+		LDA_OPCODE,
+		{
+			{ArgumentType::ARDest, ArgumentRepresentation::Unsigned, AREGISTER_SIZE, 6},
+			{ArgumentType::ARHorL, ArgumentRepresentation::Unsigned, 1, 5},
+			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 8, 8}
+		}
+	}
 };

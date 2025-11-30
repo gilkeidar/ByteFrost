@@ -88,9 +88,9 @@ OUT _S, A
 OUT _T, A
 OUT NEW_LINE, A
 
-//	2.	Set high bytes of DP and SP using LSP.
-LSP %HDP, #0x30
-LSP %HSP, #0x32
+//	2.	Set high bytes of DP and SP using LDA.
+LDA %DP, H, #0x30
+LDA %SP, H, #0x32
 
 //	3.	SP Test
 //		1.	Load a value to R0.
@@ -233,7 +233,7 @@ OUT NEW_LINE, A
 //LDW R1, %PC, LDR_INSTR_OFFSET_3
 
 //			printf("R0: %d R1: %d\n", R0, R1); (instructions: 12)
-//OUT _R, A
+//OUT _R, A 
 //OUT #0, A
 //OUT COLON, A
 //OUT SPACE, A

@@ -410,12 +410,16 @@ const AssemblyInstruction assembly_instructions[] = {
 		//	ANOTHER INSTRUCTION WHEN LSP IS REMOVED.
 		"JMP",
 		{TokenType::LABEL},
-		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
+		{&isa[LDA_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
 		{
 			{
 				{
 					ArgumentSource::Constant,
-					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+					{ArgumentType::ARDest, AREGISTER_SIZE, PC_BITS}
+				},
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::ARHorL, 1, ARHorL_HIGH_BITS}
 				},
 				{
 					ArgumentSource::TokenLabelHigh,
@@ -439,12 +443,16 @@ const AssemblyInstruction assembly_instructions[] = {
 		//	ANOTHER INSTRUCTION WHEN LSP IS REMOVED.
 		"BMI",
 		{TokenType::LABEL},
-		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
+		{&isa[LDA_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
 		{
 			{
 				{
 					ArgumentSource::Constant,
-					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+					{ArgumentType::ARDest, AREGISTER_SIZE, PC_BITS}
+				},
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::ARHorL, 1, ARHorL_HIGH_BITS}
 				},
 				{
 					ArgumentSource::TokenLabelHigh,
@@ -468,12 +476,16 @@ const AssemblyInstruction assembly_instructions[] = {
 		//	ANOTHER INSTRUCTION WHEN LSP IS REMOVED.
 		"BCS",
 		{TokenType::LABEL},
-		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
+		{&isa[LDA_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
 		{
 			{
 				{
 					ArgumentSource::Constant,
-					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+					{ArgumentType::ARDest, AREGISTER_SIZE, PC_BITS}
+				},
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::ARHorL, 1, ARHorL_HIGH_BITS}
 				},
 				{
 					ArgumentSource::TokenLabelHigh,
@@ -497,12 +509,16 @@ const AssemblyInstruction assembly_instructions[] = {
 		//	ANOTHER INSTRUCTION WHEN LSP IS REMOVED.
 		"BEQ",
 		{TokenType::LABEL},
-		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
+		{&isa[LDA_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
 		{
 			{
 				{
 					ArgumentSource::Constant,
-					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+					{ArgumentType::ARDest, AREGISTER_SIZE, PC_BITS}
+				},
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::ARHorL, 1, ARHorL_HIGH_BITS}
 				},
 				{
 					ArgumentSource::TokenLabelHigh,
@@ -526,12 +542,16 @@ const AssemblyInstruction assembly_instructions[] = {
 		//	ANOTHER INSTRUCTION WHEN LSP IS REMOVED.
 		"BPL",
 		{TokenType::LABEL},
-		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
+		{&isa[LDA_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
 		{
 			{
 				{
 					ArgumentSource::Constant,
-					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+					{ArgumentType::ARDest, AREGISTER_SIZE, PC_BITS}
+				},
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::ARHorL, 1, ARHorL_HIGH_BITS}
 				},
 				{
 					ArgumentSource::TokenLabelHigh,
@@ -555,12 +575,16 @@ const AssemblyInstruction assembly_instructions[] = {
 		//	ANOTHER INSTRUCTION WHEN LSP IS REMOVED.
 		"BCC",
 		{TokenType::LABEL},
-		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
+		{&isa[LDA_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
 		{
 			{
 				{
 					ArgumentSource::Constant,
-					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+					{ArgumentType::ARDest, AREGISTER_SIZE, PC_BITS}
+				},
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::ARHorL, 1, ARHorL_HIGH_BITS}
 				},
 				{
 					ArgumentSource::TokenLabelHigh,
@@ -584,12 +608,16 @@ const AssemblyInstruction assembly_instructions[] = {
 		//	ANOTHER INSTRUCTION WHEN LSP IS REMOVED.
 		"BNE",
 		{TokenType::LABEL},
-		{&isa[LSP_IMM_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
+		{&isa[LDA_OPCODE], &isa[BRANCH_ABS_IMM_OPCODE]},
 		{
 			{
 				{
 					ArgumentSource::Constant,
-					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+					{ArgumentType::ARDest, AREGISTER_SIZE, PC_BITS}
+				},
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::ARHorL, 1, ARHorL_HIGH_BITS}
 				},
 				{
 					ArgumentSource::TokenLabelHigh,
@@ -1053,7 +1081,7 @@ const AssemblyInstruction assembly_instructions[] = {
 	},
 	{	//	A: CALL :label
 		//	Implemented as:
-		//	A: LSP %DHPC, :label[1]
+		//	A: LDA %DP, H, :label[1]
 		//	A + 2: LDR R0, (A + 8)[1]
 		//	A + 4: PUSH R0
 		//	A + 6: JSR :label[0]
@@ -1068,13 +1096,17 @@ const AssemblyInstruction assembly_instructions[] = {
 		//	SUPPORT, E.G. THE AR DATA BUS LOAD ENABLE LUT).	
 		"CALL",
 		{TokenType::LABEL},
-		{&isa[LSP_IMM_OPCODE], &isa[LDR_OPCODE], &isa[PUSH_OPCODE], 
+		{&isa[LDA_OPCODE], &isa[LDR_OPCODE], &isa[PUSH_OPCODE], 
 			&isa[JSR_OPCODE]},
 		{
 			{
 				{
 					ArgumentSource::Constant,
-					{ArgumentType::SpecialRegister, SREGISTER_SIZE, DHPC_BITS}
+					{ArgumentType::ARDest, AREGISTER_SIZE, PC_BITS}
+				},
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::ARHorL, 1, ARHorL_HIGH_BITS}
 				},
 				{
 					ArgumentSource::TokenLabelHigh,
@@ -1112,24 +1144,24 @@ const AssemblyInstruction assembly_instructions[] = {
 		{{}}
 	},
 	//	TODO: Add Test Reg and Test Immediate instructions
-	{	//	LSP SREGISTER, #Immediate
-		//	TODO: Remove this when LSP is removed.
-		"LSP",
-		{TokenType::SREGISTER, TokenType::IMMEDIATE},
-		{&isa[LSP_IMM_OPCODE]},
-		{
-			{
-				{
-					ArgumentSource::Token,
-					{ArgumentType::SpecialRegister, SREGISTER_SIZE, FIRST_TOKEN}
-				},
-				{
-					ArgumentSource::Token,
-					{ArgumentType::Immediate, 8, SECOND_TOKEN}
-				},
-			}
-		}
-	},
+	//{	//	LSP SREGISTER, #Immediate
+	//	//	TODO: Remove this when LSP is removed.
+	//	"LSP",
+	//	{TokenType::SREGISTER, TokenType::IMMEDIATE},
+	//	{&isa[LSP_IMM_OPCODE]},
+	//	{
+	//		{
+	//			{
+	//				ArgumentSource::Token,
+	//				{ArgumentType::SpecialRegister, SREGISTER_SIZE, FIRST_TOKEN}
+	//			},
+	//			{
+	//				ArgumentSource::Token,
+	//				{ArgumentType::Immediate, 8, SECOND_TOKEN}
+	//			},
+	//		}
+	//	}
+	//},
 	{	//	LDW Rd, %AR, #Imm
 		//	Rd = *(ARSrc + Imm)
 		"LDW",
@@ -1174,4 +1206,26 @@ const AssemblyInstruction assembly_instructions[] = {
 			}
 		}
 	},
+	{	//	LDA ARDest, H/L, #Imm
+		//	ARDest[H/L] = Imm
+		"LDA",
+		{TokenType::AREGISTER, TokenType::ARHorL, TokenType::IMMEDIATE},
+		{&isa[LDA_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::ARDest, AREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::ARHorL, 1, SECOND_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 8, THIRD_TOKEN}
+				}
+			}
+		}
+	}
 };

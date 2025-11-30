@@ -49,6 +49,10 @@ const std::string COMMENT_START = "//";
 const std::string ASCII_PRINT_TYPE = "A";
 const std::string INTEGER_PRINT_TYPE = "I";
 
+//	ARHorL types (used by LDA instruction)
+const std::string ARHorL_LOW = "L";
+const std::string ARHorL_HIGH = "H";
+
 //	General Register Strings
 const std::string GREGISTER_R0_NAME = "R0";
 const std::string GREGISTER_R1_NAME = "R1";
@@ -57,9 +61,9 @@ const std::string GREGISTER_R3_NAME = "R3";
 
 //	Special Register Strings
 //	TODO: WHEN LSP IS REMOVED, REMOVE THESE.
-const std::string SREGISTER_DHPC_NAME = "DHPC";
-const std::string SREGISTER_HDP_NAME = "HDP";
-const std::string SREGISTER_HSP_NAME = "HSP";
+//const std::string SREGISTER_DHPC_NAME = "DHPC";
+//const std::string SREGISTER_HDP_NAME = "HDP";
+//const std::string SREGISTER_HSP_NAME = "HSP";
 
 //	Address Register Strings (as part of the memory addressing modes proposal
 //	that replaces the special registers (high bytes of three of the address
@@ -84,7 +88,7 @@ const std::string AREGISTER_BP_NAME = "BP";
 #define	GREGISTER_SIZE	2
 
 //	TODO: REMOVE THIS WHEN LSP IS REMOVED.
-#define	SREGISTER_SIZE	2
+//#define	SREGISTER_SIZE	2
 #define	AREGISTER_SIZE	2
 #define	ALU_FUNC_SIZE	4
 #define	BRANCH_COND_SIZE	3
@@ -126,15 +130,19 @@ const std::string AREGISTER_BP_NAME = "BP";
 
 //	Special Register Values
 //	TODO: WHEN LSP IS REMOVED, REMOVE THESE TOO.
-#define	DHPC_BITS		0
-#define	HDP_BITS		1
-#define	HSP_BITS		2
+//#define	DHPC_BITS		0
+//#define	HDP_BITS		1
+//#define	HSP_BITS		2
 
 //	Address Register Values
 #define		PC_BITS			0
 #define		DP_BITS			1
 #define		SP_BITS			2
 #define		BP_BITS			3
+
+//	AR (H / L) Values
+#define		ARHorL_LOW_BITS		0
+#define		ARHorL_HIGH_BITS	1
 
 
 const std::unordered_map<std::string, uint8_t> general_register_bits({
@@ -146,13 +154,13 @@ const std::unordered_map<std::string, uint8_t> general_register_bits({
 
 /**
  * @brief Special register name (string) -> bit values (uint8_t)
- * TODO: WHEN LSP IS REMOVED, REMOVED THIS.
+ * TODO: WHEN LSP IS REMOVED, REMOVE THIS.
  */
-const std::unordered_map<std::string, uint8_t> special_register_bits({
-	{SREGISTER_DHPC_NAME, DHPC_BITS},
-	{SREGISTER_HDP_NAME, HDP_BITS},
-	{SREGISTER_HSP_NAME, HSP_BITS}
-});
+//const std::unordered_map<std::string, uint8_t> special_register_bits({
+//	{SREGISTER_DHPC_NAME, DHPC_BITS},
+//	{SREGISTER_HDP_NAME, HDP_BITS},
+//	{SREGISTER_HSP_NAME, HSP_BITS}
+//});
 
 /**
  * @brief Address register name (string) -> bit values (uint8_t)
@@ -237,14 +245,14 @@ const std::unordered_map<std::string, uint8_t> address_register_bits({
 
 //	Load Special Register Immediate
 //	TODO:	REMOVE THIS WHEN LSP IS REMOVED.
-#define	LSP_IMM_OPCODE	0x14
+//#define	LSP_IMM_OPCODE	0x14
 
 //	LDW (LDWL technically, but LDWH is never used by any Assembly Instruction
 //	explicitly; LDWH is used effectively if a LDW instruction is used whose
 //	ARSrc value is DP or BP (i.e., the low bit of ARSrc is 1 which is the lsb
 //	of the opcode of LDWH))
 //	TODO: WHEN LSP IS REMOVED, SET THIS TO 0X14 AGAIN.
-#define	LDW_OPCODE		0x16
+#define	LDW_OPCODE		0x14
 
 //	LDWH opcode (don't use in Assembly instructions! The ARSrc operand won't be
 //	handled properly. This opcode is only included since the isa array uses
@@ -252,11 +260,11 @@ const std::unordered_map<std::string, uint8_t> address_register_bits({
 //	LDW_HIGH_DUMMY_OPCODE so that structs after it will have their proper
 //	indices).
 //	TODO: WHEN LSP IS REMOVED, SET THIS TO 0X15 AGAIN.
-#define	LDW_HIGH_DUMMY_OPCODE	0x17
+#define	LDW_HIGH_DUMMY_OPCODE	0x15
 
 //	SDW opcode (SDWL technically)
 //	TODO:	WHEN LSP IS REMOVED, SET THIS TO 0X16 AGAIN.
-#define	SDW_OPCODE		0x18
+#define	SDW_OPCODE		0x16
 
 //	SDWH opcode (don't use in Assembly instructions! The ARSrc operand won't be
 //	handled properly. This opcode is only included since the isa array uses
@@ -264,7 +272,11 @@ const std::unordered_map<std::string, uint8_t> address_register_bits({
 //	SDW_HIGH_DUMMY_OPCODE so that structs after it will have their proper
 //	indices).
 //	TODO:	WHEN LSP IS REMOVED, SET THIS TO 0X17 AGAIN.
-#define	SDW_HIGH_DUMMY_OPCODE	0x19
+#define	SDW_HIGH_DUMMY_OPCODE	0x17
+
+//	TODO: Add MAAL, MAAH, and MAG opcodes here (0x18, 0x19, and 0x1a)
+
+#define	LDA_OPCODE		0x1b
 
 //	Address confinements
 //	Address space is 16-bit (64KB), and is divided as follows:

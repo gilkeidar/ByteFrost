@@ -43,18 +43,28 @@ int getTokenIntValue(Token t) {
 				throwError("Unknown "
 					+ TokenTypeToString(TokenType::OUT_PRINT_TYPE) 
 					+ " '" + t.token_string + "'.");
-		case TokenType::SREGISTER: {
-			//	TODO: Remove this when LSP is removed.
+		case TokenType::ARHorL:
+			//	Return 1 bit value of ARHorL
+			if (t.token_string == ARHorL_LOW)
+				return ARHorL_LOW_BITS;
+			else if (t.token_string == ARHorL_HIGH)
+				return ARHorL_HIGH_BITS;
+			else
+				throwError("Unknown "
+					+ TokenTypeToString(TokenType::ARHorL)
+					+ " '" + t.token_string + "'.");
+		//case TokenType::SREGISTER: {
+		//	//	TODO: Remove this when LSP is removed.
 
-			//	TODO: Return integer value for each special register
-			//throwError("SREGISTER CONVERSION NOT IMPLEMENTED");
-			std::string sregister_name = t.token_string.substr(1);
-			if (special_register_bits.find(sregister_name) == special_register_bits.end()) {
-				throwError("Token string '" + t.token_string + "' is not a valid special register string.");
-			}
+		//	//	TODO: Return integer value for each special register
+		//	//throwError("SREGISTER CONVERSION NOT IMPLEMENTED");
+		//	std::string sregister_name = t.token_string.substr(1);
+		//	if (special_register_bits.find(sregister_name) == special_register_bits.end()) {
+		//		throwError("Token string '" + t.token_string + "' is not a valid special register string.");
+		//	}
 
-			return special_register_bits.find(sregister_name)->second;
-		}
+		//	return special_register_bits.find(sregister_name)->second;
+		//}
 		case TokenType::AREGISTER: {
 			std::string aregister_name = t.token_string.substr(1);
 			if (address_register_bits.find(aregister_name) == address_register_bits.end()) {
