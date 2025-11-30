@@ -150,6 +150,14 @@ bool isBYTE_LABELString(std::string s);
  */
 bool isOUT_PRINT_TYPEString(std::string s);
 
+/**
+ * @brief Determines whether a given string is an AR (H/L) string (i.e.,
+ * whether s is ARHorL_LOW or ARHorL_HIGH).
+ * @param s string to check
+ * @return true if s is an ARHorL string and false otherwise.
+ */
+bool isARHorLString(std::string s);
+
 //	String parsing
 
 /**

@@ -211,6 +211,12 @@ bool isOUT_PRINT_TYPEString(std::string s) {
 	return (s == ASCII_PRINT_TYPE || s == INTEGER_PRINT_TYPE);
 }
 
+bool isARHorLString(std::string s) {
+	//	In order for s to be an ARHorL string:
+	//	1.	s is ARHorL_Low or ARHorL_High
+	return (s == ARHorL_LOW || s == ARHorL_HIGH);
+}
+
 //	String parsing
 
 bool stringEndsWith(std::string s, std::string ending) {
