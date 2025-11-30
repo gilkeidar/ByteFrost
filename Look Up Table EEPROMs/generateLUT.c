@@ -104,7 +104,10 @@ int InputStateBitIsHigh(InputState state, int bitOffset) {
 OutputState ARDataBusLoadEnableGenerator(InputState state) {
     //  The AR Data Bus Load Enable LUT has the following input and output
     //  configurations:
-    //  8 inputs with the following bit assignments:
+    //  9 inputs with the following bit assignments:
+    //  8 - Clock signal (to avoid needing to NOR load triggers)
+    //      *   This is an optimization that saves 5 - 6 NOR gates by
+    //          effectively including them as part of the LUT.
     //  7 - PC Load Branch                  (ACTIVE LOW)
     //  6 - loadAR                          (control signal)
     //  5 - PC Load                         (control signal)
@@ -113,6 +116,7 @@ OutputState ARDataBusLoadEnableGenerator(InputState state) {
     //  2 - (AR) L/H instruction operand
     //  1 - ARDest[1] instruction operand
     //  0 - ARDest[0] instruction operand
+    #define CLK_OFFSET              8
     #define PC_LD_BRANCH_OFFSET     7
     #define LOAD_AR_OFFSET          6
     #define PC_LOAD_OFFSET          5
@@ -121,36 +125,110 @@ OutputState ARDataBusLoadEnableGenerator(InputState state) {
     #define AR_L_H_OP_OFFSET        2
 
     //  8 outputs with the following bit assignments:
-    //  7 - BP[H] Load Enable                   (ACTIVE LOW)  
-    //  6 - BP[L] Load Enable                   (ACTIVE LOW)  
-    //  5 - SP[H] Load Enable                   (ACTIVE LOW)  
+    //  7 - BP[H] Load Trigger                  (ACTIVE HIGH)  
+    //  6 - BP[L] Load Trigger                  (ACTIVE HIGH)  
+    //  5 - SP[H] Load Trigger                  (ACTIVE HIGH)
+    //      *   Eventually, SP[H] will also use two 4-bit counters and will have
+    //          a parallel load enable active low input so this will need to be
+    //          replaced with an active low Load Enable instead of a load
+    //          trigger
     //  4 - SP[L] Load Enable                   (ACTIVE LOW)  
-    //  3 - DP[H] Load Enable                   (ACTIVE LOW)  
-    //  2 - DP[L] Load Enable                   (ACTIVE LOW)  
-    //  1 - DHPC Load Enable                    (ACTIVE LOW)  
+    //  3 - DP[H] Load Trigger                  (ACTIVE HIGH)  
+    //  2 - DP[L] Load Trigger                  (ACTIVE HIGH)  
+    //  1 - DHPC Load Trigger                   (ACTIVE HIGH)  
     //  0 - PC[L] + PC[H] = DHPC Load Enable    (ACTIVE LOW)
-    //
-    //  Note: At most 1 of the outputs will be 0; all else will be 1.
     #define PC_LOAD_ENABLE_OFFSET   0
 
+    //  For every input state with address 0x0XX:
+    //      (This means that the clock signal is low, or in the second half of
+    //       the cycle)
+    //      1.  For each active high load trigger bit x:
+    //          1.  If x should be active, it should be set to 1. Otherwise, 0.
+    //      2.  For each active low load enable bit x:
+    //          1.  If x should be active, it should be set to 0. Otherwise, 1.
+    //  For every input state with address 0x1XX:
+    //      (This means that the clock signal is high, or in the first half of
+    //      the cycle. All bits should be inactive).
+    //      1.  For each active high load trigger bit x:
+    //          1.  x should be 0.
+    //      2.  For each active low load enable bit x:
+    //          1.  x should be 1.
 
-    OutputState selectedOutput = 0;
+    if (InputStateBitIsHigh(state, CLK_OFFSET)) {
+        //  This means that the main clock signal is high (i.e., in the first
+        //  half of the clock cycle).
+        //  All bits should be inactive.
+        //  TODO: Change this to include bit 5 (SP[H]) to be active low when the
+        //  SP[H] register is replaced with two 4-bit counters that have load
+        //  enable inputs.
+        //  7 - Load Trigger (active high) - 0
+        //  6 - Load Trigger (active high) - 0
+        //  5 - Load Trigger (active high) - 0
+        //  4 - Load Enable  (active low)  - 1
+        //  3 - Load Trigger (active high) - 0
+        //  2 - Load Trigger (active high) - 0
+        //  1 - Load Trigger (active high) - 0
+        //  0 - Load Enable  (active low)  - 1
+        //  = 0x11
+        return 0x11;
+    }
+
+    //  Otherwise - main clock signal is low (i.e., in the second half of the
+    //  clock signal).
 
     if (!InputStateBitIsHigh(state, PC_LD_BRANCH_OFFSET)) {
         //  This means that a Data Bus write to the PC is requested by a branch
         //  instruction (Branch Absolute or Branch Relative (deprecated)).
         //  Hence, PC[L] = data bus and PC[H] = DHPC.
-        selectedOutput = 1 << PC_LOAD_ENABLE_OFFSET;
+        //  
+        //  Set the P[L] + PC[H] = DHPC Load Enable (active low) to 0.
+        //  All other outputs should have inactive values.
+        //  TODO: Change this to include bit 5 (SP[H]) to be active low when the
+        //  SP[H] register is replaced with two 4-bit counters that have load
+        //  enable inputs.
+        //  7 - Load Trigger (active high) - 0
+        //  6 - Load Trigger (active high) - 0
+        //  5 - Load Trigger (active high) - 0
+        //  4 - Load Enable  (active low)  - 1
+        //  3 - Load Trigger (active high) - 0
+        //  2 - Load Trigger (active high) - 0
+        //  1 - Load Trigger (active high) - 0
+        //  0 - Load Enable  (active low)  - 0  (ACTIVE)
+        //  = 0x10
+        return 0x10;
     }
     else if (InputStateBitIsHigh(state, LOAD_AR_OFFSET)) {
         //  This means that the current instruction is LDA, MGA, MAA, JSR, or
         //  RTS.
         if (InputStateBitIsHigh(state, PC_LOAD_OFFSET)) {
-            //  A Data Bus write to the PC is requested by JSR or RTS. 
+            //  A Data Bus write to the P is requested by JSR or RTS.
             //  The byte (H or L) is specified by the loadARHorL control signal.
-            selectedOutput = 1 << PC_LOAD_ENABLE_OFFSET;
-            selectedOutput <<= 
-                InputStateBitIsHigh(state, LOAD_AR_H_OR_L_OFFSET);
+            if (InputStateBitIsHigh(state, LOAD_AR_H_OR_L_OFFSET)) {
+                //  The high byte is requested --> DHPC load trigger should be
+                //  active.
+                //  7 - Load Trigger (active high) - 0
+                //  6 - Load Trigger (active high) - 0
+                //  5 - Load Trigger (active high) - 0
+                //  4 - Load Enable  (active low)  - 1
+                //  3 - Load Trigger (active high) - 0
+                //  2 - Load Trigger (active high) - 0
+                //  1 - Load Trigger (active high) - 1  (ACTIVE)
+                //  0 - Load Enable  (active low)  - 1
+                return 0x13;
+            }
+            else {
+                //  The low byte is requested --> PC[L] + PC[H] = DHPC load
+                //  enable should be active.
+                //  7 - Load Trigger (active high) - 0
+                //  6 - Load Trigger (active high) - 0
+                //  5 - Load Trigger (active high) - 0
+                //  4 - Load Enable  (active low)  - 1
+                //  3 - Load Trigger (active high) - 0
+                //  2 - Load Trigger (active high) - 0
+                //  1 - Load Trigger (active high) - 0
+                //  0 - Load Enable  (active low)  - 0  (ACTIVE)
+                return 0x10;
+            }
         }
         else {
             //  The request is made by the LDA, MGA, or MAA instruction, which
@@ -161,18 +239,97 @@ OutputState ARDataBusLoadEnableGenerator(InputState state) {
             //  specified by the loadARHorL control signal.
             //  Otherwise, the byte is specified by the (AR) L/H instruction
             //  operand.
-            selectedOutput = 1 << ((state & 0x3) << 1);
+            //  In other words:
+            //  1.  The AR to write to is specified by the ARDest instruction
+            //      operand.
+            //  1.  If the MAA instruction is executed (OPCODE_MAA_OFFSET is 0
+            //      since it is active low):
+            //      1.  The byte is specified by the loadARHorL control signal.
+            //  2.  Otherwise:
+            //      1.  The byte is specified by the (AR) L/H instruction
+            //          operand.
+
+            //  Default state
+            OutputState result = 0x11;
+            
+            //  Determine the right bit position that represents the AR byte to
+            //  write to.
+
+            //  Get to the bit that represents the low byte of ARDest
+            OutputState active_bit = 1 << ((state & 0x3) << 1);
+
+            //  Choose whether to stay at the low byte or move to the high byte
             if (!InputStateBitIsHigh(state, OPCODE_MAA_OFFSET)) {
-                selectedOutput <<= 
+                active_bit <<= 
                     InputStateBitIsHigh(state, LOAD_AR_H_OR_L_OFFSET);
             }
             else {
-                selectedOutput <<= InputStateBitIsHigh(state, AR_L_H_OP_OFFSET);
+                active_bit <<= InputStateBitIsHigh(state, AR_L_H_OP_OFFSET);
             }
+
+            //  XOR the bit position with the result to set it to active.
+            return result ^ active_bit;
         }
     }
 
-    return MAX_OUTPUT_STATE ^ selectedOutput;
+    //  Return default
+    return 0x11;
+
+    // //  The initial value of selected output should be such that each bit is the
+    // //  negation of the default non-active value of that bit, or in other words,
+    // //  it should be the active value of that bit.
+    // //  For active low outputs, that is 0.
+    // //  For active high outputs, that is 1.
+    // //  TODO: Change this to include bit 5 (SP[H]) to be active low when the
+    // //  SP[H] register is replaced with two 4-bit counters that have load
+    // //  enable inputs.
+    // //  7 - Load Trigger (active high) - 0
+    // //  6 - Load Trigger (active high) - 0
+    // //  5 - Load Trigger (active high) - 0
+    // //  4 - Load Enable  (active low)  - 1
+    // //  3 - Load Trigger (active high) - 0
+    // //  2 - Load Trigger (active high) - 0
+    // //  1 - Load Trigger (active high) - 0
+    // //  0 - Load Enable  (active low)  - 1
+    // OutputState selectedOutput = 0xee;
+
+    // if (!InputStateBitIsHigh(state, PC_LD_BRANCH_OFFSET)) {
+    //     //  This means that a Data Bus write to the PC is requested by a branch
+    //     //  instruction (Branch Absolute or Branch Relative (deprecated)).
+    //     //  Hence, PC[L] = data bus and PC[H] = DHPC.
+    //     selectedOutput = 1 << PC_LOAD_ENABLE_OFFSET;
+    // }
+    // else if (InputStateBitIsHigh(state, LOAD_AR_OFFSET)) {
+    //     //  This means that the current instruction is LDA, MGA, MAA, JSR, or
+    //     //  RTS.
+    //     if (InputStateBitIsHigh(state, PC_LOAD_OFFSET)) {
+    //         //  A Data Bus write to the PC is requested by JSR or RTS. 
+    //         //  The byte (H or L) is specified by the loadARHorL control signal.
+    //         selectedOutput = 1 << PC_LOAD_ENABLE_OFFSET;
+    //         selectedOutput <<= 
+    //             InputStateBitIsHigh(state, LOAD_AR_H_OR_L_OFFSET);
+    //     }
+    //     else {
+    //         //  The request is made by the LDA, MGA, or MAA instruction, which
+    //         //  means that the particular AR to write to is specified by the
+    //         //  ARDest instruction operand.
+    //         //  If the MAA instruction is executed (i.e., by an instruction that
+    //         //  involves writing to both bytes of an AR), then the byte MUST be
+    //         //  specified by the loadARHorL control signal.
+    //         //  Otherwise, the byte is specified by the (AR) L/H instruction
+    //         //  operand.
+    //         selectedOutput = 1 << ((state & 0x3) << 1);
+    //         if (!InputStateBitIsHigh(state, OPCODE_MAA_OFFSET)) {
+    //             selectedOutput <<= 
+    //                 InputStateBitIsHigh(state, LOAD_AR_H_OR_L_OFFSET);
+    //         }
+    //         else {
+    //             selectedOutput <<= InputStateBitIsHigh(state, AR_L_H_OP_OFFSET);
+    //         }
+    //     }
+    // }
+
+    // return MAX_OUTPUT_STATE ^ selectedOutput;
 }
 
 OutputState ARSelectGenerator(InputState state) {

@@ -89,7 +89,7 @@ OutputState ARSelectGenerator(InputState state);
 
 static LUT luts[] = {
     {   //  AR Data Bus Load Enable LUT
-        8, 8, ARDataBusLoadEnableGenerator
+        9, 8, ARDataBusLoadEnableGenerator
     },
     {   //  ARSelect LUT
         8, 5, ARSelectGenerator
