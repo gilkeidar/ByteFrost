@@ -436,7 +436,7 @@ uint16_t Parser::getNextLineAddress(uint16_t current_address, AssemblyInstructio
 	//	Size of assembly instruction = 
 	//		length of derived ISAInstruction sequence * sizeof(ISAInstruction)
 	uint16_t next_address = current_address
-		+ (instruction.instruction_sequence.size() * ISA_INSTRUCTION_SIZE_BYTES);
+		+ ((uint16_t) instruction.instruction_sequence.size() * ISA_INSTRUCTION_SIZE_BYTES);
 
 	//	Check for overflow - if overflow occurs, the program is too large for
 	//	the address space

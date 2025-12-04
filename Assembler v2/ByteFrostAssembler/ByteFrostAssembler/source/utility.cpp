@@ -180,7 +180,7 @@ bool isBYTE_CONSTANTString(std::string s) {
 
 	if (s.length() < 2)	return false;
 
-	int byteSelectIndex = s.find_first_of(BYTE_SELECT_START);
+	size_t byteSelectIndex = s.find_first_of(BYTE_SELECT_START);
 
 	//	No byte select start character in s
 	if (byteSelectIndex == s.npos)	return false;
@@ -196,7 +196,7 @@ bool isBYTE_LABELString(std::string s) {
 
 	if (s.length() < 2)	return false;
 
-	int byteSelectIndex = s.find_first_of(BYTE_SELECT_START);
+	size_t byteSelectIndex = s.find_first_of(BYTE_SELECT_START);
 
 	//	No byte select start character in s
 	if (byteSelectIndex == s.npos)	return false;
@@ -240,7 +240,7 @@ std::string removeFileExtension(std::string file_name) {
 	if (!isFILEString(file_name)) {
 		throwError("String '" + file_name + "' is not a valid file name string.");
 	}
-	int dotIndex = file_name.find_first_of('.');
+	size_t dotIndex = file_name.find_first_of('.');
 
 	return file_name.substr(0, dotIndex);
 }
@@ -338,7 +338,7 @@ std::string getConstantNameFromByteConstant(std::string byte_constant_string) {
 	//	1.	s.length() >= 2.
 	//	2.	s = uv such that u is in TEXT and v is in BYTE_SELECT.
 
-	int byteSelectIndex = byte_constant_string.find_first_of(BYTE_SELECT_START);
+	size_t byteSelectIndex = byte_constant_string.find_first_of(BYTE_SELECT_START);
 
 	return byte_constant_string.substr(0, byteSelectIndex);
 }
@@ -352,7 +352,7 @@ int getConstantIndexFromByteConstant(std::string byte_constant_string) {
 	}
 
 	//	Get integer index string
-	int byteSelectIndex = byte_constant_string.find_first_of(BYTE_SELECT_START);
+	size_t byteSelectIndex = byte_constant_string.find_first_of(BYTE_SELECT_START);
 
 	//	Index number string is a substring of byte_constant_string from index s
 	//	to e, inclusive, defined as:
@@ -389,7 +389,7 @@ std::string getLabelNameFromByteLabel(std::string byte_label_string) {
 	//	1. s.length() >= 2.
 	//	2. s = uv such that u is a label and v is in BYTE_SELECT.
 
-	int byteSelectIndex = byte_label_string.find_first_of(BYTE_SELECT_START);
+	size_t byteSelectIndex = byte_label_string.find_first_of(BYTE_SELECT_START);
 
 	return byte_label_string.substr(1, byteSelectIndex - 1);
 }
@@ -403,7 +403,7 @@ int getLabelIndexFromByteLabel(std::string byte_label_string) {
 	}
 
 	//	Get integer index string
-	int byteSelectIndex = byte_label_string.find_first_of(BYTE_SELECT_START);
+	size_t byteSelectIndex = byte_label_string.find_first_of(BYTE_SELECT_START);
 
 	//	Index number string is a substring of byte_label_string from index s
 	//	to e, inclusive, defined as:

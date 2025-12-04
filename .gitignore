@@ -32,3 +32,7 @@ vs/
 *.log
 *.tlog
 
+/Assembler v2/.vs
+*.db
+Assembler v2/ByteFrostAssembler/ByteFrostAssembler/x64/Debug/ByteFros.ce0206dd.tlog/CL.write.1.tlog
+*.tlog

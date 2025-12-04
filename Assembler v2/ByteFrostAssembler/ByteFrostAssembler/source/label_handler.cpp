@@ -36,7 +36,7 @@ void LabelHandler::run(std::vector<Line*>& lines) {
 			//	Create new Label
 			Label newLabel {
 				getLabelName(line->tokens[0].token_string),
-				line->line_address + config.start_address
+				(uint16_t) (line->line_address + config.start_address)
 			};
 
 			std::stringstream stream;
