@@ -92,12 +92,24 @@ OUT NEW_LINE, A
 LDA %DP, H, #0x30
 LDA %SP, H, #0x32
 
+
 //	3.	SP Test
 //		1.	Load a value to R0.
 LDR R0, #0x28
 
 //		2.	Push R0 to the stack (now SP is at 0x3201 due to the current stack
 //			implementation being empty-ascending).
+PUSH R0
+// Demonstrate LDA on the Address Display 
+LDA %SP, H, #0x11
+PUSH R0
+LDA %SP, H, #0x22
+PUSH R0
+LDA %SP, H, #0x33
+PUSH R0
+LDA %SP, H, #0x44
+PUSH R0
+LDA %SP, H, #0x55
 PUSH R0
 
 //		3.	Use LDW to read the value at SP - 1 (0x3200 where R0's value was

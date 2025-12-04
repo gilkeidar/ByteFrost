@@ -8,10 +8,27 @@ Assembler/banana.asm
 Assembler/banana.mlg
 Programs/BIST.mlg
 Documentation/CPU - Copy.pptx
-/.vs
-/Assembler v2/ByteFrostAssembler/.vs
+vs/
 *.exe
 *.obj
 /Assembler v2/ByteFrostAssembler/ByteFrostAssembler/x64
 *.pdb
 *.log
+# Files built by Visual Studio
+*.ilk
+*.meta
+*.obj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.log
+*.tlog
+
