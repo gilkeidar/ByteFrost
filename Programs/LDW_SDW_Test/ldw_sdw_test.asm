@@ -111,6 +111,9 @@ LDA %SP, H, #0x44
 PUSH R0
 LDA %SP, H, #0x55
 PUSH R0
+LDA %SP, H, #0x66
+PUSH R0
+
 
 //		3.	Use LDW to read the value at SP - 1 (0x3200 where R0's value was
 //			just pushed).
