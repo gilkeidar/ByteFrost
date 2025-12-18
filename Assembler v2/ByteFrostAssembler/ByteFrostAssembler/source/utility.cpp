@@ -242,7 +242,7 @@ std::string removeFileExtension(std::string file_name) {
 	if (!isFILEString(file_name)) {
 		throwError("String '" + file_name + "' is not a valid file name string.");
 	}
-	size_t dotIndex = file_name.find_first_of('.');
+	size_t dotIndex = file_name.find_last_of('.');
 
 	return file_name.substr(0, dotIndex);
 }

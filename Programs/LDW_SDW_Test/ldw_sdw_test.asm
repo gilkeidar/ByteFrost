@@ -172,9 +172,12 @@ OUT NEW_LINE, A
 LDR R0, #0x7e
 BRK
 LDA %DP, H, #0x30
+LDA %DP, L, #0x30
+
 SDW R0, %DP, #3
 LDW R1, %DP, #3
 LDA %DP, H, #0x40
+LDA %DP, L, #0x40
 SDW R0, %DP, #4
 LDW R1, %DP, #4
 //			printf("DPH1 R0: %d R1: %d\n", R0, R1); (instructions: 12)
