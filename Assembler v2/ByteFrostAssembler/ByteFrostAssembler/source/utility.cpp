@@ -133,17 +133,19 @@ bool isFILEString(std::string s) {
 
 	if (s.length() == 0)	return false;
 
-	size_t dotIndex = s.find_first_of('.');
-
-	debug("dot index: " + std::to_string(dotIndex));
+	size_t dotIndex = s.find_last_of('.');
+	size_t slashIndex = s.find_last_of('\\');
 	
+	debug("dot index: " + std::to_string(dotIndex));
+	debug("slash index: " + std::to_string(slashIndex));
+
 	//	No dot character in s
 	if (dotIndex == s.npos)	return false;
 
-	debug("u = " + s.substr(0, dotIndex));
+	debug("u = " + s.substr(slashIndex+1, dotIndex- slashIndex-1));
 	debug("v = " + s.substr(dotIndex + 1));
 
-	return isTEXTString(s.substr(0, dotIndex))
+	return isTEXTString(s.substr(slashIndex+1, dotIndex- slashIndex-1))
 		&& isTEXTString(s.substr(dotIndex + 1));
 }
 

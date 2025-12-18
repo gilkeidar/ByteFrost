@@ -89,7 +89,7 @@ OUT _T, A
 OUT NEW_LINE, A
 
 //	2.	Set high bytes of DP and SP using LDA.
-LDA %DP, H, #0x30
+
 LDA %SP, H, #0x32
 
 
@@ -101,6 +101,7 @@ LDR R0, #0x28
 //			implementation being empty-ascending).
 PUSH R0
 // Demonstrate LDA on the Address Display 
+// BRK // (to visually inspect the address bus of SP = 1101, 2202, 3303, 4404, 5505, 6606)
 LDA %SP, H, #0x11
 PUSH R0
 LDA %SP, H, #0x22
@@ -119,7 +120,12 @@ PUSH R0
 //			just pushed).
 LDW R1, %SP, #-1
 
-//			printf("R0: %d R1: %d\n", R0, R1); (instructions: 12)
+//			printf("SPH1 R0: %d R1: %d\n", R0, R1); (instructions: 12)
+OUT _S, A
+OUT _P, A
+OUT _H, A
+OUT #1, A
+OUT SPACE, A
 OUT _R, A
 OUT #0, A
 OUT COLON, A
@@ -133,15 +139,20 @@ OUT SPACE, A
 OUT R1, I
 OUT NEW_LINE, A
 
-//		4.	Use SDW to change the value at 0x3200 to something else.
+//		4.	Use SDW to write 0x55 at 0x6605.
 LDR R2, #0x55
 SDW R2, %SP, #-1
 
-//		5.	Pop the value from the stack to R0 (will pop the value at 0x3200).
+//		5.	Pop the value from the stack to R0 (will pop the value at 0x6605).
 POP R0
 
 //		6.	Verify that R0's value is the value that SDW wrote at 0x3200.
-//			printf("R2: %d R0: %d\n", R2, R0);
+//			printf("SPH2 R2: %d R0: %d\n", R2, R0);
+OUT _S, A
+OUT _P, A
+OUT _H, A
+OUT #2, A
+OUT SPACE, A
 OUT _R, A
 OUT #2, A
 OUT COLON, A
@@ -157,11 +168,21 @@ OUT NEW_LINE, A
 
 //	4.	DP Test
 //		1.	Use SDW to write a value at DP and verify it is correct using LDW.
-LDR R0, #0x7e
-SDW R0, %DP, #0
-LDW R1, %DP, #0
 
-//			printf("R0: %d R1: %d\n", R0, R1); (instructions: 12)
+LDR R0, #0x7e
+BRK
+LDA %DP, H, #0x30
+SDW R0, %DP, #3
+LDW R1, %DP, #3
+LDA %DP, H, #0x40
+SDW R0, %DP, #4
+LDW R1, %DP, #4
+//			printf("DPH1 R0: %d R1: %d\n", R0, R1); (instructions: 12)
+OUT _D, A
+OUT _P, A
+OUT _H, A
+OUT #1, A
+OUT SPACE, A
 OUT _R, A
 OUT #0, A
 OUT COLON, A
@@ -177,11 +198,17 @@ OUT NEW_LINE, A
 
 //		2.	Use SDW to write a value at DP + 127 and verify it is correct using
 //			LDW.
+BRK
 LDR R0, #0x25
 SDW R0, %DP, #127
 LDW R1, %DP, #127
 
-//			printf("R0: %d R1: %d\n", R0, R1); (instructions: 12)
+//			printf("DPH2 R0: %d R1: %d\n", R0, R1); (instructions: 12)
+OUT _D, A
+OUT _P, A
+OUT _H, A
+OUT #2, A
+OUT SPACE, A
 OUT _R, A
 OUT #0, A
 OUT COLON, A
