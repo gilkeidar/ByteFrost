@@ -180,10 +180,9 @@ LDA %DP, H, #0x40
 LDA %DP, L, #0x40
 SDW R0, %DP, #4
 LDW R1, %DP, #4
-//			printf("DPH1 R0: %d R1: %d\n", R0, R1); (instructions: 12)
+//			printf("DP1 R0: %d R1: %d\n", R0, R1); (instructions: 12)
 OUT _D, A
 OUT _P, A
-OUT _H, A
 OUT #1, A
 OUT SPACE, A
 OUT _R, A
@@ -201,7 +200,7 @@ OUT NEW_LINE, A
 
 //		2.	Use SDW to write a value at DP + 127 and verify it is correct using
 //			LDW.
-BRK // Single Step to see DP = 4090, 410F, 4040, 3FF0
+// BRK // Single Step to see DP = 4090, 410F, 4040, 3FF0
 LDR R0, #0x25
 LDA %DP, L, #0x90
 SDW R0, %DP, #0x7F
@@ -210,10 +209,9 @@ LDA %DP, L, #0x40
 SDW R0, %DP, #-0x50
 LDW R1, %DP, #-0x50
 
-//			printf("DPH2 R0: %d R1: %d\n", R0, R1); (instructions: 12)
+//			printf("DP2 R0: %d R1: %d\n", R0, R1); (instructions: 12)
 OUT _D, A
 OUT _P, A
-OUT _H, A
 OUT #2, A
 OUT SPACE, A
 OUT _R, A
@@ -231,11 +229,19 @@ OUT NEW_LINE, A
 
 //		3.	Use SDW to write a value at DP - 128 and verify it is correct using
 //			LDW.
+// BRK // Check DP = 5050, 4FD0
 LDR R0, #0x82
+LDA %DP, H, #0x50
+LDA %DP, L, #0x50
 SDW R0, %DP, #-128
 LDW R1, %DP, #-128
 
-//			printf("R0: %d R1: %d\n", R0, R1); (instructions: 12)
+//			printf("DP3 R0: %d R1: %d\n", R0, R1); (instructions: 12)
+OUT _D, A
+OUT _P, A
+
+OUT #3, A
+OUT SPACE, A
 OUT _R, A
 OUT #0, A
 OUT COLON, A
@@ -253,13 +259,17 @@ OUT NEW_LINE, A
 //		1.	Load byte from a particular instruction (e.g., the immediate byte)
 //			using LDW, PC, #X and ensure it is the expected byte.
 //			Instruction to use: LDR R0, #0x82 (high byte = #0x82)
-.define	1	LDR_INSTR_OFFSET_1	-33
+.define	1	LDR_INSTR_OFFSET_1	-3
 .define	1	LDR_INSTR_OFFSET_2	-63
 
-LDR R0, #0x82
+LDR R0, #0x45
 LDW R1, %PC, LDR_INSTR_OFFSET_1
 
-//			printf("R0: %d R1: %d\n", R0, R1); (instructions: 12)
+//			printf("PC1 R0: %d R1: %d\n", R0, R1); (instructions: 12)
+OUT _P, A
+OUT _C, A
+OUT #1, A
+OUT SPACE, A
 OUT _R, A
 OUT #0, A
 OUT COLON, A
@@ -273,15 +283,21 @@ OUT SPACE, A
 OUT R1, I
 OUT NEW_LINE, A
 
-//		2.	Store byte to a particular instruction (e.g., change the immediate
-//			byte using SDW, PC, #X and then read it using LDW to ensure it is
-//			the correct value.
+//		2.	Test LDA perfoming JUMP
+
+BRK  // The PC Counter ofsets the first bit so the loaded address is shifted left before use.
+     // To load PC=6052, the values loaded are 30 and 29. 
+LDA %PC, H, #0x30
+LDA %PC, L, #0x29
 
 //LDR R0, #0x22
 //SDW R0, %PC, LDR_INSTR_OFFSET_2
 //LDW R1, %PC, LDR_INSTR_OFFSET_3
 
-//			printf("R0: %d R1: %d\n", R0, R1); (instructions: 12)
+//			printf("PC2 R0: %d R1: %d\n", R0, R1); (instructions: 12)
+OUT _P, A
+OUT _C, A
+OUT #2, A
 //OUT _R, A 
 //OUT #0, A
 //OUT COLON, A
