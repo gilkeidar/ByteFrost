@@ -170,7 +170,7 @@ OUT NEW_LINE, A
 //		1.	Use SDW to write a value at DP and verify it is correct using LDW.
 
 LDR R0, #0x7e
-BRK
+// BRK // single step to see DP = 3030, 3033, 4040, 4044
 LDA %DP, H, #0x30
 LDA %DP, L, #0x30
 
@@ -201,10 +201,14 @@ OUT NEW_LINE, A
 
 //		2.	Use SDW to write a value at DP + 127 and verify it is correct using
 //			LDW.
-BRK
+BRK // Single Step to see DP = 4090, 410F, 4040, 3FF0
 LDR R0, #0x25
-SDW R0, %DP, #127
+LDA %DP, L, #0x90
+SDW R0, %DP, #0x7F
 LDW R1, %DP, #127
+LDA %DP, L, #0x40
+SDW R0, %DP, #-0x50
+LDW R1, %DP, #-0x50
 
 //			printf("DPH2 R0: %d R1: %d\n", R0, R1); (instructions: 12)
 OUT _D, A
