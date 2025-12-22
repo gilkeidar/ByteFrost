@@ -89,9 +89,9 @@ OUT _T, A
 OUT NEW_LINE, A
 
 //	2.	Set high bytes of DP and SP using LDA.
-
+BRK  // Check that SP=0x3258
 LDA %SP, H, #0x32
-
+LDA %SP, L, #0x58
 
 //	3.	SP Test
 //		1.	Load a value to R0.
@@ -286,29 +286,37 @@ OUT NEW_LINE, A
 //		2.	Test LDA perfoming JUMP
 
 BRK  // The PC Counter ofsets the first bit so the loaded address is shifted left before use.
-     // To load PC=6052, the values loaded are 30 and 29. 
+// In address 6052 put a jump back to this location
+// That should look like 
+// 3B 00 1B AA   // PC=0158
+
+LDA %DP, H, #0x60
+LDA %DP, L, #0x52
+LDR R3, #0x3B
+SDW R3, %DP, #0
+LDR R3, #0x00
+SDW R3, %DP, #1
+LDR R3, #0x1B
+SDW R3, %DP, #2
+LDR R3, #0xAC
+SDW R3, %DP, #3
+
+
+     // Now, Jump to PC=6052. The values loaded to PC are shifted by 1 60 -> 30 and 52 -> 29. 
 LDA %PC, H, #0x30
 LDA %PC, L, #0x29
-
-//LDR R0, #0x22
-//SDW R0, %PC, LDR_INSTR_OFFSET_2
-//LDW R1, %PC, LDR_INSTR_OFFSET_3
 
 //			printf("PC2 R0: %d R1: %d\n", R0, R1); (instructions: 12)
 OUT _P, A
 OUT _C, A
 OUT #2, A
-//OUT _R, A 
-//OUT #0, A
-//OUT COLON, A
-//OUT SPACE, A
-//OUT R0, I
-//OUT SPACE, A
-//OUT _R, A
-//OUT #1, A
-//OUT COLON, A
-//OUT SPACE, A
-//OUT R1, I
-//OUT NEW_LINE, A
+OUT SPACE, A
+OUT _M, A 
+OUT _A, A 
+OUT _D, A 
+OUT _E, A 
+OUT SPACE, A
+OUT _I, A 
+OUT _T, A 
 
 BRK
