@@ -89,7 +89,7 @@ OUT _T, A
 OUT NEW_LINE, A
 
 //	2.	Set high bytes of DP and SP using LDA.
-BRK  // Check that SP=0x3258
+// BRK  // Check that SP=0x3258
 LDA %SP, H, #0x32
 LDA %SP, L, #0x58
 
@@ -294,11 +294,18 @@ LDA %DP, H, #0x60
 LDA %DP, L, #0x52
 LDR R3, #0x3B
 SDW R3, %DP, #0
-LDR R3, #0x00
+
+//  Store return address of RETURN_POINT at #0x6052.
+//  Note that the ByteFrost Assembler handles labeles in the following way:
+//  1.  If a LABEL is used without byte selection (i.e., as a full label, such as BEQ :RETURN_POINT), then the label immediate is replaced not with the byte address but the instruction address (already shifted right by 1).
+//  2.  If a BYTE_LABEL is used (e.g., as here, LDR R3, :RETURN_POINT[1]), the raw byte is used without shifting right. However, since we want the PC to read this value, 
+LDR R3, :RETURN_POINT[1] // #0x00
+LSR R3, R3  // Program counter needs divided by half and the bit ned to carry over to the lower byte 
 SDW R3, %DP, #1
 LDR R3, #0x1B
 SDW R3, %DP, #2
-LDR R3, #0xAC
+LDR R3, :RETURN_POINT[0] // #0xAC
+ROR R3, R3
 SDW R3, %DP, #3
 
 
@@ -307,6 +314,7 @@ LDA %PC, H, #0x30
 LDA %PC, L, #0x29
 
 //			printf("PC2 R0: %d R1: %d\n", R0, R1); (instructions: 12)
+:RETURN_POINT
 OUT _P, A
 OUT _C, A
 OUT #2, A
