@@ -373,6 +373,64 @@ OUT #3, A
 OUT COLON, A
 OUT SPACE, A
 OUT R3, I
+OUT NEW_LINE, A
+
+//	Test RTS instruction.
+//	RTS instruction semantics:
+//	0.	Assume that SP points at return address in little-endian format, i.e.
+//		SP + 1: RET[H]
+//		SP    : RET[L]
+//	1.	SP++.
+//		*	SP points at RET[H]
+//	2.	DHPC = *SP; SP--.
+//		*	SP points at RET[L].
+//	3.	PC[L] = *SP, PC[H] = DHPC (RET[H]); SP++
+//		*	SP points at RET[H] and PC has been set to RET.
+//	4.	SP++
+//		*	SP points at the byte before RET[H] on the stack (i.e., above it).
+//	Hence, we can test RTS' implementation as follows:
+//	1.	Push a return address to the stack (can be some label).
+//	2.	Call RTS; should've jumped to the return address on the stack and ran
+//		the code there.
+//		*	If fall through, print error; if set to a random address, will have
+//			undefined behavior.
+LDR R3, :RTS_SUCCESS[1]
+LSR R3, R3
+PUSH R3
+LDR R3, :RTS_SUCCESS[0]
+ROR R3, R3
+PUSH R3
+
+RTS
+
+:RTS_FAILURE
+
+//	Print RTS FAIL
+OUT _R, A
+OUT _T, A
+OUT _S, A
+OUT SPACE, A
+OUT _F, A
+OUT _A, A
+OUT _I, A
+OUT _L, A
+OUT SPACE, A
+
+BRK
+
+:RTS_SUCCESS
+
+//	Print RTS SUCCESS
+OUT _R, A
+OUT _T, A
+OUT _S, A
+OUT SPACE, A
+OUT _S, A
+OUT _U, A
+OUT _C, A
+OUT _C, A
+OUT _E, A
+OUT _S, A
 OUT SPACE, A
 
 BRK
