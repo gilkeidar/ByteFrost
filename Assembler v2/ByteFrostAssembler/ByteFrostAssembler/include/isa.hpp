@@ -244,12 +244,22 @@ const ISAInstruction isa[] = {
 		SDW_HIGH_DUMMY_OPCODE,
 		{}
 	},
-	{	//	TODO: MAAL
-		0x18,
-		{}
+	{	//	MAAL ARDest, ARSrc, Imm
+		MAA_OPCODE,
+		{
+			{
+				{ArgumentType::ARDest, ArgumentRepresentation::Unsigned, AREGISTER_SIZE, 6},
+				//	Position is set to -1 since ARSrc must be handled in a
+				//	non-contiguous manner (ARSrc in MAA is in bits 5 and 0)
+				//	Similar handling for LDW and SDW
+				{ArgumentType::ARSrc, ArgumentRepresentation::Unsigned, AREGISTER_SIZE, -1},
+				{ArgumentType::Immediate, ArgumentRepresentation::Signed, 8, 8}
+			}
+		}
 	},
-	{	//	TODO: MAAH
-		0x19,
+	{	//	MAAH (dummy struct - NEVER USE THIS STRUCT IN AN ASSEMBLY
+		//	INSTRUCTION SINCE THE ARSrc OPERAND WON'T BE PROPERLY HANDLED)
+		MAA_HIGH_DUMMY_OPCODE,
 		{}
 	},
 	{	//	MAG Rd, ARSrc, L/H

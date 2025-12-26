@@ -1271,5 +1271,27 @@ const AssemblyInstruction assembly_instructions[] = {
 				}
 			}
 		}
+	},
+	{	//	MAA ARDest, ARSrc, #Imm
+		//	ARDest = ARSrc + Imm
+		"MAA",
+		{TokenType::AREGISTER, TokenType::AREGISTER, TokenType::IMMEDIATE},
+		{&isa[MAA_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::ARDest, AREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::ARSrc, AREGISTER_SIZE, SECOND_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 8, THIRD_TOKEN}
+				}
+			}
+		}
 	}
 };
