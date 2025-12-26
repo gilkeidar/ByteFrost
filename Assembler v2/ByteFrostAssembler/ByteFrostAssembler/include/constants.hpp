@@ -278,6 +278,8 @@ const std::unordered_map<std::string, uint8_t> address_register_bits({
 
 #define	LDA_OPCODE		0x1b
 
+#define	MGA_OPCODE		0x1c
+
 //	Address confinements
 //	Address space is 16-bit (64KB), and is divided as follows:
 //	FFFF	MMIO

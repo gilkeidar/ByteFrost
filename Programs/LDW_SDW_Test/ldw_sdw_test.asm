@@ -285,7 +285,7 @@ OUT NEW_LINE, A
 
 //		2.	Test LDA perfoming JUMP
 
-BRK  // The PC Counter ofsets the first bit so the loaded address is shifted left before use.
+//BRK  // The PC Counter ofsets the first bit so the loaded address is shifted left before use.
 // In address 6052 put a jump back to this location
 // That should look like 
 // 3B 00 1B AA   // PC=0158
@@ -313,6 +313,18 @@ SDW R3, %DP, #3
 LDA %PC, H, #0x30
 LDA %PC, L, #0x29
 
+//	Ensure this worked by printing a different message otherwise and stopping.
+//	(I.e., avoid erroneous fall-through to :RETURN_POINT)
+//	printf("ERROR\n");
+OUT _E, A
+OUT _R, A
+OUT _R, A
+OUT _O, A
+OUT _R, A
+OUT NEW_LINE, A
+
+BRK
+
 //			printf("PC2 R0: %d R1: %d\n", R0, R1); (instructions: 12)
 :RETURN_POINT
 OUT _P, A
@@ -326,5 +338,41 @@ OUT _E, A
 OUT SPACE, A
 OUT _I, A 
 OUT _T, A 
+OUT SPACE, A
+
+//	Test MGA instruction.
+//	1.	Set R0 = 0x65 and R1 = 0x02
+LDR R0, #0x65
+LDR R1, #0x02
+
+//	2.	Set DP = {R0, R1}.
+MGA %DP, H, R0
+MGA %DP, L, R1
+
+//	3.	Store R2 = 0x64 at *DP.
+LDR R2, #0x64
+SDW R2, %DP, #0
+
+//	4.	R3 = *DP
+LDW R3, %DP, #0
+
+//	5.	Print MGA: R2: {R2} R3: {R3}\n
+OUT _M, A
+OUT _G, A
+OUT _A, A
+OUT COLON, A
+OUT SPACE, A
+OUT _R, A
+OUT #2, A
+OUT COLON, A
+OUT SPACE, A
+OUT R2, I
+OUT SPACE, A
+OUT _R, A
+OUT #3, A
+OUT COLON, A
+OUT SPACE, A
+OUT R3, I
+OUT SPACE, A
 
 BRK

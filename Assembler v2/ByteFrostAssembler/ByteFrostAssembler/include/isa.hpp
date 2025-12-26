@@ -263,5 +263,13 @@ const ISAInstruction isa[] = {
 			{ArgumentType::ARHorL, ArgumentRepresentation::Unsigned, 1, 5},
 			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 8, 8}
 		}
+	},
+	{	//	MGA ARDest, L/H, Rs1
+		MGA_OPCODE,
+		{
+			{ArgumentType::ARDest, ArgumentRepresentation::Unsigned, AREGISTER_SIZE, 6},
+			{ArgumentType::ARHorL, ArgumentRepresentation::Unsigned, 1, 5},
+			Rs1
+		}
 	}
 };

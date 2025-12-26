@@ -1227,5 +1227,27 @@ const AssemblyInstruction assembly_instructions[] = {
 				}
 			}
 		}
+	},
+	{	//	MGA ARDest, H/L, Rs1
+		//	ARDest[H/L] = Rs1
+		"MGA",
+		{TokenType::AREGISTER, TokenType::ARHorL, TokenType::GREGISTER},
+		{&isa[MGA_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::ARDest, AREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::ARHorL, 1, SECOND_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rs1, GREGISTER_SIZE, THIRD_TOKEN}
+				}
+			}
+		}
 	}
 };
