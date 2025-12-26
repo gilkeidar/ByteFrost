@@ -167,10 +167,10 @@ const ISAInstruction isa[] = {
 			Rd
 		}
 	},
-	{	//	JSR
+	{	//	JSR (takes no arguments)
 		JSR_OPCODE,
 		{
-			{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 8, 8}
+			//{ArgumentType::Immediate, ArgumentRepresentation::Unsigned, 8, 8}
 		}
 	},
 	{	//	RTS

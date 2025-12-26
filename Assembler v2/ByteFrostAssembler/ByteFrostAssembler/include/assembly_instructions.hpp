@@ -1079,7 +1079,60 @@ const AssemblyInstruction assembly_instructions[] = {
 			}
 		}
 	},
+	{	//	JSR (for function pointer semantics - i.e., jump to DP)
+		//	JSR takes no arguments.
+		"JSR",
+		{},
+		{&isa[JSR_OPCODE]},
+		{
+			{}
+		}
+	},
 	{	//	A: CALL :label
+		//	Implemented as:
+		//	1.	Set DP = target address.
+		//	2.	JSR.
+		//	A:		LDA %DP, L, :label[0]
+		//	A + 2:	LDA %DP, H, :label[1]
+		//	A + 4:	JSR
+		"CALL",
+		{TokenType::LABEL},
+		{&isa[LDA_OPCODE], &isa[LDA_OPCODE], &isa[JSR_OPCODE]},
+		{
+			{	//	A:	LDA %DP, L, :label[0]
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::ARDest, AREGISTER_SIZE, DP_BITS}
+				},
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::ARHorL, 1, ARHorL_LOW_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelLow,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				}
+			},
+			{	//	A + 2:	LDA %DP, H, :label[1]
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::ARDest, AREGISTER_SIZE, DP_BITS}
+				},
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::ARHorL, 1, ARHorL_HIGH_BITS}
+				},
+				{
+					ArgumentSource::TokenLabelHigh,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				}
+			},
+			{	//	A + 4: JSR (no arguments
+
+			}
+		}
+
+
 		//	Implemented as:
 		//	A: LDA %DP, H, :label[1]
 		//	A + 2: LDR R0, (A + 8)[1]
@@ -1094,7 +1147,7 @@ const AssemblyInstruction assembly_instructions[] = {
 		//	INSTRUCTION BREAKS DUE TO THE PC[L] -> DB DIRECT CONNECTION BEING
 		//	REMOVED (JSR WILL BE UPDATED EVENTUALLY BUT REQUIRES NEW HARDWARE
 		//	SUPPORT, E.G. THE AR DATA BUS LOAD ENABLE LUT).	
-		"CALL",
+		/*"CALL",
 		{TokenType::LABEL},
 		{&isa[LDA_OPCODE], &isa[LDR_OPCODE], &isa[PUSH_OPCODE], 
 			&isa[JSR_OPCODE]},
@@ -1135,7 +1188,7 @@ const AssemblyInstruction assembly_instructions[] = {
 					{ArgumentType::Immediate, 8, FIRST_TOKEN}
 				},
 			},
-		}
+		}*/
 	},
 	{	//	RTS
 		"RTS",
