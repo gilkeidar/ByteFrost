@@ -276,6 +276,18 @@ const std::unordered_map<std::string, uint8_t> address_register_bits({
 
 //	TODO: Add MAAL, MAAH, and MAG opcodes here (0x18, 0x19, and 0x1a)
 
+//	MAA opcode (MAAL technically)
+#define	MAA_OPCODE		0x18
+
+//	MAAH opcode (don't use in Assembly instructions! The ARSrc operand won't be
+//	handled properly. This opcode is only included since the isa array uses
+//	opcode as index, so this is included for a dummy struct at index
+//	MAA_HIGH_DUMMY_OPCODE so that structs after it will have their proper
+//	indices).
+#define	MAA_HIGH_DUMMY_OPCODE	0x19
+
+#define	MAG_OPCODE		0x1a
+
 #define	LDA_OPCODE		0x1b
 
 #define	MGA_OPCODE		0x1c

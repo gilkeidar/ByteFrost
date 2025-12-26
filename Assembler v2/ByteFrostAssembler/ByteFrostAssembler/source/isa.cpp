@@ -69,9 +69,10 @@ uint16_t ISAInstruction::generateCode(std::vector<Argument> arguments) const {
 		//	2) since they have different placements?
 
 		if (e.type == ArgumentType::ARSrc 
-			&& (this->opcode == LDW_OPCODE || this->opcode == SDW_OPCODE)) {
-			//	Need to expand later to include SDW_OPCODE and MAA_OPCODE
-			debug("SPECIAL CASE: Handling LDW or SDW instruction.");
+			&& (this->opcode == LDW_OPCODE || this->opcode == SDW_OPCODE 
+				|| this->opcode == MAA_OPCODE)) {
+			//	TODO: Need to expand later to include SDW_OPCODE and MAA_OPCODE
+			debug("SPECIAL CASE: Handling LDW, SDW, or MAA instruction.");
 
 			//	Set 0 bit to arguments[i].value's first bit.
 			instruction_string |= arguments[i].value & 1;

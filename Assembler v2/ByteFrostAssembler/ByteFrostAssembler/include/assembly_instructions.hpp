@@ -1249,5 +1249,27 @@ const AssemblyInstruction assembly_instructions[] = {
 				}
 			}
 		}
+	},
+	{	//	MAG Rd, ARSrc, L/H
+		//	Rd = ARSrc[L/H]
+		"MAG",
+		{TokenType::GREGISTER, TokenType::AREGISTER, TokenType::ARHorL},
+		{&isa[MAG_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::ARSrc, AREGISTER_SIZE, SECOND_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::ARHorL, 1, THIRD_TOKEN}
+				}
+			}
+		}
 	}
 };

@@ -252,9 +252,13 @@ const ISAInstruction isa[] = {
 		0x19,
 		{}
 	},
-	{	//	TODO: MAG
-		0x1a,
-		{}
+	{	//	MAG Rd, ARSrc, L/H
+		MAG_OPCODE,
+		{
+			Rd,
+			{ArgumentType::ARSrc, ArgumentRepresentation::Unsigned, AREGISTER_SIZE, 8},
+			{ArgumentType::ARHorL, ArgumentRepresentation::Unsigned, 1, 5}
+		}
 	},
 	{	//	LDA ARDest, L/H, Immediate
 		LDA_OPCODE,
