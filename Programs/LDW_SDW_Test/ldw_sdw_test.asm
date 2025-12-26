@@ -338,7 +338,7 @@ OUT _E, A
 OUT SPACE, A
 OUT _I, A 
 OUT _T, A 
-OUT SPACE, A
+OUT NEW_LINE, A
 
 //	Test MGA instruction.
 //	1.	Set R0 = 0x65 and R1 = 0x02
@@ -394,6 +394,7 @@ OUT NEW_LINE, A
 //		the code there.
 //		*	If fall through, print error; if set to a random address, will have
 //			undefined behavior.
+BRK
 LDR R3, :RTS_SUCCESS[1]
 LSR R3, R3
 PUSH R3
