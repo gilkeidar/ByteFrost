@@ -97,11 +97,11 @@ LDA %SP, L, #0x58
 //		1.	Load a value to R0.
 LDR R0, #0x28
 
-//		2.	Push R0 to the stack (now SP is at 0x3201 due to the current stack
-//			implementation being empty-ascending).
+//		2.	Push R0 to the stack (now SP is at 0x3257 due to the current stack
+//			implementation being full-descending).
 PUSH R0
 // Demonstrate LDA on the Address Display 
-// BRK // (to visually inspect the address bus of SP = 1101, 2202, 3303, 4404, 5505, 6606)
+// BRK // (to visually inspect the address bus of SP = 1156, 2255, 3354, 4453, 5552, 6651)
 LDA %SP, H, #0x11
 PUSH R0
 LDA %SP, H, #0x22
@@ -116,9 +116,9 @@ LDA %SP, H, #0x66
 PUSH R0
 
 
-//		3.	Use LDW to read the value at SP - 1 (0x3200 where R0's value was
+//		3.	Use LDW to read the value at SP (0x6651 where R0's value was
 //			just pushed).
-LDW R1, %SP, #-1
+LDW R1, %SP, #0
 
 //			printf("SPH1 R0: %d R1: %d\n", R0, R1); (instructions: 12)
 OUT _S, A
@@ -139,14 +139,14 @@ OUT SPACE, A
 OUT R1, I
 OUT NEW_LINE, A
 
-//		4.	Use SDW to write 0x55 at 0x6605.
+//		4.	Use SDW to write 0x55 at 0x6651.
 LDR R2, #0x55
-SDW R2, %SP, #-1
+SDW R2, %SP, #0
 
-//		5.	Pop the value from the stack to R0 (will pop the value at 0x6605).
+//		5.	Pop the value from the stack to R0 (will pop the value at 0x6651).
 POP R0
 
-//		6.	Verify that R0's value is the value that SDW wrote at 0x3200.
+//		6.	Verify that R0's value is the value that SDW wrote at 0x6651.
 //			printf("SPH2 R2: %d R0: %d\n", R2, R0);
 OUT _S, A
 OUT _P, A

@@ -40,3 +40,4 @@ vs/
 /Assembler v2/ByteFrostAssembler/ByteFrostAssembler/Debug
 /Assembler v2/ByteFrostAssembler/ByteFrostAssembler/x64/
 *.tlog
+/.vs
