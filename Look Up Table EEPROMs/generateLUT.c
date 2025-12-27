@@ -155,6 +155,8 @@ OutputState ARDataBusLoadEnableGenerator(InputState state) {
     //          1.  x should be 1.
 
     if (InputStateBitIsHigh(state, CLK_OFFSET)) {
+        //  NOTE: THIS IS NO LONGER USED! CLK_OFFSET WILL ALWAYS BE 0 (LOW).
+        //  CAN REMOVE THIS.
         //  This means that the main clock signal is high (i.e., in the first
         //  half of the clock cycle).
         //  All bits should be inactive.
@@ -176,7 +178,40 @@ OutputState ARDataBusLoadEnableGenerator(InputState state) {
     //  Otherwise - main clock signal is low (i.e., in the second half of the
     //  clock signal).
 
-    if (!InputStateBitIsHigh(state, PC_LD_BRANCH_OFFSET)) {
+    if (!InputStateBitIsHigh(state, LOAD_AR_OFFSET) 
+        && !InputStateBitIsHigh(state, PC_LD_BRANCH_OFFSET)) {
+        //  VERY IMPORTANT NOTE! PREVENT FUTURE BUGS IF EVER ADDING OR MODIFYING
+        //  BRANCH INSTRUCTIONS OR OTHER INSTRUCTIONS THAT SET THE DHPC!
+        //  ===================================================================
+        //  NOTE: Added check that the LoadAR control signal is NOT set to
+        //  avoid this case being reached by accident.
+        //  When could it be reached by accident?
+        //  In the JSR and RTS instruction microcode, there is a cycle where
+        //  the instruction attempts to write the Data Bus value to the DHPC.
+        //  It does this by setting:
+        //      1.  loadAR = 1
+        //      2.  loadARHorL = 1 (H)
+        //      3.  PC Load = 1
+        //  The problem is that, when PC Load is 1, the PC Load Branch active
+        //  low signal is now going to be 0 if the condition bits of the
+        //  instruction strings (bits 7:5) are determined to pass. For JSR and
+        //  RTS, those bits are 000, which equate to "JMP" (i.e., always take
+        //  the branch), which cases the PC Load Branch active low signal to be
+        //  0. This being the case, the AR DB LE LUT mistakenly would send out
+        //  a load enable to PC[L] (and PC[H] = DHPC), essentially thinking that
+        //  the current instruction is a branch instruction with condition bits,
+        //  even though it is not.
+        //  Two ways to fix this:
+        //      1.  Set the "condition bits" of JSR and RTS to 100 to indicate
+        //          "never" take the branch (which is unintuitive given that JSR
+        //          and RTS ALWAYS take the "branch" to jump to the target or
+        //          return address, respectively).
+        //      2.  Modify the AR DB LE LUT to check for this by assuming that
+        //          a branch instruction will NOT set the loadAR control signal
+        //          in the same cycle that it is branching.
+        //  We are taking the second approach here.
+        //  ===================================================================
+        //
         //  This means that a Data Bus write to the PC is requested by a branch
         //  instruction (Branch Absolute or Branch Relative (deprecated)).
         //  Hence, PC[L] = data bus and PC[H] = DHPC.
