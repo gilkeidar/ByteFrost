@@ -41,3 +41,4 @@ vs/
 /Assembler v2/ByteFrostAssembler/ByteFrostAssembler/x64/
 *.tlog
 /.vs
+Assembler v2/ByteFrostAssembler/ByteFrostAssembler/ByteFrostAssembler.vcxproj
