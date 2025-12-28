@@ -139,6 +139,10 @@ const AssemblyInstruction assembly_instructions[] = {
 					ArgumentSource::Token,
 					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
 				},
+				{	//	Rs1 is not used but must be set.
+					ArgumentSource::Constant,
+					{ArgumentType::Rs1, GREGISTER_SIZE, 0}
+				},
 				{
 					ArgumentSource::Token,
 					{ArgumentType::Rs2, GREGISTER_SIZE, SECOND_TOKEN}

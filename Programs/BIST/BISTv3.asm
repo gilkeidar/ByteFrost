@@ -174,21 +174,120 @@ OUT SPACE, A
 OUT _A, A
 OUT _L, A
 OUT _U, A
-// 0-	OR
+OUT NEW_LINE, A
+
+LDR R0, #0x27
+LDR R1, #0xE6
+
+// 0 -	OR
+
+OUT _O, A
+OUT _R, A
+OUT COMMA, A
+OR  R2, R1, R0   
+LDR R3, #0xE7
+TST R2, R3
+BNE :FAIL
+
 // 1 - 	AND
+
+OUT _A, A
+OUT _N, A
+OUT _D, A
+OUT COMMA, A
+AND  R2, R1, R0   
+LDR R3, #0x26
+TST R2, R3
+BNE :FAIL
+
 // 2 - 	XOR
+
+OUT _X, A
+OUT _O, A
+OUT _R, A
+OUT COMMA, A
+XOR  R2, R1, R0   
+LDR R3, #0xC1
+TST R2, R3
+BNE :FAIL
+
 // 2.1- NOT
+
+OUT _N, A
+OUT _O, A
+OUT _T, A
+OUT COMMA, A
+NOT  R2, R0   
+LDR R3, #0xD8
+TST R2, R3
+BNE :FAIL
+
 // 3 - 	ADD
+
+OUT _A, A
+OUT _D, A
+OUT _D, A
+OUT COMMA, A
+ADD  R2, R1, R0   // 10D = E6 + 27
+BCC :FAIL         // Fail if Cary is not set
+LDR R3, #0x0D
+TST R2, R3
+BNE :FAIL
+
 // 3.1- SUB
+
+OUT NEW_LINE, A
+OUT _S, A
+OUT _U, A
+OUT _B, A
+OUT DASH, A
+OUT _S, A
+OUT _B, A
+OUT _C, A
+OUT COMMA, A
+BRK
+SUB  R2, R1, R0   // BF = E6 - 27
+BCC :FAIL         // Borrow is inverse of Carry. No Borrow, so Carry is set. Fail if Cary is not set
+OUT DOT, A        // Pass 1 check 
+SBC  R3, R0, R0   // Test the Borrow (0x00BF = 0x27E6 - 0x2727) 
+TST R3, #0x00
+BNE :FAIL
+OUT DOT, A        // Pass 2 check 
+LDR R3, #0xBF
+TST R2, R3
+BNE :FAIL
+OUT DOT, A        // Pass 3 check 
+
+SUB  R2, R0, R1   // 41 + Borrow = 27 - E6
+BCS :FAIL         // Borrow is inverse of Carry. Borrow is needed so Carry is clear. Fail if Cary is not clear
+OUT DOT, A        // Pass 4 check 
+SBC  R3, R0, R0   // Test the Borrow (0xFF41 = 0x2727 - 0x27E6) 
+
+TST R3, #0xF
+BNE :FAIL
+OUT DOT, A        // Pass 5 check 
+LDR R3, #0x41
+TST R2, R3
+BNE :FAIL
+
 // 4 - 	ASL - Shift Left (lsb gets 0)
 // 4.1- ROL - Rotate Left (lsb gets Cin)
-// 5 - Shift Right
-// 6 - ROR - Rotate Right
+// 5 -  LSR - Logic Shift Right
+// 5.1- ASR - Arithmaetic Shift Right
+// 6 -  ROR - Rotate Right Cin -> Reg -> Cout
+// 7 -  ADC	- C = A + B + Cin
+// 7.1- SBC - C = A - B - Cin
 
 OUT NEW_LINE, A
 ////////////////////////////////////
 
 
+:PASS
+OUT NEW_LINE, A
+OUT _P, A
+OUT _A, A
+OUT _S, A
+OUT _S, A
 BRK
 
 :FAIL
