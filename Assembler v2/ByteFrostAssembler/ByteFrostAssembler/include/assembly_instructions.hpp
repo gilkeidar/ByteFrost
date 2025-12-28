@@ -1196,6 +1196,51 @@ const AssemblyInstruction assembly_instructions[] = {
 		{&isa[RTS_OPCODE]},
 		{{}}
 	},
+	{	//	TST Rs1, Rs2
+		//	Perform Rs1 - Rs2 and set flags accordingly.
+		"TST",
+		{TokenType::GREGISTER, TokenType::GREGISTER},
+		{&isa[TST_REG_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, SUB_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rs1, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rs2, GREGISTER_SIZE, SECOND_TOKEN}
+				}
+			}
+		}	
+	},
+	{	//	TST Rs1, 4-bit Immediate
+		//	Perform Rs1 - Immediate and set flags accordingly.
+		"TST",
+		{TokenType::GREGISTER, TokenType::IMMEDIATE},
+		{&isa[TST_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::Func, ALU_FUNC_SIZE, SUB_FUNC_BITS}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Rd, GREGISTER_SIZE, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 4, SECOND_TOKEN}
+				}
+			}
+		}
+	},
+
 	//	TODO: Add Test Reg and Test Immediate instructions
 	//{	//	LSP SREGISTER, #Immediate
 	//	//	TODO: Remove this when LSP is removed.

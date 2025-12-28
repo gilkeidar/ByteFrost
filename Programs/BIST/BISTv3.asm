@@ -45,6 +45,7 @@
 .define	1 RIGHT_PAR			0x29
 .define 1 COMMA				0x2c
 .define 1 ASTERISK			0x2a
+.define 1 DASH				0x2d
 .define 1 DOT				0x2e
 
 .define 1 _p				0x70
@@ -69,14 +70,131 @@ OUT #3, A
 OUT DOT, A
 OUT #0, A
 OUT NEW_LINE, A
-////////////////////////////////////
+
+
+//////////////////////////////////// Op Code 0x00 - NOP
 OUT _O, A
 OUT _p, A
 OUT #0, I
 OUT COLON, A
+OUT SPACE, A
+
+// Test the number of clocks on NOPs
+
+//	The interface of the 32-bit cycle counter is as follows:
+//	Address		R/W Access?		Effect
+//	0xE200		W				Reset 32-bit counter (to 0)
+//	0xE201		W				Latch 32-bit counter (snapshot current value)
+//	0xE202		R				Read counter byte 0 (LSB)
+//	0xE203		R				Read counter byte 1
+//	0xE204		R				Read counter byte 2
+//	0xE205		R				Read counter byte 3 (MSB)
+//	(Note that the counter value is accessed as a little-endian integer)
+.define 2 counter_base	0xE200
 
 
+LDA %DP, H, counter_base[1]
+LDA %DP, L, counter_base[0]
+SDW R0, %DP, #0     // Reset Counter
+
+NOP
+NOP
+NOP
+NOP
+NOP   // Time 5 NOPS. Counter = 5 * 3 + 4 = 19 (0x13)
+
+SDW R0, %DP, #1  // Latch Counter
+// LDW R0, %DP, #5  // Print Byte4
+// OUT R0, I
+LDW R0, %DP, #4  // Print Byte3
+OUT R0, I
+LDW R1, %DP, #3  // Print Byte2
+OUT R1, I
+LDW R2, %DP, #2  // Print Byte1
+OUT R2, I
+LDR R3, #0x13
+TST R2, R3
+BNE :FAIL
+
+OUT SPACE, A
+
+SDW R0, %DP, #0     // Reset Counter
+
+NOP
+NOP
+NOP
+NOP
+NOP   // Time 5 NOPS
+NOP
+NOP
+NOP
+NOP
+NOP   // Time 10 NOPS Counter = 10 * 3 + 4 = 34 (0x22)
+
+
+SDW R0, %DP, #1  // Latch Counter
+// LDW R0, %DP, #5  // Print Byte4
+// OUT R0, I
+LDW R0, %DP, #4  // Print Byte3
+OUT R0, I
+LDW R1, %DP, #3  // Print Byte2
+OUT R1, I
+LDW R2, %DP, #2  // Print Byte1
+OUT R2, I
+LDR R3, #0x22
+TST R2, R3
+BNE :FAIL
 
 OUT NEW_LINE, A
 ////////////////////////////////////
+
+//////////////////////////////////// Op Code 0x01 - BRK 
+OUT _O, A
+OUT _p, A
+OUT #1, I
+OUT COLON, A
+OUT SPACE, A
+OUT _B, A
+OUT _R, A
+OUT _K, A
+OUT DASH, A
+OUT _S, A
+OUT _K, A
+OUT _I, A
+OUT _P, A
+OUT NEW_LINE, A
+////////////////////////////////////
+
+//////////////////////////////////// Op Code 0x02 - ALU 
+OUT _O, A
+OUT _p, A
+OUT #2, I
+OUT COLON, A
+OUT SPACE, A
+OUT _A, A
+OUT _L, A
+OUT _U, A
+// 0-	OR
+// 1 - 	AND
+// 2 - 	XOR
+// 2.1- NOT
+// 3 - 	ADD
+// 3.1- SUB
+// 4 - 	ASL - Shift Left (lsb gets 0)
+// 4.1- ROL - Rotate Left (lsb gets Cin)
+// 5 - Shift Right
+// 6 - ROR - Rotate Right
+
+OUT NEW_LINE, A
+////////////////////////////////////
+
+
+BRK
+
+:FAIL
+OUT NEW_LINE, A
+OUT _F, A
+OUT _A, A
+OUT _I, A
+OUT _L, A
 BRK
