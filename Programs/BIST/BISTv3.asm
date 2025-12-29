@@ -417,8 +417,62 @@ ROR R2, R2   // CE     -> 67
 LDR R3, #0x67
 TST R2, R3
 BNE :FAIL
+OUT NEW_LINE, A
 
-////////////////////////////////////
+//////////////////////////////////// Op Code 0x03 - LDR 
+OUT _O, A
+OUT _p, A
+OUT #3, I
+OUT COLON, A
+OUT SPACE, A
+OUT _L, A
+OUT _D, A
+OUT _R, A
+OUT DASH, A
+OUT _S, A
+OUT _K, A
+OUT _I, A
+OUT _P, A
+OUT NEW_LINE, A
+
+//////////////////////////////////// Op Code 0x04 - MOV 
+OUT _O, A
+OUT _p, A
+OUT #4, I
+OUT COLON, A
+OUT SPACE, A
+OUT _M, A
+OUT _O, A
+OUT _V, A
+BRK
+LDR R1, #0xA5
+MOV R2, R1
+MOV R3, R2
+MOV R0, R3
+
+LDR R1, #0x5A
+
+TST R1, R2
+BEQ :FAIL
+MOV R2, R1
+TST R1, R2
+BNE :FAIL
+
+TST R2, R3
+BEQ :FAIL
+MOV R3, R2
+TST R2, R3
+BNE :FAIL
+ 
+TST R3, R0
+BEQ :FAIL
+MOV R0, R3
+TST R3, R0
+BNE :FAIL
+
+OUT NEW_LINE, A
+
+////////////////////////////////////////////
 
 
 :PASS
