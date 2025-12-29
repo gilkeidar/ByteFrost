@@ -176,8 +176,10 @@ OUT _L, A
 OUT _U, A
 OUT NEW_LINE, A
 
-LDR R0, #0x27
-LDR R1, #0xE6
+LDR R0, #0x27       // Don't change!
+LDR R1, #0xE6       // Don't change!
+
+////////////////////////////////////////////
 
 // 0 -	OR
 
@@ -188,6 +190,8 @@ OR  R2, R1, R0
 LDR R3, #0xE7
 TST R2, R3
 BNE :FAIL
+
+////////////////////////////////////////////
 
 // 1 - 	AND
 
@@ -200,6 +204,8 @@ LDR R3, #0x26
 TST R2, R3
 BNE :FAIL
 
+////////////////////////////////////////////
+
 // 2 - 	XOR
 
 OUT _X, A
@@ -210,6 +216,8 @@ XOR  R2, R1, R0
 LDR R3, #0xC1
 TST R2, R3
 BNE :FAIL
+
+////////////////////////////////////////////
 
 // 2.1- NOT
 
@@ -222,19 +230,41 @@ LDR R3, #0xD8
 TST R2, R3
 BNE :FAIL
 
-// 3 - 	ADD
+////////////////////////////////////////////
 
+// 3 - 	ADD
+// 7 -  ADC	- C = A + B + Cin
+
+OUT NEW_LINE, A
 OUT _A, A
 OUT _D, A
 OUT _D, A
-OUT COMMA, A
+OUT DASH, A
+OUT _A, A
+OUT _D, A
+OUT _C, A
+ 
 ADD  R2, R1, R0   // 10D = E6 + 27
 BCC :FAIL         // Fail if Cary is not set
-LDR R3, #0x0D
-TST R2, R3
+OUT DOT, A        // Pass 1 check 
+ADC  R3, R0, R1   // Test the Carry  (0x10E0D = 27E6 + E627) 
+BCC :FAIL         // Fail if Cary is not set
+OUT DOT, A        // Pass 2 check 
+
+LDR R0, #0x0E
+TST R0, R3
 BNE :FAIL
+OUT DOT, A        // Pass 3 check 
+LDR R0, #0x0D
+TST R0, R2
+BNE :FAIL
+OUT DOT, A        // Pass 4 check 
+LDR R0, #0x27     // Restore Settings 
+
+////////////////////////////////////////////
 
 // 3.1- SUB
+// 7.1- SBC - C = A - B - NOT(Cin)
 
 OUT NEW_LINE, A
 OUT _S, A
@@ -244,8 +274,7 @@ OUT DASH, A
 OUT _S, A
 OUT _B, A
 OUT _C, A
-OUT COMMA, A
-BRK
+
 SUB  R2, R1, R0   // BF = E6 - 27
 BCC :FAIL         // Borrow is inverse of Carry. No Borrow, so Carry is set. Fail if Cary is not set
 OUT DOT, A        // Pass 1 check 
@@ -257,7 +286,7 @@ LDR R3, #0xBF
 TST R2, R3
 BNE :FAIL
 OUT DOT, A        // Pass 3 check 
-
+// Now repeat bu with Borrow (0xFF41 = 0x2727 - 0x27E6)
 SUB  R2, R0, R1   // 41 + Borrow = 27 - E6
 BCS :FAIL         // Borrow is inverse of Carry. Borrow is needed so Carry is clear. Fail if Cary is not clear
 OUT DOT, A        // Pass 4 check 
@@ -269,16 +298,126 @@ OUT DOT, A        // Pass 5 check
 LDR R3, #0x41
 TST R2, R3
 BNE :FAIL
-
-// 4 - 	ASL - Shift Left (lsb gets 0)
-// 4.1- ROL - Rotate Left (lsb gets Cin)
-// 5 -  LSR - Logic Shift Right
-// 5.1- ASR - Arithmaetic Shift Right
-// 6 -  ROR - Rotate Right Cin -> Reg -> Cout
-// 7 -  ADC	- C = A + B + Cin
-// 7.1- SBC - C = A - B - Cin
-
+OUT DOT, A        // Pass 6 check 
 OUT NEW_LINE, A
+
+////////////////////////////////////////////
+
+// 4 - 	ASL - Shift Left (msb goes to Cout, lsb gets 0)
+
+OUT _A, A
+OUT _S, A
+OUT _L, A
+OUT COMMA, A
+
+ASL R2, R1   // E6 -> CC + C
+LDR R3, #0xCC
+TST R2, R3
+BNE :FAIL
+ASL R2, R2   // CC -> 98 + C
+LDR R3, #0x98
+TST R2, R3
+BNE :FAIL
+ASL R2, R2   // 98 -> 30 + C
+LDR R3, #0x30
+TST R2, R3
+BNE :FAIL
+ASL R2, R2   // 30 -> 60
+LDR R3, #0x60
+TST R2, R3
+BNE :FAIL
+
+////////////////////////////////////////////
+
+// 4.1- ROL - Rotate Left (msb goes to Cout, lsb gets Cin)
+
+OUT _R, A
+OUT _O, A
+OUT _L, A
+OUT COMMA, A
+
+// Clear Carry 
+LDR R3, #0x00
+ROL R3, R3
+
+ROL R2, R1   // E6     -> CC + C
+BCC :FAIL
+ROL R2, R2   // CC + C -> 99 + C
+BCC :FAIL
+ROL R2, R2   // 99 + C -> 33 + C
+BCC :FAIL
+ROL R2, R2   // 33 + C -> 67
+BCS :FAIL
+ROL R2, R2   // 67     -> CE
+LDR R3, #0xCE
+TST R2, R3
+BNE :FAIL
+
+////////////////////////////////////////////
+
+// 5 -  LSR - Logic Shift Right (msb gets 0, lsb goes to Cout)
+OUT _L, A
+OUT _S, A
+OUT _R, A
+OUT COMMA, A
+
+LSR R2, R1   // E6     -> 73
+BCS :FAIL
+LSR R2, R2   // 73     -> 39 + C
+BCC :FAIL
+LSR R2, R2   // 39 + C -> 1C + C
+BCC :FAIL
+LSR R2, R2   // 1C + C -> 0E
+BCS :FAIL
+LSR R2, R2   // 0E     -> 07
+LDR R3, #0x07
+TST R2, R3
+BNE :FAIL
+
+////////////////////////////////////////////
+
+// 5.1- ASR - Arithmaetic Shift Right (msb sign-extended, lsb goes to Cout)
+OUT _A, A
+OUT _S, A
+OUT _R, A
+OUT COMMA, A
+
+ASR R2, R1   // E6     -> F3
+BCS :FAIL
+ASR R2, R2   // F3     -> F9 + C
+BCC :FAIL
+ASR R2, R2   // F9 + C -> FC + C
+BCC :FAIL
+ASR R2, R2   // FC + C -> FE
+BCS :FAIL
+LDR R3, #0xFE
+TST R2, R3
+BNE :FAIL
+
+////////////////////////////////////////////
+
+// 6 -  ROR - Rotate Right Cin -> Reg -> Cout
+OUT _R, A
+OUT _O, A
+OUT _R, A
+
+// Clear Carry 
+LDR R3, #0x00
+ROR R3, R3
+
+ROR R2, R1   // E6     -> 73
+BCS :FAIL
+ROR R2, R2   // 73     -> 39 + C
+BCC :FAIL
+ROR R2, R2   // 39 + C -> 9C + C
+BCC :FAIL
+ROR R2, R2   // 9C + C -> CE
+BCS :FAIL
+ROR R2, R2   // CE     -> 67
+LDR R3, #0x67
+TST R2, R3
+BNE :FAIL
+
 ////////////////////////////////////
 
 
