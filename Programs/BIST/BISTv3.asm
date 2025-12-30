@@ -376,7 +376,7 @@ BNE :FAIL
 
 ////////////////////////////////////////////
 
-// 5.1- ASR - Arithmaetic Shift Right (msb sign-extended, lsb goes to Cout)
+// 5.1- ASR - Arithmetic Shift Right (msb sign-extended, lsb goes to Cout)
 OUT _A, A
 OUT _S, A
 OUT _R, A
