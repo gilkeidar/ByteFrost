@@ -101,7 +101,7 @@ NOP
 NOP
 NOP
 NOP
-NOP   // Time 5 NOPS. Counter = 5 * 3 + 4 = 19 (0x13)
+NOP   // Time 5 NOPS. Counter = 5 * 2 + 4 = 14 (0xE)
 
 SDW R0, %DP, #1  // Latch Counter
 // LDW R0, %DP, #5  // Print Byte4
@@ -112,7 +112,7 @@ LDW R1, %DP, #3  // Print Byte2
 OUT R1, I
 LDW R2, %DP, #2  // Print Byte1
 OUT R2, I
-LDR R3, #0x13
+LDR R3, #0xE
 TST R2, R3
 BNE :FAIL
 
@@ -129,7 +129,7 @@ NOP
 NOP
 NOP
 NOP
-NOP   // Time 10 NOPS Counter = 10 * 3 + 4 = 34 (0x22)
+NOP   // Time 10 NOPS Counter = 10 * 2 + 4 = 24 (0x18)
 
 
 SDW R0, %DP, #1  // Latch Counter
@@ -141,7 +141,7 @@ LDW R1, %DP, #3  // Print Byte2
 OUT R1, I
 LDW R2, %DP, #2  // Print Byte1
 OUT R2, I
-LDR R3, #0x22
+LDR R3, #0x18
 TST R2, R3
 BNE :FAIL
 
@@ -444,7 +444,7 @@ OUT SPACE, A
 OUT _M, A
 OUT _O, A
 OUT _V, A
-BRK
+
 LDR R1, #0xA5
 MOV R2, R1
 MOV R3, R2
@@ -472,8 +472,164 @@ BNE :FAIL
 
 OUT NEW_LINE, A
 
-////////////////////////////////////////////
+//////////////////////////////////// Op Code 0x05 - BRANCH ABS
+OUT _O, A
+OUT _p, A
+OUT #5, I
+OUT COLON, A
+OUT SPACE, A
+OUT _B, A
+OUT _R, A
+OUT _A, A
+OUT _N, A
+OUT _C, A
+OUT _H, A
+OUT SPACE, A
+OUT _A, A
+OUT _B, A
+OUT _S, A
+OUT NEW_LINE, A
 
+//	The conditional branches are tested twice - once where the branch
+//	should be taken, and once where it should not be taken.
+
+//	1.	JMP
+OUT _J, A
+OUT _M, A
+OUT _P, A
+
+JMP :JMP_PASS
+JMP :FAIL
+
+:JMP_PASS
+
+//	2.	BMI (Branch on Minus - Negative flag must be set)
+OUT COMMA, A
+OUT _B, A
+OUT _M, A
+OUT _I, A
+
+//	Branch should not be taken.
+LDR R0, #4
+LDR R1, #5
+
+TST R1, R0	//	R1 - R0 = 1 > 0, minus flag not set.
+BMI :FAIL
+
+//	Branch should be taken.
+TST R0, R1	//	R0 - R1 = -1 < 0, minus flag is set.
+BMI :BMI_PASS
+JMP :FAIL
+
+:BMI_PASS
+
+//	3.	BCS (Branch Carry Set - Carry flag must be set)
+OUT COMMA, A
+OUT _B, A
+OUT _C, A
+OUT _S, A
+
+//	Branch should not be taken.
+LDR R0, #0x40
+ASL R0, R0	//	R0 = 0x80, Cout = 0 -> Carry flag is not set.
+BCS :FAIL
+
+//	Branch should be taken.
+ASL R0, R0	//	R0 = 0x00, Cout = 1 -> Carry flag is set.
+BCS :BCS_PASS
+JMP :FAIL
+
+:BCS_PASS
+
+//	4.	BEQ (Branch Equal - Zero flag must be set)
+OUT COMMA, A
+OUT _B, A
+OUT _E, A
+OUT _Q, A
+
+//	Branch should not be taken.
+LDR R0, #0x56
+LDR R1, #0x55
+
+TST R1, R0
+BEQ :FAIL
+
+//	Branch should be taken.
+INC R1
+TST R1, R0
+BEQ :BEQ_PASS
+JMP :FAIL
+
+:BEQ_PASS
+
+//	5.	BPL (Branch on Plus - Negative flag must not be set (really, should be Branch on Non-Negative))
+OUT COMMA, A
+OUT _B, A
+OUT _P, A
+OUT _L, A
+
+//	Branch should not be taken.
+LDR R0, #0x55
+LDR R1, #0x56
+
+TST R0, R1	//	R0 - R1 = -1 -> Negative flag is set.
+BPL :FAIL
+
+//	Branch should be taken.
+TST R1, R0	//	R1 - R0 = 1 -> non-negative (negative flag not set).
+BPL :BPL_PASS1
+JMP :FAIL
+
+:BPL_PASS1
+
+//	Branch should be taken
+TST R0, R0	//	R0 - R0 = 0 -> non-negative (negative flag not set).
+BPL :BPL_PASS2
+JMP :FAIL
+
+:BPL_PASS2
+
+//	6.	BCC (Branch Carry Clear - Carry flag must not be set)
+OUT COMMA, A
+OUT _B, A
+OUT _C, A
+OUT _C, A
+
+//	Branch should not be taken.
+LDR R0, #0x05
+ASR R0, R0	//	R0 = 0x02, Cout = 1
+
+BCC :FAIL
+
+//	Branch should be taken.
+ASR R0, R0	//	R0 = 0x01, Cout = 0
+BCC :BCC_PASS
+JMP :FAIL
+
+:BCC_PASS
+
+//	7.	BNE (Branch Not Equal - Zero flag must not be set)
+OUT COMMA, A
+OUT _B, A
+OUT _N, A
+OUT _E, A
+
+//	Branch should not be taken.
+LDR R0, #0x47
+LDR R1, #0x47
+
+TST R1, R0
+BNE :FAIL
+
+//	Branch should be taken.
+DEC R1
+TST R1, R0
+BNE :BNE_PASS
+JMP :FAIL
+
+:BNE_PASS
+
+////////////////////////////////////////////
 
 :PASS
 OUT NEW_LINE, A
@@ -481,6 +637,20 @@ OUT _P, A
 OUT _A, A
 OUT _S, A
 OUT _S, A
+OUT SPACE, A
+
+LDA %DP, H, counter_base[1]
+LDA %DP, L, counter_base[0]
+
+SDW R0, %DP, #1  // Latch Counter
+// LDW R0, %DP, #5  // Print Byte4
+// OUT R0, I
+LDW R0, %DP, #4  // Print Byte3
+OUT R0, I
+LDW R1, %DP, #3  // Print Byte2
+OUT R1, I
+LDW R2, %DP, #2  // Print Byte1
+OUT R2, I
 BRK
 
 :FAIL
