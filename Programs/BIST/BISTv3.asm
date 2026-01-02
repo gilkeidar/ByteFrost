@@ -12,8 +12,17 @@
 // Set Stack Pointer to 0x7700
 //////////////////////////////////
 
-.define	1 NEW_LINE	 	0x10
-.define 1 SPACE			0x20
+.define	1 NEW_LINE	 		0x10
+.define 1 SPACE				0x20
+.define 1 LEFT_PAR			0x28
+.define	1 RIGHT_PAR			0x29
+.define 1 COMMA				0x2c
+.define 1 ASTERISK			0x2a
+.define 1 DASH				0x2d
+.define 1 DOT				0x2e
+.define 1 COLON				0x3a
+.define 1 EQUALS			0x3d
+
 .define	1 _A				0x41
 .define	1 _B				0x42
 .define	1 _C				0x43
@@ -40,14 +49,11 @@
 .define	1 _X				0x58
 .define	1 _Y				0x59
 .define	1 _Z				0x5a
-.define 1 COLON				0x3a
-.define 1 LEFT_PAR			0x28
-.define	1 RIGHT_PAR			0x29
-.define 1 COMMA				0x2c
-.define 1 ASTERISK			0x2a
-.define 1 DASH				0x2d
-.define 1 DOT				0x2e
 
+.define 1 _l				0x6c
+.define 1 _m				0x6d
+.define 1 _n				0x6e
+.define 1 _o				0x6f
 .define 1 _p				0x70
 .define 1 _q				0x71
 .define 1 _r				0x72
@@ -57,8 +63,9 @@
 .define 1 _v				0x76
 .define 1 _w				0x77
 .define 1 _x				0x78
+.define 1 _y				0x79
+.define 1 _z				0x7a
 
-.define 1 EQUALS			0x3d
 
 OUT _B, A
 OUT _I, A
@@ -626,8 +633,165 @@ DEC R1
 TST R1, R0
 BNE :BNE_PASS
 JMP :FAIL
-
 :BNE_PASS
+
+//////////////////////////////////// Op Code 0x06 - ALU Immediate
+// The immediate is only 4 bit sign extended, so the range is [-8 .. 7] 
+// Only two parameter operations are applicable 
+OUT NEW_LINE, A
+OUT _O, A
+OUT _p, A
+OUT #6, I
+OUT COLON, A
+OUT SPACE, A
+OUT _A, A
+OUT _L, A
+OUT _U, A
+OUT SPACE, A
+OUT _I, A
+OUT _m, A
+OUT NEW_LINE, A
+
+////////////////////////////////////////////
+
+// 0 -	OR
+
+OUT _O, A
+OUT _R, A
+OUT COMMA, A
+LDR R0 #0x65
+OR  R0, #8 // 8 is extended to F8, so  FD = F8 OR 65   
+LDR R3, #0xFD
+TST R0, R3
+BNE :FAIL
+
+LDR R0 #0x65
+OR  R0, #1 //   65 = 01 OR 65   
+LDR R3, #0x65
+TST R0, R3
+BNE :FAIL
+
+////////////////////////////////////////////
+
+// 1 - 	AND
+
+OUT _A, A
+OUT _N, A
+OUT _D, A
+OUT COMMA, A
+
+LDR R2, #0x65
+AND  R2, #0xC  // 0x64 = 0xFC AND 0x65  
+LDR R3, #0x64
+TST R2, R3
+BNE :FAIL
+
+LDR R2, #0x65
+AND R2, #0x4 // 0x04 = 0x04 AND 0x65  
+LDR R3, #0x04
+TST R2, R3
+BNE :FAIL
+
+////////////////////////////////////////////
+
+// 2 - 	XOR
+
+OUT _X, A
+OUT _O, A
+OUT _R, A
+OUT COMMA, A
+
+LDR R2, #0x7B
+XOR R2, #0x9  
+LDR R1, #0x82  // 0x82 = 0xF9 XOR 0x7B  
+TST R2, R1
+BNE :FAIL
+
+LDR R0, #0x65
+XOR R0, #0x4  
+LDR R3, #0x61 // 0x61 = 0x04 XOR 0x65 
+TST R0, R3
+BNE :FAIL 
+
+
+JMP :PASS
+
+
+////////////////////////////////////////////
+
+// 3 - 	ADD
+// 7 -  ADC	- C = A + B + Cin
+
+OUT NEW_LINE, A
+OUT _A, A
+OUT _D, A
+OUT _D, A
+OUT DASH, A
+OUT _A, A
+OUT _D, A
+OUT _C, A
+ 
+ADD  R2, R1, R0   // 10D = E6 + 27
+BCC :FAIL         // Fail if Cary is not set
+OUT DOT, A        // Pass 1 check 
+ADC  R3, R0, R1   // Test the Carry  (0x10E0D = 27E6 + E627) 
+BCC :FAIL         // Fail if Cary is not set
+OUT DOT, A        // Pass 2 check 
+
+LDR R0, #0x0E
+TST R0, R3
+BNE :FAIL
+OUT DOT, A        // Pass 3 check 
+LDR R0, #0x0D
+TST R0, R2
+BNE :FAIL
+OUT DOT, A        // Pass 4 check 
+LDR R0, #0x27     // Restore Settings 
+
+////////////////////////////////////////////
+
+// 3.1- SUB
+// 7.1- SBC - C = A - B - NOT(Cin)
+
+OUT NEW_LINE, A
+OUT _S, A
+OUT _U, A
+OUT _B, A
+OUT DASH, A
+OUT _S, A
+OUT _B, A
+OUT _C, A
+
+SUB  R2, R1, R0   // BF = E6 - 27
+BCC :FAIL         // Borrow is inverse of Carry. No Borrow, so Carry is set. Fail if Cary is not set
+OUT DOT, A        // Pass 1 check 
+SBC  R3, R0, R0   // Test the Borrow (0x00BF = 0x27E6 - 0x2727) 
+TST R3, #0x00
+BNE :FAIL
+OUT DOT, A        // Pass 2 check 
+LDR R3, #0xBF
+TST R2, R3
+BNE :FAIL
+OUT DOT, A        // Pass 3 check 
+// Now repeat bu with Borrow (0xFF41 = 0x2727 - 0x27E6)
+SUB  R2, R0, R1   // 41 + Borrow = 27 - E6
+BCS :FAIL         // Borrow is inverse of Carry. Borrow is needed so Carry is clear. Fail if Cary is not clear
+OUT DOT, A        // Pass 4 check 
+SBC  R3, R0, R0   // Test the Borrow (0xFF41 = 0x2727 - 0x27E6) 
+
+TST R3, #0xF
+BNE :FAIL
+OUT DOT, A        // Pass 5 check 
+LDR R3, #0x41
+TST R2, R3
+BNE :FAIL
+OUT DOT, A        // Pass 6 check 
+OUT NEW_LINE, A
+
+////////////////////////////////////////////
+
+
+
 
 ////////////////////////////////////////////
 
