@@ -394,7 +394,7 @@ OUT NEW_LINE, A
 //		the code there.
 //		*	If fall through, print error; if set to a random address, will have
 //			undefined behavior.
-BRK
+
 LDR R3, :RTS_SUCCESS[1]
 LSR R3, R3
 PUSH R3
@@ -432,6 +432,179 @@ OUT _C, A
 OUT _C, A
 OUT _E, A
 OUT _S, A
+OUT _S, A
+OUT NEW_LINE, A
+
+//  Test remaining instructions:
+//  1.  MAG
+//  2.  MAA
+//  3.  JSR
+
+//  1.  Test MAG instruction (MAG Rd, ARSrc, L/H)
+//      *   Can test with MGA / LDA
+//      1.  Set DP to 0x1977 using LDA and verify using MAG.
+
+//  DP = 0x1977
+LDA %DP, H, #0x19
+LDA %DP, L, #0x77
+
+MAG R0, %DP, L
+MAG R1, %DP, H
+
+//  printf("MAG DP E: 1977 A: {R1,R0}\n");
+OUT _M, A
+OUT _A, A
+OUT _G, A
 OUT SPACE, A
+OUT _D, A
+OUT _P, A
+OUT SPACE, A
+OUT _E, A
+OUT COLON, A
+OUT #0x19, I
+OUT #0x77, I
+OUT SPACE, A
+OUT _A, A
+OUT COLON, A
+OUT R1, I
+OUT R0, I
+
+//      2.  Set SP to 0x2022 using LDA and verify using MAG.
+
+//  SP = 0x2022
+LDA %SP, H, #0x20
+LDA %SP, L, #0x22
+
+MAG R0, %SP, L
+MAG R1, %SP, H
+
+//  printf("MAG SP E:2022 A:{R1, R0}\n");
+OUT _M, A
+OUT _A, A
+OUT _G, A
+OUT SPACE, A
+OUT _S, A
+OUT _P, A
+OUT SPACE, A
+OUT _E, A
+OUT COLON, A
+OUT #0x20, I
+OUT #0x22, I
+OUT SPACE, A
+OUT _A, A
+OUT COLON, A
+OUT R1, I
+OUT R0, I
+
+//  2.  Test MAA instruction
+//      1.  Set DP to #0x3344 and SP to DP + 127. Expectation: SP = #0x33C3
+
+//  DP = 0x3344
+LDA %DP, H, #0x33
+LDA %DP, L, #0x44
+
+//  SP = DP + 127
+MAA %SP, %DP, #127
+
+//  printf("MAA1 DP: {R1R0} E: 3344\n");
+MAG R1, %DP, H
+MAG R0, %DP, L
+
+OUT _M, A
+OUT _A, A
+OUT _A, A
+OUT #1, A
+OUT SPACE, A
+OUT _D, A
+OUT _P, A
+OUT COLON, A
+OUT SPACE, A
+OUT R1, I
+OUT R0, I
+OUT SPACE, A
+OUT _E, A
+OUT COLON, A
+OUT #0x33, I
+OUT #0x44, I
+
+//  printf("MAA1 SP: {R1R0} E: 33C3\n");
+MAG R1, %SP, H
+MAG R0, %SP, L
+
+OUT _M, A
+OUT _A, A
+OUT _A, A
+OUT #1, A
+OUT SPACE, A
+OUT _S, A
+OUT _P, A
+OUT COLON, A
+OUT SPACE, A
+OUT R1, I
+OUT R0, I
+OUT SPACE, A
+OUT _E, A
+OUT COLON, A
+OUT #0x33, I
+OUT #0xC3, I
+
+//      2.  Set DP to DP - 128. Expectation: DP = #0x32C4
+MAA %DP, %DP, #-128
+
+//  printf("MAA2 DP: {R1R0} E: 32C4\n");
+MAG R1, %DP, H
+MAG R0, %DP, L
+
+OUT _M, A
+OUT _A, A
+OUT _A, A
+OUT #2, A
+OUT SPACE, A
+OUT _D, A
+OUT _P, A
+OUT COLON, A
+OUT SPACE, A
+OUT R1, I
+OUT R0, I
+OUT SPACE, A
+OUT _E, A
+OUT COLON, A
+OUT #0x32, I
+OUT #0xC4, I
+
+//  3.  Test JSR (using CALL)
+BRK
+
+CALL :function
+
+:JSR_FAILURE
+//	Print JSR FAIL
+OUT _J, A
+OUT _S, A
+OUT _R, A
+OUT SPACE, A
+OUT _F, A
+OUT _A, A
+OUT _I, A
+OUT _L, A
+OUT SPACE, A
+
+BRK
+
+:function
+//  Print CALL SUCCESS
+OUT NEW_LINE, A
+OUT _C, A
+OUT _A, A
+OUT _L, A
+OUT _L, A
+OUT SPACE, A
+OUT _S, A
+OUT _U, A
+OUT _C, A
+OUT _C, A
+OUT _E, A
+OUT _S, A
+OUT _S, A
 
 BRK

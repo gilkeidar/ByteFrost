@@ -1,4 +1,5 @@
 //////////////////////////////////
+// BISTv2:
 // Enhance to 16bit address range
 // 0x0000 .. 0x1FFF  ROM 
 // 0x2000 .. 0xDFFF  RAM

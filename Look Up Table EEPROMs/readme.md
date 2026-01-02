@@ -1,4 +1,4 @@
-#   Look Up Table EEPROMs
+# Look Up Table EEPROMs
 
 **Last Updated:** June 15, 2025
 
@@ -14,7 +14,7 @@ maintenance will also be more difficult since more ICs = more components that
 can potentially result in failures.
 
 Hence, in order to minimize hardware implementation area cost, lower complexity,
-and increase testability and maintainability, we can implement complex 
+and increase testability and maintainability, we can implement complex
 combinational circuits using LUTs (look-up tables), implemented using EEPROMs.
 The idea is that the EEPROMs act as a black box encompassing the implementation,
 with each 1-bit input of the combinational logic circuit being assigned and sent
@@ -25,4 +25,7 @@ In order to set an EEPROM's LUT contents, we need to generate a binary file that
 contains the LUT. In this folder is the software for doing so and binary files
 for LUTs used by the ByteFrost.
 
-NOTE: Issues with programmer configuration - choose CAT28C16A
+
+
+**NOTE: Issues with programmer configuration - choose CAT28C16A**
+
