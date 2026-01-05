@@ -121,7 +121,8 @@ LDA %DP, L, sdcard[0]
 
 LDR R0, #0			//	for (i = 0; i < 8; i++)
 :for_loop			//	{
-	TST R0, #8		//		Perform i - 8 (i < 8 -> i - 8 < 0) to set ALU flags.
+	LDR R1, #8		//		
+	TST R0, R1		//		Perform i - 8 (i < 8 -> i - 8 < 0) to set ALU flags.
 					//		(If i < 8, i - 8 < 0 and N flag is set)
 	BPL :after_for_loop		
 					//		page (R1) = 32 + i

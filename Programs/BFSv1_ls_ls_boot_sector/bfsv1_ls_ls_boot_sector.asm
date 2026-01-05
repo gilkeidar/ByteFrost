@@ -67,6 +67,8 @@
 //		6.	Print the filename.
 //		7.	Print newline.
 
+.start 0x2000
+
 .define	1 NEW_LINE	 	0x10
 .define 1 SPACE			0x20
 .define	1 _A				0x41
@@ -120,8 +122,8 @@
 .define	1 DIR_ENTRY_SIZE_BYTES	16
 
 .define	1 DirectoryEntry_filename_offset	0
-.define 1 DirectoryEntry_inode_block_sector_offset_lo	14
-.define 1 DirectoryEntry_inode_block_sector_offset_hi	15
+.define 1 DirectoryEntry_inode_block_sector_offset_lo	15
+.define 1 DirectoryEntry_inode_block_sector_offset_hi	14
 
 //  Memory use:
 //  Page 0x30: Directory block
@@ -176,7 +178,7 @@ LDR R0, dir_block_page
 SDW R0, %DP, DISK_MMIO_PAGE_OFFSET
 
 //	Set Byte 1 (Sector High) to 0x00
-LDR R0, #0
+LDR R0, #0x00
 SDW R0, %DP, DISK_MMIO_SECTOR_HI_OFFSET
 
 //	Set Byte 2 (Sector Low) to 0x08
@@ -191,7 +193,7 @@ SDW R0, %DP, DISK_MMIO_GO_OFFSET
 
 //	3.	Set total_blocks (a 16-bit counter as there are 2048 total blocks in the
 //		disk) to 0.
-LDR R0, #0
+LDR R0, #0x00
 SDW R0, %SP, sp_total_blocks_hi
 SDW R0, %SP, sp_total_blocks_lo
 
@@ -204,9 +206,9 @@ LDR R1, inode_arr_base_page		//	inode_page = 0x31;
 LDA %DP, H, dir_block_page		//	DirectoryEntry * entry = 0x3000;
 LDA %DP, L, #0
 
-DEC R0
 :loop_1					//	for (; i < 16;) {
-TST R0, #15				//		R0 - 16 = i - 16 (since i < 16 -> i - 16 < 0)
+LDR R3, #16
+TST R0, R3				//		R0 - 16 = i - 16 (since i < 16 -> i - 16 < 0)
 BPL :loop_1_done		//		(Since if i < 16, i - 16 < 0 and negative flag is set)
 
 //		1.	If the inode block pointer of the current entry is 0, skip to the
@@ -312,9 +314,10 @@ LDA %DP, L, #0
 LDA %BP, H, inode_arr_base_page	//	Inode * entry_inode = 0x3100;
 LDA %BP, L, #0
 
-DEC R0
 :loop_2					//	for (; i < 16;) {
-TST R0, #15 			//		R0 - 16 = i - 16 (since i < 16 -> i - 16 < 0)
+OUT ASTERISK, A
+LDR R3, #16
+TST R0, R3 				//		R0 - 16 = i - 16 (since i < 16 -> i - 16 < 0)
 BPL :loop_2_done		//		(Since if i < 16, i - 16 < 0 and negative flag is set)
 
 //		1.	If the inode block pointer of the current entry is 0, skip to the
@@ -343,11 +346,11 @@ OUT SPACE, A
 //		4.	Read the file size field in bytes of this entry's inode
 
 //	Read entry_node->file_size_bytes HIGH byte
-LDW R2, %BP, #1
+LDW R2, %BP, #0
 OUT R2, I
 
 //	Read entry_node->file_size_bytes LOW byte
-LDW R2, %BP, #0
+LDW R2, %BP, #1
 OUT R2, I
 
 //		5.	Print space.
@@ -364,7 +367,8 @@ OUT SPACE, A
 //					1.	DP++, R2++
 LDR R2, #0
 :file_name_print_loop
-TST R2, #14		//	R2 < 14 -> R2 - 14 < 0
+LDR R3, #14
+TST R2, R3		//	R2 < 14 -> R2 - 14 < 0
 BPL :file_name_print_loop_done
 LDW R3, %DP, #0
 TST R3, #0
@@ -377,9 +381,9 @@ JMP :file_name_print_loop
 
 :file_name_print_loop_done
 
-DEC R2
 :move_dp_to_next_entry_loop
-TST R2, #15
+LDR R3, #16
+TST R2, R3
 BPL :move_dp_to_next_entry_loop_done
 INC R2
 MAA %DP, %DP, #1
@@ -391,6 +395,7 @@ JMP :move_dp_to_next_entry_loop
 OUT NEW_LINE, A
 
 :loop_2_update
+OUT COMMA, A
 INC R0
 INC R1
 MGA %BP, H, R1

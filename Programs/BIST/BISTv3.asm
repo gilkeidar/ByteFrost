@@ -768,27 +768,59 @@ TST R2, #0x07
 BNE :FAIL
 OUT NEW_LINE, A
 
-////////////////////////////////////////////
 
-
-JMP :PASS
-//////////////////////////////////// Op Code 0x0E - PUSH
+//////////////////////////////////// Op Code 0x0E - PUSH, 0x0F - POP
 //   
 //   
+.define 1, stack_test_length 0x30
 OUT NEW_LINE, A
 OUT _O, A
 OUT _p, A
 OUT #0x0E, I
+OUT DASH, A
+OUT #0x0F, I
 OUT COLON, A
 OUT SPACE, A
 OUT _P, A
 OUT _U, A
 OUT _S, A
 OUT _H, A
+OUT DASH, A
+OUT _P, A
+OUT _O, A
+OUT _P, A
 OUT NEW_LINE, A
+
+LDA %DP, H, #0x45
+LDA %DP, L, #0x00
+LDA %SP, H, #0x45
+LDA %SP, L, #0x00
+
+LDR R1, stack_test_length
+
+// Push Loop
+:push_loop
+PUSH R1
+DEC R1 
+BNE :push_loop
+
+
+// Pop & Check loop
+:pop_loop
+INC R1
+POP R2
+SUB R2, R2, R1
+BNE :FAIL
+
+    BEQ +2
+    BRK     // Fail R1 != R2
+	INC R1 
+    BNE -19
+
 
 ////////////////////////////////////////////
 
+JMP :PASS
 ////////////////////////////////////////////
 
 :PASS
