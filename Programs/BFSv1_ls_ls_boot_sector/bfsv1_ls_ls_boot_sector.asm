@@ -358,7 +358,50 @@ OUT R2, I
 //		5.	Print space.
 OUT SPACE, A
 
-//		6.	Print the filename.
+
+//		6.	Print file type
+
+//	Read entry_node->file_type
+LDW R2, %BP, #3
+
+//	Map type value to a character to print
+//	1.	0 --> UNKNOWN
+//	1.	1 --> TEXT
+//	2.	2 --> ASM
+//	3.	3 --> MLG
+//	4.	4 --> BIN
+TST R2, #0
+BNE :file_type_text_check
+OUT _U, A
+JMP :file_type_check_done
+
+:file_type_text_check
+TST R2, #1
+BNE :file_type_asm_check
+OUT _T, A
+JMP :file_type_check_done
+
+:file_type_asm_check
+TST R2, #2
+BNE :file_type_mlg_check
+OUT _A, A
+JMP :file_type_check_done
+
+:file_type_mlg_check
+TST R2, #3
+BNE :file_type_bin_check
+OUT _M, A
+JMP :file_type_check_done
+
+:file_type_bin_check
+OUT _B, A
+
+:file_type_check_done
+
+//		7.	Print space.
+OUT SPACE, A
+
+//		8.	Print the filename.
 //			1.	for (R2 = 0; R2 < 14;):
 //				1.	R3 = *DP.
 //				2.	if R3 == '\0', break
@@ -395,7 +438,7 @@ JMP :move_dp_to_next_entry_loop
 
 :done_entry
 
-//			7.	Print newline.
+//		9.	Print newline.
 OUT NEW_LINE, A
 
 :loop_2_update
