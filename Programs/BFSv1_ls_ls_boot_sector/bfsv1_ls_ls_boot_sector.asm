@@ -140,6 +140,7 @@
 .define	1 sp_total_blocks_hi	0
 .define	1 sp_total_blocks_lo	-1
 
+////////////////////////////////////////////////////
 //  Implementation
 
 //	0.	Set SP to 0xDFFF.
@@ -207,6 +208,7 @@ LDA %DP, H, dir_block_page		//	DirectoryEntry * entry = 0x3000;
 LDA %DP, L, #0
 
 :loop_1					//	for (; i < 16;) {
+
 LDR R3, #16
 TST R0, R3				//		R0 - 16 = i - 16 (since i < 16 -> i - 16 < 0)
 BPL :loop_1_done		//		(Since if i < 16, i - 16 < 0 and negative flag is set)
@@ -315,7 +317,7 @@ LDA %BP, H, inode_arr_base_page	//	Inode * entry_inode = 0x3100;
 LDA %BP, L, #0
 
 :loop_2					//	for (; i < 16;) {
-OUT ASTERISK, A
+//OUT ASTERISK, A
 LDR R3, #16
 TST R0, R3 				//		R0 - 16 = i - 16 (since i < 16 -> i - 16 < 0)
 BPL :loop_2_done		//		(Since if i < 16, i - 16 < 0 and negative flag is set)
@@ -382,20 +384,22 @@ JMP :file_name_print_loop
 :file_name_print_loop_done
 
 :move_dp_to_next_entry_loop
+// OUT R2, I
+ 
 LDR R3, #16
 TST R2, R3
-BPL :move_dp_to_next_entry_loop_done
+BPL :done_entry
 INC R2
 MAA %DP, %DP, #1
 JMP :move_dp_to_next_entry_loop
 
-:move_dp_to_next_entry_loop_done
+:done_entry
 
 //			7.	Print newline.
 OUT NEW_LINE, A
 
 :loop_2_update
-OUT COMMA, A
+
 INC R0
 INC R1
 MGA %BP, H, R1

@@ -132,6 +132,13 @@ LDR R0, #0			//	for (i = 0; i < 8; i++)
 	SDW R1, %DP, DISK_MMIO_PAGE_OFFSET
 					//		Set Sector High to 0x00 (Read and top 3 sector ID
 					//		bits are 0).
+					
+//	OUT _P, A
+//	OUT _G, A
+//	OUT SPACE, A
+//	OUT R1, I
+//	OUT COMMA, A
+	
 	LDR R1, #0x00
 	SDW R1, %DP, DISK_MMIO_SECTOR_HI_OFFSET
 					//		Set Sector Low to i.
@@ -139,8 +146,34 @@ LDR R0, #0			//	for (i = 0; i < 8; i++)
 					//		Go (R1 is ignored). ByteFrost blocks here.
 	SDW R1, %DP, DISK_MMIO_GO_OFFSET
 	
+//	OUT _S, A
+//	OUT _C, A
+//	OUT SPACE, A
+//	OUT R1, I
+//	OUT R0, I
+//	OUT NEW_LINE, A
 	INC R0			//		(i++);
 	JMP :for_loop	//	}
-	
+
 :after_for_loop			//	Jump to boot sector code.
-	JMP :__RAM_START__	//	Jump to RAM start (0x2000) - page 32.
+	
+////////////////////////////////////////////////////
+// CHECK BOOT ROM MEMORY LOADING
+
+// LDA %DP, H, #0x20
+// LDA %DP, L, #0xF8
+// OUT #0x20, I
+// OUT #0xF8, I
+// OUT COLON, A
+// OUT SPACE, A
+// LDR R1, #0x10
+
+// :print_loop2
+// LDW R2, %DP, #0
+// OUT R2, I
+// OUT SPACE, A
+// MAA %DP, %DP, #1
+// DEC R1
+// BPL :print_loop2
+	
+JMP :__RAM_START__	//	Jump to RAM start (0x2000) - page 32.
