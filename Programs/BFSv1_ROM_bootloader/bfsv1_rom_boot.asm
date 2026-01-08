@@ -85,11 +85,11 @@ OUT _T, A
 OUT NEW_LINE, A
 
 //	2.	Copy first 8 pages from disk to pages 32 - 39 in RAM.
-
 //	Set DP to point at the disk MMIO base address.
 LDA %DP, H, sdcard[1]
 LDA %DP, L, sdcard[0]
-
+LDA %BP, H, sdcard[1]
+LDA %BP, L, sdcard[0]
 //	Disk MMIO interface is as follows:
 //	Byte 0 (0xE000): Page (in ByteFrost address space)
 //	Byte 1 (0xE001): Command and Sector High (3 lsbs)
@@ -112,47 +112,56 @@ LDA %DP, L, sdcard[0]
 //	disk interface! It stops fetching instructions until the disk operation is
 //	complete).
 
-//	R0: i = 0 to 7 (page counter)
-//	R1: Disk command byte value
 .define	1 DISK_MMIO_PAGE_OFFSET			0
 .define	1 DISK_MMIO_SECTOR_HI_OFFSET	1
 .define 1 DISK_MMIO_SECTOR_LO_OFFSET	2
 .define 1 DISK_MMIO_GO_OFFSET			3
 
-LDR R0, #0			//	for (i = 0; i < 8; i++)
+LDR R0, #0x00		//	R0: Sector
+LDR R1, #0x20		//  R1: Page
+LDR R2, #0x00		//  R2: Sector High + Command (Read)
+
 :for_loop			//	{
-	LDR R1, #8		//		
-	TST R0, R1		//		Perform i - 8 (i < 8 -> i - 8 < 0) to set ALU flags.
-					//		(If i < 8, i - 8 < 0 and N flag is set)
-	BPL :after_for_loop		
-					//		page (R1) = 32 + i
-	LDR R1, #32		//			(R1 = 32)
-	ADD R1, R1, R0	//			(R1 = 32 + i)
-					//		Set MMIO page interface to page (32 + i).
-	SDW R1, %DP, DISK_MMIO_PAGE_OFFSET
-					//		Set Sector High to 0x00 (Read and top 3 sector ID
-					//		bits are 0).
-					
-//	OUT _P, A
-//	OUT _G, A
-//	OUT SPACE, A
-//	OUT R1, I
-//	OUT COMMA, A
+	SDW R0, %BP, DISK_MMIO_SECTOR_LO_OFFSET	//		Sector to bring
+	SDW R2, %BP, DISK_MMIO_SECTOR_HI_OFFSET	//		Sector to bring
+	SDW R1, %BP, DISK_MMIO_PAGE_OFFSET 		// 		Page to store
+	SDW R1, %BP, DISK_MMIO_GO_OFFSET		// 		GO
+
+	OUT _P, A
+	OUT _G, A
+	OUT SPACE, A
+	OUT R1, I
+	OUT COMMA, A
+
+	OUT _S, A
+	OUT _C, A
+	OUT SPACE, A
+	OUT R2, I
+	OUT R0, I
+	OUT NEW_LINE, A
+	OUT _D, A
+OUT _P, A
+OUT SPACE, A
+MAG R3, %DP, H
+OUT R3, I
+MAG R3, %DP, L
+OUT R3, I
+OUT COMMA, A
+OUT _B, A
+OUT _P, A
+OUT SPACE, A
+MAG R3, %BP, H
+OUT R3, I
+MAG R3, %BP, L
+OUT R3, I
+OUT NEW_LINE, A
+
 	
-	LDR R1, #0x00
-	SDW R1, %DP, DISK_MMIO_SECTOR_HI_OFFSET
-					//		Set Sector Low to i.
-	SDW R0, %DP, DISK_MMIO_SECTOR_LO_OFFSET
-					//		Go (R1 is ignored). ByteFrost blocks here.
-	SDW R1, %DP, DISK_MMIO_GO_OFFSET
-	
-//	OUT _S, A
-//	OUT _C, A
-//	OUT SPACE, A
-//	OUT R1, I
-//	OUT R0, I
-//	OUT NEW_LINE, A
-	INC R0			//		(i++);
+	TST R0, #0x07		//  Did we serve Sector 07 (Last Boot sector).
+	BEQ :after_for_loop	// Yes, we are done
+						// No, Copy the next sector
+	INC R1			//  R1: Page++
+	INC R0			//	R0: Sector++
 	JMP :for_loop	//	}
 
 :after_for_loop			//	Jump to boot sector code.
@@ -160,20 +169,7 @@ LDR R0, #0			//	for (i = 0; i < 8; i++)
 ////////////////////////////////////////////////////
 // CHECK BOOT ROM MEMORY LOADING
 
-// LDA %DP, H, #0x20
-// LDA %DP, L, #0xF8
-// OUT #0x20, I
-// OUT #0xF8, I
-// OUT COLON, A
-// OUT SPACE, A
-// LDR R1, #0x10
 
-// :print_loop2
-// LDW R2, %DP, #0
-// OUT R2, I
-// OUT SPACE, A
-// MAA %DP, %DP, #1
-// DEC R1
-// BPL :print_loop2
+BRK
 	
 JMP :__RAM_START__	//	Jump to RAM start (0x2000) - page 32.
