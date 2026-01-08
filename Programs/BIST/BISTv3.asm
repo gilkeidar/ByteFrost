@@ -804,22 +804,81 @@ PUSH R1
 DEC R1 
 BNE :push_loop
 
-
+LDR R3, stack_test_length
 // Pop & Check loop
 :pop_loop
 INC R1
 POP R2
-SUB R2, R2, R1
+TST R2, R1
 BNE :FAIL
+TST R1, R3
+BNE :pop_loop
+ 
+/////////////////////////////////// Op Code 0x1A - MAG, 0x1C - MGA
+//   
 
-    BEQ +2
-    BRK     // Fail R1 != R2
-	INC R1 
-    BNE -19
+OUT _O, A
+OUT _p, A
+OUT #0x1A, I
+OUT DASH, A
+OUT #0x1C, I
+OUT COLON, A
+OUT SPACE, A
+OUT _M, A
+OUT _A, A
+OUT _G, A
+OUT DASH, A
+OUT _M, A
+OUT _G, A
+OUT _A, A
+OUT NEW_LINE, A
 
+LDR R0, #0xFF
+:mag_mga_loop
+MGA %DP, H, R0
+MGA %DP, L, R0
+MGA %BP, H, R0
+MGA %BP, L, R0
+MAG R3, %DP, H
+TST R3, R0
+BNE :print_bad_line
+MAG R3, %DP, L
+TST R3, R0
+BNE :print_bad_line
+MAG R3, %BP, H
+TST R3, R0
+BNE :print_bad_line
+MAG R3, %BP, L
+TST R3, R0
+BNE :print_bad_line
+JMP :cont_mag_loop
 
-////////////////////////////////////////////
-
+:print_bad_line
+OUT R0, I
+OUT COLON, A
+OUT SPACE, A
+OUT _D, A
+OUT _P, A
+OUT SPACE, A
+MAG R3, %DP, H
+OUT R3, I
+MAG R3, %DP, L
+OUT R3, I
+OUT COMMA, A
+OUT _B, A
+OUT _P, A
+OUT SPACE, A
+MAG R3, %BP, H
+OUT R3, I
+MAG R3, %BP, L
+OUT R3, I
+OUT NEW_LINE, A
+:cont_mag_loop
+TST R0, #0
+BEQ :after_mag_mga
+DEC R0
+JMP :mag_mga_loop
+:after_mag_mga
 JMP :PASS
 ////////////////////////////////////////////
 
