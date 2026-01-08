@@ -102,6 +102,15 @@ int InputStateBitIsHigh(InputState state, int bitOffset) {
 //  LUT generation functions
 
 OutputState ARDataBusLoadEnableGenerator(InputState state) {
+    if (state >= 0x200) {
+        //  State is invalid (10th bit is set) - want to set full 2 KB EEPROM
+        //  with values, so we'll store the default value where no AR byte
+        //  register is loading.
+        //  NOTE: This will need to be changed when SP[H] is implemented using
+        //  two 4-bit counters instead of an 8-bit register.
+        return 0x11;
+    }
+
     //  The AR Data Bus Load Enable LUT has the following input and output
     //  configurations:
     //  9 inputs with the following bit assignments:
