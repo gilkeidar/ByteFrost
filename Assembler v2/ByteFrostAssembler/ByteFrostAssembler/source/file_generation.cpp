@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 void OutputFileGenerator::run(std::vector<Line*> & lines) {
 	debug("=== Stage 4: OutputFileGenerator.run() ===");
@@ -110,4 +111,51 @@ void OutputFileGenerator::createBINFile(std::ofstream& output_file) {
 
 void OutputFileGenerator::createMLGFile(std::ofstream& output_file) {
 	//	TODO: fill this
+	debug("Creating MLG file...");
+
+	//	For each line l:
+	//	1.	If it is an InstructionLine:
+	//		1.	Generate the instruction code as a vector<uint16_t> instruction_code.
+	//		1.	For each uint16_t instruction:
+	//			1.	If this is the first instruction:
+	//				1.	Print the low and high bytes, address, and original line as:
+	//					"0xLB,\t0xHB,\t// 0x[ADDRESS]: [ORIGINAL LINE]"
+	//			2.	Otherwise:
+	//				1.	Print the low and high bytes and address as:
+	//					"0xLB,\t0xHB,\t// 0x[ADDRESS]: ([INSTRUCTION NAME] continued)
+	//	2.	Otherwise:
+	//		1.	Print the original line string.
+	for (Line* line : this->lines) {
+		if (line->type == LineType::INSTRUCTION) {
+			InstructionLine* instructionLine = (InstructionLine*)line;
+			
+			std::vector<uint16_t> instruction_code =
+				instructionLine->instruction->generateCode(*instructionLine, config);
+
+			//for (uint16_t code : instruction_code) {
+			for (size_t i = 0; i < instruction_code.size(); i++) {
+				uint16_t code = instruction_code[i];
+				std::stringstream converter;
+				converter << "0x" << std::hex << std::setw(2) << std::setfill('0') << (code & 0xff)
+					<< ", 0x" << std::hex << std::setw(2) << std::setfill('0') << ((code >> 8) & 0xff)
+					<< ",\t// 0x" << std::hex << std::setw(4) << std::setfill('0') <<  (instructionLine->line_address + config.start_address + (i << 1)) << ": ";
+				if (i == 0) {
+					converter << instructionLine->original_string;
+				}
+				else {
+					converter << "(" << instructionLine->instruction->name << " continued)";
+				}
+				converter << "\n";
+
+				std::string instructionString = converter.str();
+				converter.clear();
+				output_file.write(instructionString.c_str(), instructionString.length());
+			}
+		}
+		else {
+			//	Write original line as is
+			std::string lineString = line->original_string + "\n";
+			output_file.write(lineString.c_str(), lineString.length());
+		}
+	}
 }

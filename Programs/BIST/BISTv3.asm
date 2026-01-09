@@ -681,13 +681,13 @@ OUT _D, A
 OUT COMMA, A
 
 LDR R2, #0x65
-AND  R2, #0xC  // 0x64 = 0xFC AND 0x65  
+AND  R2, #0xC  	// 0x64 = 0xFC AND 0x65  
 LDR R3, #0x64
 TST R2, R3
 BNE :FAIL
 
 LDR R2, #0x65
-AND R2, #0x4 // 0x04 = 0x04 AND 0x65  
+AND R2, #0x4 	// 0x04 = 0x04 AND 0x65  
 LDR R3, #0x04
 TST R2, R3
 BNE :FAIL
@@ -714,15 +714,11 @@ TST R0, R3
 BNE :FAIL 
 
 
-JMP :PASS
-
-
 ////////////////////////////////////////////
 
 // 3 - 	ADD
 // 7 -  ADC	- C = A + B + Cin
 
-OUT NEW_LINE, A
 OUT _A, A
 OUT _D, A
 OUT _D, A
@@ -730,30 +726,22 @@ OUT DASH, A
 OUT _A, A
 OUT _D, A
 OUT _C, A
- 
-ADD  R2, R1, R0   // 10D = E6 + 27
-BCC :FAIL         // Fail if Cary is not set
-OUT DOT, A        // Pass 1 check 
-ADC  R3, R0, R1   // Test the Carry  (0x10E0D = 27E6 + E627) 
-BCC :FAIL         // Fail if Cary is not set
-OUT DOT, A        // Pass 2 check 
+OUT COMMA, A
 
-LDR R0, #0x0E
-TST R0, R3
+LDR R1, #0xFE 
+ADD R1, #6			// 0x104 = FE + 06
+BCC :FAIL         	// Fail if Cary is not set
+ADC R1, #0x05  		// 0A = 05 + 04 + 1
+BCS :FAIL         	// Fail if Cary is set
+LDR R0, #0x0A
+TST R0, R1
 BNE :FAIL
-OUT DOT, A        // Pass 3 check 
-LDR R0, #0x0D
-TST R0, R2
-BNE :FAIL
-OUT DOT, A        // Pass 4 check 
-LDR R0, #0x27     // Restore Settings 
 
 ////////////////////////////////////////////
 
 // 3.1- SUB
 // 7.1- SBC - C = A - B - NOT(Cin)
 
-OUT NEW_LINE, A
 OUT _S, A
 OUT _U, A
 OUT _B, A
@@ -762,37 +750,136 @@ OUT _S, A
 OUT _B, A
 OUT _C, A
 
-SUB  R2, R1, R0   // BF = E6 - 27
-BCC :FAIL         // Borrow is inverse of Carry. No Borrow, so Carry is set. Fail if Cary is not set
-OUT DOT, A        // Pass 1 check 
-SBC  R3, R0, R0   // Test the Borrow (0x00BF = 0x27E6 - 0x2727) 
-TST R3, #0x00
+// Substract with Borrow 
+LDR R2, #0x03 
+SUB R2, #0x05  		// FE = 03 - 05 
+BCS :FAIL         	// Borrow is inverse of Carry. Borrow is set, so Carry is not set. Fail if Carry is set
+LDR R3, #0x03 
+SBC R3, #0x0F   	// F is extended by HW to FF, so 03 = 03 - -1 -Borrow  
+TST R3, #0x03
 BNE :FAIL
-OUT DOT, A        // Pass 2 check 
-LDR R3, #0xBF
-TST R2, R3
+ 
+// Substract without Borrow 
+LDR R2, #0x13 
+SUB R2, #0x05  		// 0E = 13 - 05 
+BCC :FAIL         	// Borrow is inverse of Carry. Borrow is not needed so Carry is set. Fail if Cary is not set
+SBC R2, #0x07      	// 0x07 = 0x0E - 0x07
+TST R2, #0x07
 BNE :FAIL
-OUT DOT, A        // Pass 3 check 
-// Now repeat bu with Borrow (0xFF41 = 0x2727 - 0x27E6)
-SUB  R2, R0, R1   // 41 + Borrow = 27 - E6
-BCS :FAIL         // Borrow is inverse of Carry. Borrow is needed so Carry is clear. Fail if Cary is not clear
-OUT DOT, A        // Pass 4 check 
-SBC  R3, R0, R0   // Test the Borrow (0xFF41 = 0x2727 - 0x27E6) 
-
-TST R3, #0xF
-BNE :FAIL
-OUT DOT, A        // Pass 5 check 
-LDR R3, #0x41
-TST R2, R3
-BNE :FAIL
-OUT DOT, A        // Pass 6 check 
 OUT NEW_LINE, A
 
-////////////////////////////////////////////
 
+//////////////////////////////////// Op Code 0x0E - PUSH, 0x0F - POP
+//   
+//   
+.define 1, stack_test_length 0x30
+OUT NEW_LINE, A
+OUT _O, A
+OUT _p, A
+OUT #0x0E, I
+OUT DASH, A
+OUT #0x0F, I
+OUT COLON, A
+OUT SPACE, A
+OUT _P, A
+OUT _U, A
+OUT _S, A
+OUT _H, A
+OUT DASH, A
+OUT _P, A
+OUT _O, A
+OUT _P, A
+OUT NEW_LINE, A
 
+LDA %DP, H, #0x45
+LDA %DP, L, #0x00
+LDA %SP, H, #0x45
+LDA %SP, L, #0x00
 
+LDR R1, stack_test_length
 
+// Push Loop
+:push_loop
+PUSH R1
+DEC R1 
+BNE :push_loop
+
+LDR R3, stack_test_length
+// Pop & Check loop
+:pop_loop
+INC R1
+POP R2
+TST R2, R1
+BNE :FAIL
+TST R1, R3
+BNE :pop_loop
+ 
+/////////////////////////////////// Op Code 0x1A - MAG, 0x1C - MGA
+//   
+
+OUT _O, A
+OUT _p, A
+OUT #0x1A, I
+OUT DASH, A
+OUT #0x1C, I
+OUT COLON, A
+OUT SPACE, A
+OUT _M, A
+OUT _A, A
+OUT _G, A
+OUT DASH, A
+OUT _M, A
+OUT _G, A
+OUT _A, A
+OUT NEW_LINE, A
+
+LDR R0, #0xFF
+:mag_mga_loop
+MGA %DP, H, R0
+MGA %DP, L, R0
+MGA %BP, H, R0
+MGA %BP, L, R0
+MAG R3, %DP, H
+TST R3, R0
+BNE :print_bad_line
+MAG R3, %DP, L
+TST R3, R0
+BNE :print_bad_line
+MAG R3, %BP, H
+TST R3, R0
+BNE :print_bad_line
+MAG R3, %BP, L
+TST R3, R0
+BNE :print_bad_line
+JMP :cont_mag_loop
+
+:print_bad_line
+OUT R0, I
+OUT COLON, A
+OUT SPACE, A
+OUT _D, A
+OUT _P, A
+OUT SPACE, A
+MAG R3, %DP, H
+OUT R3, I
+MAG R3, %DP, L
+OUT R3, I
+OUT COMMA, A
+OUT _B, A
+OUT _P, A
+OUT SPACE, A
+MAG R3, %BP, H
+OUT R3, I
+MAG R3, %BP, L
+OUT R3, I
+OUT NEW_LINE, A
+:cont_mag_loop
+TST R0, #0
+BEQ :after_mag_mga
+DEC R0
+JMP :mag_mga_loop
+:after_mag_mga
+JMP :PASS
 ////////////////////////////////////////////
 
 :PASS
@@ -816,7 +903,7 @@ OUT R1, I
 LDW R2, %DP, #2  // Print Byte1
 OUT R2, I
 BRK
-
+///////////////////////////////////////////////
 :FAIL
 OUT NEW_LINE, A
 OUT _F, A

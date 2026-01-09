@@ -1,5 +1,5 @@
 <NotepadPlus>
-    <UserLang name="ByteFrost Assembly V8" ext="asm" udlVersion="2.1">
+    <UserLang name="ByteFrost Assembly V9" ext="asm" udlVersion="2.1">
         <Settings>
             <Global caseIgnored="yes" allowFoldOfComments="no" foldCompact="no" forcePureLC="0" decimalSeparator="0" />
             <Prefix Keywords1="no" Keywords2="yes" Keywords3="yes" Keywords4="yes" Keywords5="no" Keywords6="no" Keywords7="no" Keywords8="no" />
@@ -24,7 +24,7 @@
             <Keywords name="Folders in comment, open"></Keywords>
             <Keywords name="Folders in comment, middle"></Keywords>
             <Keywords name="Folders in comment, close"></Keywords>
-            <Keywords name="Keywords1">LDR&#x000D;&#x000A;MOV&#x000D;&#x000A;OR&#x000D;&#x000A;AND&#x000D;&#x000A;XOR&#x000D;&#x000A;NOT&#x000D;&#x000A;ADD&#x000D;&#x000A;SUB&#x000D;&#x000A;ASL&#x000D;&#x000A;ROL&#x000D;&#x000A;LSR&#x000D;&#x000A;ASR&#x000D;&#x000A;ROR&#x000D;&#x000A;ADC&#x000D;&#x000A;SBC&#x000D;&#x000A;INC&#x000D;&#x000A;DEC&#x000D;&#x000A;JMP&#x000D;&#x000A;BMI&#x000D;&#x000A;BCS&#x000D;&#x000A;BEQ&#x000D;&#x000A;BPL&#x000D;&#x000A;BCC&#x000D;&#x000A;BNE&#x000D;&#x000A;PUSH&#x000D;&#x000A;POP&#x000D;&#x000A;JSR&#x000D;&#x000A;RTS&#x000D;&#x000A;LMA&#x000D;&#x000A;SMA&#x000D;&#x000A;LMR&#x000D;&#x000A;SMR&#x000D;&#x000A;OUT&#x000D;&#x000A;NOP&#x000D;&#x000A;BRK&#x000D;&#x000A;CALL&#x000D;&#x000A;LDW&#x000D;&#x000A;SDW&#x000D;&#x000A;LDA&#x000D;&#x000A;MAG&#x000D;&#x000A;MGA&#x000D;&#x000A;MAA</Keywords>
+            <Keywords name="Keywords1">LDR&#x000D;&#x000A;MOV&#x000D;&#x000A;OR&#x000D;&#x000A;AND&#x000D;&#x000A;XOR&#x000D;&#x000A;NOT&#x000D;&#x000A;ADD&#x000D;&#x000A;SUB&#x000D;&#x000A;ASL&#x000D;&#x000A;ROL&#x000D;&#x000A;LSR&#x000D;&#x000A;ASR&#x000D;&#x000A;ROR&#x000D;&#x000A;ADC&#x000D;&#x000A;SBC&#x000D;&#x000A;INC&#x000D;&#x000A;DEC&#x000D;&#x000A;JMP&#x000D;&#x000A;BMI&#x000D;&#x000A;BCS&#x000D;&#x000A;BEQ&#x000D;&#x000A;BPL&#x000D;&#x000A;BCC&#x000D;&#x000A;BNE&#x000D;&#x000A;PUSH&#x000D;&#x000A;POP&#x000D;&#x000A;JSR&#x000D;&#x000A;RTS&#x000D;&#x000A;LMA&#x000D;&#x000A;SMA&#x000D;&#x000A;LMR&#x000D;&#x000A;SMR&#x000D;&#x000A;OUT&#x000D;&#x000A;NOP&#x000D;&#x000A;BRK&#x000D;&#x000A;CALL&#x000D;&#x000A;LDW&#x000D;&#x000A;SDW&#x000D;&#x000A;LDA&#x000D;&#x000A;MAG&#x000D;&#x000A;MGA&#x000D;&#x000A;MAA&#x000D;&#x000A;TST</Keywords>
             <Keywords name="Keywords2">R&#x000D;&#x000A;%</Keywords>
             <Keywords name="Keywords3">:</Keywords>
             <Keywords name="Keywords4">.</Keywords>
