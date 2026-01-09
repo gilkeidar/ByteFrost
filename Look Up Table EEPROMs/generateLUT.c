@@ -188,7 +188,7 @@ OutputState ARDataBusLoadEnableGenerator(InputState state) {
     //  clock signal).
 
     if (!InputStateBitIsHigh(state, LOAD_AR_OFFSET) 
-        && !InputStateBitIsHigh(state, PC_LD_BRANCH_OFFSET)) {
+        && InputStateBitIsHigh(state, PC_LD_BRANCH_OFFSET)) {
         //  VERY IMPORTANT NOTE! PREVENT FUTURE BUGS IF EVER ADDING OR MODIFYING
         //  BRANCH INSTRUCTIONS OR OTHER INSTRUCTIONS THAT SET THE DHPC!
         //  ===================================================================
