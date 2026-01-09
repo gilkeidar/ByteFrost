@@ -42,9 +42,9 @@
 
 #define PROGRAMMING_DATA
 
-//#define  PROG_NAME        Micro0_7
+#define  PROG_NAME        Micro0_7
 // #define  PROG_NAME        micro8_15
-  #define  PROG_NAME        Micro16_23
+//  #define  PROG_NAME        Micro16_23
 // #define  BASE_PAGE        0
 
 //#define  PROG_NAME        TwoLoops

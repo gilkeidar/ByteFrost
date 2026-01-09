@@ -69,31 +69,24 @@ const int chipSelect = SDCARD_SS_PIN;
  *
  *  @returns 1 if successful, and 0 otherwise
  */
-int initialize() {
-  //  Setup SD Card
-  #if DEBUG
-    Serial.println("Setting up SD card...");
-  #endif
+int initialize() 
+{
+    //  Setup SD Card
+      Serial.println("Setting up SD card...");
+  
 
-  if (!card.init(SPI_HALF_SPEED, chipSelect)) {
-    #if DEBUG
-      Serial.println("Error: Failed to initialize the SD library and card.");
-    #endif
-
-    return 0;
-  } else if (!SD.begin(chipSelect)) {
-    #if DEBUG
-      Serial.println("Error: Failed to initialize the SD library with the SD.h interface.");
-    #endif
-
-    return 0;
-  }
-
-  #if DEBUG
+    if (!card.init(SPI_HALF_SPEED, chipSelect)) 
+    {
+        Serial.println("Error: Failed to initialize the SD library and card.");
+        return 0;
+    } 
+    else if (!SD.begin(chipSelect)) 
+    {
+        Serial.println("Error: Failed to initialize the SD library with the SD.h interface.");
+        return 0;
+    }
     Serial.println("Finished setting up SD card (wiring is correct and card is present).");
-  #endif
-
-  return 1;
+    return 1;
 }
 
 /**
@@ -257,8 +250,7 @@ void setup() {
   //  Attach GO interrupt
   attachInterrupt(digitalPinToInterrupt(GRANT_INT), BusGrant, RISING);
 
-  #if DEBUG
-    Serial.begin(500000);
+  Serial.begin(115200);
 
     //  There is a delay between the call to Serial.begin() and the serial stream
     //  opening; this busy wait ensures that the following Serial printouts are
@@ -268,7 +260,6 @@ void setup() {
       ;
 
     Serial.println("MKRZero SD Card Driver");
-  #endif
 
   initialize();
 }
@@ -567,8 +558,6 @@ uint16_t readCommandFromSR(void)
           Serial.println(sr_bit);
         #endif DEBUG
     }
-    // Serial.print("SR Command: 0x");
-    // Serial.println(sr_cmd, HEX);
     return sr_cmd;
 }
 void loop() 
@@ -581,13 +570,6 @@ void loop()
           Serial.println("Got a Bus Grant Interrupt");
         #endif
         sr_cmd = readCommandFromSR();
-        #if DEBUG
-          Serial.print("SR Command: 0x");
-          Serial.println(sr_cmd, HEX);
-          // delay(2000);
-          // Serial.println("Release the bus");
-        #endif
-        
                 
         //  Handle the command
         //  Disk Command Format:  16 bits-long command
@@ -597,13 +579,12 @@ void loop()
         uint16_t sectorID = sr_cmd & (0x07FF);
         bool writeToDisk = (sr_cmd & (0x8000)) == 0x8000;
 
-        #if DEBUG
-          Serial.println("SR Command ======");
-          Serial.print("Writing to Disk? ");
-          Serial.println(writeToDisk);
-          Serial.print("Sector ID: ");
-          Serial.println(sectorID);
-        #endif
+        Serial.print("SR Command: ");
+        if (writeToDisk)
+          Serial.print("Write Sector ");
+        else
+          Serial.print("Read Sector ");
+        Serial.println(sectorID);
 
         if (writeToDisk) {
           //  Write page (256 bytes) to a sector (256 bytes) in disk
