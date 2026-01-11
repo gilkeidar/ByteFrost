@@ -773,7 +773,6 @@ OUT NEW_LINE, A
 //   
 //   
 .define 1, stack_test_length 0x30
-OUT NEW_LINE, A
 OUT _O, A
 OUT _p, A
 OUT #0x0E, I
@@ -835,43 +834,76 @@ OUT NEW_LINE, A
 
 LDR R0, #0xFF
 :mag_mga_loop
-MGA %DP, H, R0
-MGA %DP, L, R0
 MGA %BP, H, R0
 MGA %BP, L, R0
-MAG R3, %DP, H
-TST R3, R0
-BNE :print_bad_line
-MAG R3, %DP, L
-TST R3, R0
-BNE :print_bad_line
+MGA %DP, H, R0
+MGA %DP, L, R0
+MGA %SP, H, R0
+MGA %SP, L, R0
+
 MAG R3, %BP, H
 TST R3, R0
 BNE :print_bad_line
 MAG R3, %BP, L
 TST R3, R0
 BNE :print_bad_line
+
+MAG R3, %DP, H
+TST R3, R0
+BNE :print_bad_line
+MAG R3, %DP, L
+TST R3, R0
+BNE :print_bad_line
+
+MAG R3, %SP, H
+TST R3, R0
+BNE :print_bad_line
+MAG R3, %SP, L
+TST R3, R0
+BNE :print_bad_line
+
 JMP :cont_mag_loop
 
 :print_bad_line
+				// 1234567890123456
+				// R0: DP  BP   SP
+				//   0000,0000,0000 
 OUT R0, I
 OUT COLON, A
 OUT SPACE, A
 OUT _D, A
 OUT _P, A
 OUT SPACE, A
+OUT SPACE, A
+OUT _B, A
+OUT _P, A
+OUT SPACE, A
+OUT SPACE, A
+OUT SPACE, A
+OUT _S, A
+OUT _P, A
+					// "  0000,0000,0000"
+OUT SPACE, A		
+OUT SPACE, A		
 MAG R3, %DP, H
 OUT R3, I
 MAG R3, %DP, L
 OUT R3, I
 OUT COMMA, A
-OUT _B, A
-OUT _P, A
-OUT SPACE, A
+
 MAG R3, %BP, H
 OUT R3, I
 MAG R3, %BP, L
 OUT R3, I
+OUT COMMA, A
+
+OUT _S, A
+MAG R3, %SP, H
+OUT R3, I
+MAG R3, %SP, L
+OUT R3, I
+
+
 OUT NEW_LINE, A
 :cont_mag_loop
 TST R0, #0
