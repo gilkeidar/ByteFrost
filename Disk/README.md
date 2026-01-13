@@ -16,3 +16,8 @@ ByteFrost a simple readSector / writeSector interface.
 The ByteFrost only sees this interface and so can ignore the SD card's filesystem. This means that the
 ByteFrost disk can implement any or no filesystem, which can allow us to simplify the ByteFrost's
 filesystem as the ByteFrost's kernel will need to handle all filesystem operations.
+
+## Arduino IDE Setting
+Board:
+Select Tools -> Board -> Arduino SAMD Boards -> Arduino MKR Zero
+Note: if the wrong board is selected, compilation will fail cacause it would not find the sam.h file
