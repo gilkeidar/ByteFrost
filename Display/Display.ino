@@ -1,4 +1,14 @@
 /*
+  ByteFrost Notes
+1. IDE Setup
+      a. Board "Arduino NANO"
+      b. CPU "ATmega328p (old bootloader)"
+2. To program the Arduino - the RESET control signal (black) need to be disconnected!!.
+3. Currently the Tx is used by another signal. Need to free Tx and transmit the display data on it.
+
+
+
+  ----------------------------------------------
   LiquidCrystal Library - Hello World
 
   Demonstrates the use a 16x2 LCD display.  The LiquidCrystal
@@ -317,7 +327,7 @@ void setup() {
   //PCMSK0 |= B00100000;  // Activate interrupt on display enable (D13) pin (PCINT3)
 
   // Debug
-  //Serial.begin(57600); // open the serial port at 57600 bps:
+ // Serial.begin(57600); // open the serial port at 57600 bps:
 
   /*queue[0] = {'A', 0};
   queue[1] = {'B', 0};
