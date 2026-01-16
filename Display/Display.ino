@@ -5,11 +5,8 @@
       b. CPU "ATmega328p (old bootloader)"
 2. To program the Arduino - the RESET control signal (black) need to be disconnected!!.
 3. Currently the Tx is used by another signal. Need to free Tx and transmit the display data on it.
-
-To Do
-1. Connect power such that NANU wouldnt require a USB connection
-2. Check if reset can be set to not interfere with program download
-3. Try if 4 bit write works. if so, free up Rx and Tx
+4. To allow Serial printing through Rx/Tx (D1/D0) The Display is configured to use only 4 bit to the Display (D4-D7).
+This is achieved by using a constuctor with only 4 data bits, and using the write4bits()
 
 
 
@@ -54,7 +51,7 @@ To Do
   http://www.arduino.cc/en/Tutorial/LiquidCrystalHelloWorld
 
 */
-//#define TEST_INPUT
+#define TEST_INPUT
 
 // include the library code:
 #include <LiquidCrystal.h>
@@ -81,8 +78,9 @@ typedef struct queue_item {
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
 const int rs = 12, en = 11, d0 = 1, d1 = 0, d2 = 13, d3 = 3, d4 = 4, d5 = 5, d6 = 6, d7 = 7; // d0 and d1 are switched in the implementation
-int display_data_out[] = {d0, d1, d2, d3, d4, d5, d6, d7};    // For modified write4bits we're using
-LiquidCrystal lcd(rs, en, d0, d1, d2, d3, d4, d5, d6, d7);
+int display_data_out[] = {d0, d1, d2, d3, d4, d5, d6, d7};    
+// LiquidCrystal lcd(rs, en, d0, d1, d2, d3, d4, d5, d6, d7);  // Initialize for 8bit
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);                  // Initialize for 4bit
 
 void pulseEnable(void)
 {
@@ -94,27 +92,11 @@ void pulseEnable(void)
   delayMicroseconds(12);
 }
 
-#if 0 // not used
-void write4bits(uint8_t value) {
-  //for (int i = 0; i < 4; i++) {
-  //  digitalWrite(display_data_out[i], (value >> i) & 0x01);
-    /*if ((value >> i) & 0x01)
-    {
-      setPin(display_data_out[i]);
-    }
-    else
-    {
-      clrPin(display_data_out[i]);
-    }*/
-  //}
-
-  PORTD = ((value & 0x0f) << 2) |(PORTD & 0xc3);
-  
-  //delayMicroseconds(1);
-
+void write4bits(uint8_t value) 
+{
+  PORTD = ((value & 0x0f) << 4) |(PORTD & 0x0f);  // PD4, PD5, PD6, PD7  <- value  | dont change D3:D0
   pulseEnable();
 }
-#endif
 
 void write8bits(uint8_t value) {
   //PORTD = value;
@@ -136,10 +118,10 @@ void send(uint8_t value, uint8_t mode)
 {
   digitalWrite(rs, mode);
 
-  write8bits(value);
+  // write8bits(value);
 
-  //write4bits(value>>4);
-  //write4bits(value);
+  write4bits(value>>4);
+  write4bits(value);
 }
 
 inline size_t write(uint8_t value) 
@@ -204,11 +186,7 @@ void scroll_up()
   lcd.setCursor(0, ROWS - 1);
   for (j = 0; j < COLS; j++)
   {
-    /*if (shadow[ROWS - 1][j] != ' ')
-      write(' ');*/
     shadow[ROWS - 1][j] = ' ';
-    //lcd.setCursor(j, ROWS - 1);
-    //lcd.write(' ');
     write(' ');
   }
 }
@@ -225,6 +203,7 @@ void new_line()
   }
 
   lcd.setCursor(cur_col, cur_row);
+  Serial.println();
 }
 
 int convert_input(byte * input)
@@ -270,11 +249,10 @@ void disp_write(unsigned char input)
       lcd.setCursor(cur_col, cur_row); 
     }
      //lcd.setCursor(cur_col, cur_row);
-    //lcd.write(input);
-#ifndef TEST_INPUT
+     //lcd.write(input);
+
     write(input);
-#endif
-   
+    Serial.write(input);  
     // Write character to shadow
     shadow[cur_row][cur_col] = input;
     cur_col++;
@@ -340,22 +318,6 @@ void loop() {
     
     // Queue not empty - print first character
     curr_char = queue[queue_base];
-#ifdef TEST_INPUT
-    static int test_position = 0;
-    Serial.print(curr_char.type);
-    Serial.print(":");
-    Serial.print(curr_char.input_char);
-    Serial.print(":");
-    Serial.print(analogRead(A6));
-    
-    Serial.print(" ");
-    if( test_position++ > 16)
-    {
-      Serial.println(test_position);   
-      test_position = 0;
-    }
-#endif
-
     if (!curr_char.type)  // Print as ASCII
     {
       //Serial.println("Printing ascii");
@@ -376,7 +338,6 @@ void loop() {
       disp_write(high_digit);
       disp_write(low_digit);
     }
-
-       queue_base++;
+    queue_base++;
   }
 }
