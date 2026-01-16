@@ -6,6 +6,11 @@
 2. To program the Arduino - the RESET control signal (black) need to be disconnected!!.
 3. Currently the Tx is used by another signal. Need to free Tx and transmit the display data on it.
 
+To Do
+1. Connect power such that NANU wouldnt require a USB connection
+2. Check if reset can be set to not interfere with program download
+3. Try if 4 bit write works. if so, free up Rx and Tx
+
 
 
   ----------------------------------------------
@@ -49,6 +54,7 @@
   http://www.arduino.cc/en/Tutorial/LiquidCrystalHelloWorld
 
 */
+//#define TEST_INPUT
 
 // include the library code:
 #include <LiquidCrystal.h>
@@ -136,7 +142,8 @@ void send(uint8_t value, uint8_t mode)
   //write4bits(value);
 }
 
-inline size_t write(uint8_t value) {
+inline size_t write(uint8_t value) 
+{
   send(value, HIGH);
   return 1; // assume sucess
 }
@@ -166,9 +173,9 @@ byte queue_pos = 0;      // Position in queue
 // Computer Bus vars
 byte disp_en = 2;
 byte disp_en_val;
-byte ascii_or_int = 10;  // If 0: Print as ASCII; if 1: Print as integer (hex)
-//byte data_bus_in[] = {14, 15, 16, 17, 18, 19, 8, 9}; // A0, A1, A2, A3, A4, A5, D8, D9
-byte data_bus_in[] = {14, 15, 16, 17, 18, 19, 19, 20}; // A0, A1, A2, A3, A4, A5, D8, D9
+byte ascii_or_int = 10;  // D10 If 0: Print as ASCII; if 1: Print as integer (hex)
+//byte ascii_or_int = 20;  // A6 If 0: Print as ASCII; if 1: Print as integer (hex) - Didn't work for high speed as A6 needs analogRead that takes 100uS
+byte data_bus_in[] = {14, 15, 16, 17, 18, 19, 8, 9}; // A0, A1, A2, A3, A4, A5, D8, D9
 
 // Edge detector vars
 bool was_low = true;    // For positive edge
@@ -244,7 +251,7 @@ int convert_input(byte * input)
   return PRINT_CHAR;
 }
 
-void disp_write(char input)
+void disp_write(unsigned char input)
 {
     if (cur_col >= COLS)
     {
@@ -264,15 +271,34 @@ void disp_write(char input)
     }
      //lcd.setCursor(cur_col, cur_row);
     //lcd.write(input);
+#ifndef TEST_INPUT
     write(input);
-   // Serial.write(input);
-
+#endif
+   
     // Write character to shadow
     shadow[cur_row][cur_col] = input;
     cur_col++;
 }
 
-void setup() {
+
+byte input_type;
+Character curr_char;
+int num_interrupts = 0;
+int num_low_interrupts = 0;
+
+void disp_en_handler()
+{
+  // Read input and add to queue
+  input_type = (PINB & 0x04) >> 2; // PB2
+ // input_type = (analogRead(A6) > 100); RK: This test failed as analog read takes 100uS, so it work nice while clock is slow but cannot fit ByteFrost at 400KHz!
+  input_char = (PINC & 0x3f) | ((PINB & 0x03) << 6);  // PB1, PB0, PC5..PC0
+
+  queue[queue_pos++] = {input_char, input_type};
+  num_low_interrupts++;
+}
+
+void setup() 
+{
   // set up the LCD's number of columns and rows:
   lcd.begin(COLS, ROWS);
   lcd.cursor();
@@ -302,47 +328,11 @@ void setup() {
   // Setup interrupt handling
   attachInterrupt(digitalPinToInterrupt(disp_en), disp_en_handler, RISING); // inverted source signal so both display and the display register should react to rising edge of disp_en signal
 
-  // Setup interupt handling
-  // Source: https://www.electrosoftcloud.com/en/pcint-interrupts-on-arduino/
-  //PCICR |= B00000001; // We activate the interrupts of the PB port
-  //PCMSK0 |= B00100000;  // Activate interrupt on display enable (D13) pin (PCINT3)
-
   // Debug
-// Serial.begin(57600); // open the serial port at 57600 bps:
-
-  /*queue[0] = {'A', 0};
-  queue[1] = {'B', 0};
-  queue[2] = {'C', 0};
-  queue[3] = {'D', 0};
-  queue[4] = {'E', 0};
-  queue[5] = {'F', 0};
-  queue[6] = {'G', 0};
-  queue[7] = {'H', 0};
-  queue[8] = {'I', 0};
-  queue[9] = {'J', 0};
-  queue[10] = {'K', 0};
-  queue[11] = {'L', 0};
-  queue_pos = 12;*/
-
+#ifdef TEST_INPUT
+  Serial.begin(57600); // open the serial port at 57600 bps:
+#endif
 }
-
-
-byte input_type;
-Character curr_char;
-int num_interrupts = 0;
-int num_low_interrupts = 0;
-
-void disp_en_handler()
-{
-  // Read input and add to queue
-  input_type = (PINB & 0x04) >> 2; // PB2
-  input_char = (PINC & 0x3f) | ((PINB & 0x03) << 6);  // PB1, PB0, PC5..PC0
-  //input_char =  (PINC & 0x7f) | ((PINB & 0x02) << 6);;  // PC7..PC0
-  queue[queue_pos++] = {input_char, input_type};
-  num_low_interrupts++;
-}
-
-
 
 void loop() {
   if (queue_pos != queue_base)
@@ -350,10 +340,21 @@ void loop() {
     
     // Queue not empty - print first character
     curr_char = queue[queue_base];
-    //Serial.print("Printing character ");
-    //Serial.print(curr_char.input_char);
-    //Serial.print(" type:");
-    //Serial.println(curr_char.type, HEX);
+#ifdef TEST_INPUT
+    static int test_position = 0;
+    Serial.print(curr_char.type);
+    Serial.print(":");
+    Serial.print(curr_char.input_char);
+    Serial.print(":");
+    Serial.print(analogRead(A6));
+    
+    Serial.print(" ");
+    if( test_position++ > 16)
+    {
+      Serial.println(test_position);   
+      test_position = 0;
+    }
+#endif
 
     if (!curr_char.type)  // Print as ASCII
     {
