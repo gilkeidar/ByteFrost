@@ -78,7 +78,8 @@ typedef struct queue_item {
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
 const int rs = 12, en = 11, d0 = 1, d1 = 0, d2 = 13, d3 = 3, d4 = 4, d5 = 5, d6 = 6, d7 = 7; // d0 and d1 are switched in the implementation
-int display_data_out[] = {d0, d1, d2, d3, d4, d5, d6, d7};    
+// byte display_data_out[] = {d0, d1, d2, d3, d4, d5, d6, d7};    
+byte display_data_out[] = {d4, d5, d6, d7};    
 // LiquidCrystal lcd(rs, en, d0, d1, d2, d3, d4, d5, d6, d7);  // Initialize for 8bit
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);                  // Initialize for 4bit
 
@@ -97,7 +98,7 @@ void write4bits(uint8_t value)
   PORTD = ((value & 0x0f) << 4) |(PORTD & 0x0f);  // PD4, PD5, PD6, PD7  <- value  | dont change D3:D0
   pulseEnable();
 }
-
+#if 0
 void write8bits(uint8_t value) {
   //PORTD = value;
 
@@ -112,6 +113,7 @@ void write8bits(uint8_t value) {
 
   pulseEnable();
 }
+#endif
 
 // write either command or data, with automatic 4/8-bit selection
 void send(uint8_t value, uint8_t mode)
@@ -156,7 +158,6 @@ byte queue_pos = 0;      // Position in queue
 byte disp_en = 2;
 byte disp_en_val;
 byte ascii_or_int = 10;  // D10 If 0: Print as ASCII; if 1: Print as integer (hex)
-//byte ascii_or_int = 20;  // A6 If 0: Print as ASCII; if 1: Print as integer (hex) - Didn't work for high speed as A6 needs analogRead that takes 100uS
 byte data_bus_in[] = {14, 15, 16, 17, 18, 19, 8, 9}; // A0, A1, A2, A3, A4, A5, D8, D9
 
 // Edge detector vars
@@ -291,7 +292,7 @@ void setup()
     pinMode(data_bus_in[i], INPUT); 
   }
 
-  for (i = 0; i < 7; i++)
+  for (i = 0; i < sizeof(display_data_out); i++)
     pinMode(display_data_out[i], OUTPUT);
 
   valid_input = false;
@@ -306,10 +307,7 @@ void setup()
   // Setup interrupt handling
   attachInterrupt(digitalPinToInterrupt(disp_en), disp_en_handler, RISING); // inverted source signal so both display and the display register should react to rising edge of disp_en signal
 
-  // Debug
-#ifdef TEST_INPUT
   Serial.begin(57600); // open the serial port at 57600 bps:
-#endif
 }
 
 void loop() {
