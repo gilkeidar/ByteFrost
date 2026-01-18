@@ -1,6 +1,6 @@
 #   ByteFrost Development Log - On the Road to Version 2
 
-December 27, 2025
+December 27, 2025 - January 18, 2026
 
 ##  Overview
 
@@ -77,7 +77,8 @@ The task categories are:
 2.  Software - Assembler
 3.  Software - Filesystem
 4.  Software - ByteFrost Programs
-5.  Documentation
+5.  Software / Infrastructure - Remote ByteFrost Interaction
+6.  Documentation
 
 From this task list, we can devise a roadmap towards ByteFrost Version 2.
 
@@ -89,6 +90,8 @@ There are a few remaining hardware tasks.
 
 1.  Add the `BP` address register.
     *   This register can be implemented with two regular 8-bit registers.
+    *   **Note:** As of January 18, 2026, this has been complete for a few 
+        weeks.
 2.  Replace the current `SP[H]` 8-bit register with two 4-bit counters.
     *   This will allow an arbitrarily large stack in RAM (instead of the 
         current stack that is limited to a single 256-byte page).
@@ -257,6 +260,32 @@ addresses in the assembler and specifying addresses explicitly.
     *   Hmm, I'm not exactly sure. I want this to be as simple as possible for
         the programmer. I wonder how MIPS / ARM / etc. assemblers handle this,
         since their PC is likely shifted as well.
+4.  Import / Export label system
+    *   As the ByteFrost becomes more complex, the number locations of where 
+        machine code can be grows.
+    *   At present, there are three possible locations:
+        1.  In ROM.
+        2.  In disk.
+        3.  In RAM (copied from ROM or from disk).
+    *   Of course, when jumping to a label, the label address is within the
+        ByteFrost address space and thus can point to ROM or RAM (technically
+        also to MMIO regions, though the assembler should never allow a label
+        to be set to an address after RAM).
+    *   However, there are two potential issues with this:
+        1.  If the label to jump to is not known by the assembler (since it
+            isn't hardcoded to the assembler nor defined in the given assembly
+            file), the assembler with throw an error.
+            *   This is a compile-time problem.
+        2.  If the label is known but that address in memory does not contain
+            the relevant code, the ByteFrost will fetch garbage at that address.
+            *   This is a run-time problem.
+            *   If the label's address is in ROM, then this assumingly shouldn't
+                occur if the ROM's EEPROM contains the correct binary file.
+                If this occurs, it cannot be fixed in runtime - rather, it
+                represents a hardware configuration fix (the EEPROM must be
+                replaced or reflashed with the correct ROM binary).
+    1.  Labels Unknown to Assembler (Compile-Time, Static)
+    2.  Needed Code Not Loaded Yet (Run-Time, Dynamic)
         
 ##  Software - Filesystem
 
@@ -316,7 +345,7 @@ May want to review File systems from CSE 120 and OS: 3 Easy Pieces for this.
 3.  Port old programs to new ISA updates.
     1.  Eight Queens solver.
     2.  Binary search tree implementation.
-4.  Self-compiled C programs.
+4.  Manually-compiled C programs.
     1.  Examples from Addressing Modes Proposal (v2) can be modified slightly to
         do this.
 5.  BASIC interpreter? (or just have a BASIC cross-compiler instead).
@@ -344,6 +373,13 @@ May want to review File systems from CSE 120 and OS: 3 Easy Pieces for this.
                     doing this! May require a copy primitive to be stored in 
                     ROM).
             *   May want to have support for scripting / BASIC(?)
+        5.  Pass command-line arguments to the program that is run.
+            *   I.e., provide argc, argv inputs to the `main()` of the loaded
+                program.
+        6.  Collects the status code of the run program.
+            *   I.e., `main()` returns a status code to the shell.
+
+##  Software / Infrastructure - Remote ByteFrost Interaction
 
 ##  Documentation
 
