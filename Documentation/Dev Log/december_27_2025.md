@@ -381,6 +381,14 @@ May want to review File systems from CSE 120 and OS: 3 Easy Pieces for this.
 
 ##  Software / Infrastructure - Remote ByteFrost Interaction
 
+The idea here is to provide remote access to the ByteFrost via an intermediary
+(a modern Linux laptop):
+
+Remote machine <-> Intermediary Linux laptop <-> ByteFrost
+
+1.  Remote File Transfer Support
+    *   Be able to update the disk file in the SD Card remotely.
+
 ##  Documentation
 
 1.  Full hardware documentation
