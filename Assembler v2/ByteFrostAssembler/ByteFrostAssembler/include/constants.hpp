@@ -33,6 +33,36 @@ const std::string ASSEMBLY_FILE_ENDING = "asm";
 #define	TOKEN_DELIMITER_TAB		'\t'
 #define	TOKEN_DELIMITER_COMMA	','
 
+//	Parser (Stage 1) Special token start and end characters.
+//	These tokens are special in that their token strings may contain delimiters
+//	(for example, ' ' is a valid character token, as is ",,,, , " a valid
+//	string token).
+//	NOTE: Strings are not implemented yet.
+#define	TOKEN_CHAR_START		'\''
+#define	TOKEN_CHAR_END			'\''
+#define	TOKEN_STRING_START		'\"'
+#define	TOKEN_STRING_END		'\"'
+
+#define	SPECIAL_CHAR_START		'\\'
+
+/**
+ * @brief Mapping special escape characters to their ASCII equivalents.
+ * This list more-or-less matches C's escape sequences.
+ */
+const std::unordered_map<char, char> special_characters {
+	{'a', 0x07},	//	Alert (beep, bell)
+	{'b', 0x08},	//	Backspace
+	{'e', 0x1b},	//	Escape character
+	{'f', 0x0c},	//	Formfeed page break
+	{'n', 0x10},	//	Newline NOTE - THIS DIFFERS FROM ASCII! In ASCII, newline is 0x0a
+	{'r', 0x0d},	//	Carriage return
+	{'t', 0x09},	//	Horizontal tab
+	{'v', 0x0b},	//	Vertical tab
+	{'\\', '\\'},	//	Backslash
+	{'\'', '\''},	//	Single quotes
+	{'\"', '\"'}	//	Double quotes
+};
+
 //	Parsing
 #define	UNDERSCORE				'_'
 //#define	SPECIAL_REGISTER_PREFIX	'%'
