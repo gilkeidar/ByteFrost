@@ -1,2 +1,20 @@
 ﻿  assembler.cpp
-  ByteFrostAssembler.vcxproj -> C:\Users\keida\OneDrive\Documents\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\x64\Debug\ByteFrostAssembler.exe
+  assembly_instructions.cpp
+  clap.cpp
+  file_generation.cpp
+  isa.cpp
+  label_handler.cpp
+  main.cpp
+  parser.cpp
+  preprocessor.cpp
+C:\Users\keida\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\preprocessor.cpp(87,33): warning C4244: '=': conversion from '__int64' to 'long', possible loss of data
+  utility.cpp
+C:\Users\keida\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(410,23): warning C4244: 'return': conversion from '__int64' to 'int', possible loss of data
+C:\Users\keida\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(452,23): warning C4244: 'return': conversion from '__int64' to 'int', possible loss of data
+C:\Users\keida\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(503,23): warning C4244: 'return': conversion from '__int64' to 'int', possible loss of data
+  Generating Code...
+C:\Users\keida\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(372,1): warning C4715: 'getNumberValue': not all control paths return a value
+C:\Users\keida\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\utility.cpp(628,1): warning C4715: 'fitsArgumentRange': not all control paths return a value
+C:\Users\keida\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\parser.cpp(360,1): warning C4715: 'Parser::generateLine': not all control paths return a value
+C:\Users\keida\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\ByteFrostAssembler\source\assembly_instructions.cpp(102,1): warning C4715: 'getTokenIntValue': not all control paths return a value
+  ByteFrostAssembler.vcxproj -> C:\Users\keida\GitHub\ByteFrost\Assembler v2\ByteFrostAssembler\x64\Debug\ByteFrostAssembler.exe

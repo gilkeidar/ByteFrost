@@ -3,4 +3,9 @@
   <PropertyGroup>
     <ShowAllFiles>true</ShowAllFiles>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LocalDebuggerCommandArguments>bfsv1_ls_ls_boot_sector.asm</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerWorkingDirectory>C:\Users\keida\GitHub\ByteFrost\Programs\BFSv1_ls_ls_boot_sector</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
 </Project>

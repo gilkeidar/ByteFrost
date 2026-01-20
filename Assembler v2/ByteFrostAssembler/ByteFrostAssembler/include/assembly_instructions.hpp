@@ -1057,6 +1057,23 @@ const AssemblyInstruction assembly_instructions[] = {
 			}
 		}
 	},
+	{	//	OUT Character (treated as OUT immediate with A print type).
+		"OUT",
+		{TokenType::CHARACTER},
+		{&isa[OUT_IMM_OPCODE]},
+		{
+			{
+				{
+					ArgumentSource::Token,
+					{ArgumentType::Immediate, 8, FIRST_TOKEN}
+				},
+				{
+					ArgumentSource::Constant,
+					{ArgumentType::OUTDisplayType, 1, ASCII_PRINT_TYPE_BIT}
+				}
+			}
+		}
+	},
 	{	//	PUSH Rs1
 		"PUSH",
 		{TokenType::GREGISTER},

@@ -85,6 +85,10 @@ int getTokenIntValue(Token t) {
 			}*/
 			return immediateValue;
 		}
+		case TokenType::CHARACTER: {
+			//	Return ASCII integer value of the character.
+			return getCharValue(t.token_string);
+		}
 		case TokenType::NUMBER:
 		case TokenType::INSTRUCTION:
 		case TokenType::TEXT:
