@@ -60,7 +60,8 @@ const std::unordered_map<char, char> special_characters {
 	{'v', 0x0b},	//	Vertical tab
 	{'\\', '\\'},	//	Backslash
 	{'\'', '\''},	//	Single quotes
-	{'\"', '\"'}	//	Double quotes
+	{'\"', '\"'},	//	Double quotes
+	{'0', 0x00}		//	Null terminator ('\0')
 };
 
 //	Parsing
