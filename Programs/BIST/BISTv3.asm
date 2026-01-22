@@ -66,7 +66,8 @@
 .define 1 _y				0x79
 .define 1 _z				0x7a
 
-
+OUT NEW_LINE, A   // Space from previous run on the minicom
+OUT NEW_LINE, A
 OUT _B, A
 OUT _I, A
 OUT _S, A
@@ -770,6 +771,14 @@ OUT NEW_LINE, A
 
 /////////////////////////////////// Op Code 0x1A - MAG, 0x1C - MGA
 //   
+.define 2 mag_mga_result	0x5000
+
+
+LDA %DP, H, mag_mga_result[1]
+LDA %DP, L, mag_mga_result[0]
+LDR R2, #0
+SDW R2, %DP, #0     // Reset mag_mga_result
+
 :mag_mga
 OUT _O, A
 OUT _p, A
@@ -858,19 +867,44 @@ OUT R3, I
 MAG R3, %SP, L
 OUT R3, I
 
-
 OUT NEW_LINE, A
+LDA %DP, H, mag_mga_result[1]
+LDA %DP, L, mag_mga_result[0]
+LDW R2, %DP, #0      
+INC R2
+SDW R2, %DP, #0
+
 :cont_mag_loop
 TST R0, #0
 BEQ :after_mag_mga
 DEC R0
 JMP :mag_mga_loop
+
 :after_mag_mga
 
+LDA %DP, H, mag_mga_result[1]
+LDA %DP, L, mag_mga_result[0]
+LDW R2, %DP, #0      
+TST R2, #0
+BEQ :push_pop
+OUT _F, A
+OUT _A, A
+OUT _I, A
+OUT _L, A
+OUT SPACE ,A
+OUT R2, I
+OUT SPACE ,A
+OUT _T, A
+OUT _I, A
+OUT _M, A
+OUT _E, A
+OUT _S, A
+OUT NEW_LINE ,A
+JMP :FAIL
 //////////////////////////////////// Op Code 0x0E - PUSH, 0x0F - POP
 //   
 //   
-
+:push_pop
 .define 1, stack_test_length 0xE0
 OUT _O, A
 OUT _p, A
@@ -908,11 +942,25 @@ LDR R3, stack_test_length
 INC R1
 POP R2
 TST R2, R1
-BNE :FAIL
+BNE :local_fail
 TST R1, R3
 BNE :pop_loop
  
 JMP :PASS
+:local_fail
+OUT _E, A
+OUT _X, A
+OUT _P, A
+OUT SPACE, A
+OUT R1, I
+OUT SPACE, A
+OUT _G, A
+OUT _O, A
+OUT _T, A
+OUT SPACE, A
+OUT R2, I
+OUT NEW_LINE, A
+JMP :FAIL
 ////////////////////////////////////////////
 
 :PASS

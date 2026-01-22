@@ -16,7 +16,9 @@ int main(int argc, char ** argv) {
     //  Usage: generateLUT [LUT id] [output file name]
     if (argc != EXPECTED_NUM_ARGS) {
         //  Print usage string and exit.
-        printf("Usage: generateLUT [LUT id] [output file name]\n");
+        printf("Usage: generateLUT [LUT id] [output file name]\n"
+               "          0 - ARDataBusLoadEnableGenerator    \n"
+               "          1 - ARSelectGenerator               \n"    );
         return 1;
     }
 
@@ -134,17 +136,13 @@ OutputState ARDataBusLoadEnableGenerator(InputState state) {
     #define AR_L_H_OP_OFFSET        2
 
     //  8 outputs with the following bit assignments:
-    //  7 - BP[H] Load Trigger                  (ACTIVE HIGH)  
-    //  6 - BP[L] Load Trigger                  (ACTIVE HIGH)  
-    //  5 - SP[H] Load Trigger                  (ACTIVE HIGH)
-    //      *   Eventually, SP[H] will also use two 4-bit counters and will have
-    //          a parallel load enable active low input so this will need to be
-    //          replaced with an active low Load Enable instead of a load
-    //          trigger
-    //  4 - SP[L] Load Enable                   (ACTIVE LOW)  
-    //  3 - DP[H] Load Trigger                  (ACTIVE HIGH)  
-    //  2 - DP[L] Load Trigger                  (ACTIVE HIGH)  
-    //  1 - DHPC Load Trigger                   (ACTIVE HIGH)  
+    //  7 - BP[H] Load Trigger                  (574 - ACTIVE HIGH)  
+    //  6 - BP[L] Load Trigger                  (574 - ACTIVE HIGH)  
+    //  5 - SP[H] Load Trigger                  (191 - ACTIVE HIGH for AND, then inversed Low)
+    //  4 - SP[L] Load Enable                   (191 - ACTIVE HIGH for AND, then inversed Low)  
+    //  3 - DP[H] Load Trigger                  (574 - ACTIVE HIGH)  
+    //  2 - DP[L] Load Trigger                  (574 - ACTIVE HIGH)  
+    //  1 - DHPC Load Trigger                   (574 - ACTIVE HIGH)  
     //  0 - PC[L] + PC[H] = DHPC Load Enable    (ACTIVE LOW)
     #define PC_LOAD_ENABLE_OFFSET   0
 
@@ -175,13 +173,13 @@ OutputState ARDataBusLoadEnableGenerator(InputState state) {
         //  7 - Load Trigger (active high) - 0
         //  6 - Load Trigger (active high) - 0
         //  5 - Load Trigger (active high) - 0
-        //  4 - Load Enable  (active low)  - 1
+        //  4 - Load Enable  (active high) - 0
         //  3 - Load Trigger (active high) - 0
         //  2 - Load Trigger (active high) - 0
         //  1 - Load Trigger (active high) - 0
         //  0 - Load Enable  (active low)  - 1
         //  = 0x11
-        return 0x11;
+        return 0x01;
     }
 
     //  Otherwise - main clock signal is low (i.e., in the second half of the
@@ -233,13 +231,13 @@ OutputState ARDataBusLoadEnableGenerator(InputState state) {
         //  7 - Load Trigger (active high) - 0
         //  6 - Load Trigger (active high) - 0
         //  5 - Load Trigger (active high) - 0
-        //  4 - Load Enable  (active low)  - 1
+        //  4 - Load Enable  (active high) - 0
         //  3 - Load Trigger (active high) - 0
         //  2 - Load Trigger (active high) - 0
         //  1 - Load Trigger (active high) - 0
         //  0 - Load Enable  (active low)  - 0  (ACTIVE)
         //  = 0x10
-        return 0x10;
+        return 0x00;
     }
     else if (InputStateBitIsHigh(state, LOAD_AR_OFFSET)) {
         //  This means that the current instruction is LDA, MGA, MAA, JSR, or
@@ -253,12 +251,12 @@ OutputState ARDataBusLoadEnableGenerator(InputState state) {
                 //  7 - Load Trigger (active high) - 0
                 //  6 - Load Trigger (active high) - 0
                 //  5 - Load Trigger (active high) - 0
-                //  4 - Load Enable  (active low)  - 1
+                //  4 - Load Enable  (active high) - 0
                 //  3 - Load Trigger (active high) - 0
                 //  2 - Load Trigger (active high) - 0
                 //  1 - Load Trigger (active high) - 1  (ACTIVE)
                 //  0 - Load Enable  (active low)  - 1
-                return 0x13;
+                return 0x03;
             }
             else {
                 //  The low byte is requested --> PC[L] + PC[H] = DHPC load
@@ -266,12 +264,12 @@ OutputState ARDataBusLoadEnableGenerator(InputState state) {
                 //  7 - Load Trigger (active high) - 0
                 //  6 - Load Trigger (active high) - 0
                 //  5 - Load Trigger (active high) - 0
-                //  4 - Load Enable  (active low)  - 1
+                //  4 - Load Enable  (active high) - 0
                 //  3 - Load Trigger (active high) - 0
                 //  2 - Load Trigger (active high) - 0
                 //  1 - Load Trigger (active high) - 0
                 //  0 - Load Enable  (active low)  - 0  (ACTIVE)
-                return 0x10;
+                return 0x00;
             }
         }
         else {
@@ -294,7 +292,7 @@ OutputState ARDataBusLoadEnableGenerator(InputState state) {
             //          operand.
 
             //  Default state
-            OutputState result = 0x11;
+            OutputState result = 0x01;
             
             //  Determine the right bit position that represents the AR byte to
             //  write to.
@@ -317,7 +315,7 @@ OutputState ARDataBusLoadEnableGenerator(InputState state) {
     }
 
     //  Return default
-    return 0x11;
+    return 0x01;
 
     // //  The initial value of selected output should be such that each bit is the
     // //  negation of the default non-active value of that bit, or in other words,
@@ -330,7 +328,7 @@ OutputState ARDataBusLoadEnableGenerator(InputState state) {
     // //  7 - Load Trigger (active high) - 0
     // //  6 - Load Trigger (active high) - 0
     // //  5 - Load Trigger (active high) - 0
-    // //  4 - Load Enable  (active low)  - 1
+    // //  4 - Load Enable  (active high) - 0
     // //  3 - Load Trigger (active high) - 0
     // //  2 - Load Trigger (active high) - 0
     // //  1 - Load Trigger (active high) - 0
