@@ -768,54 +768,9 @@ TST R2, #0x07
 BNE :FAIL
 OUT NEW_LINE, A
 
-
-//////////////////////////////////// Op Code 0x0E - PUSH, 0x0F - POP
-//   
-//   
-.define 1, stack_test_length 0x30
-OUT _O, A
-OUT _p, A
-OUT #0x0E, I
-OUT DASH, A
-OUT #0x0F, I
-OUT COLON, A
-OUT SPACE, A
-OUT _P, A
-OUT _U, A
-OUT _S, A
-OUT _H, A
-OUT DASH, A
-OUT _P, A
-OUT _O, A
-OUT _P, A
-OUT NEW_LINE, A
-
-LDA %DP, H, #0x45
-LDA %DP, L, #0x00
-LDA %SP, H, #0x45
-LDA %SP, L, #0x00
-
-LDR R1, stack_test_length
-
-// Push Loop
-:push_loop
-PUSH R1
-DEC R1 
-BNE :push_loop
-
-LDR R3, stack_test_length
-// Pop & Check loop
-:pop_loop
-INC R1
-POP R2
-TST R2, R1
-BNE :FAIL
-TST R1, R3
-BNE :pop_loop
- 
 /////////////////////////////////// Op Code 0x1A - MAG, 0x1C - MGA
 //   
-
+:mag_mga
 OUT _O, A
 OUT _p, A
 OUT #0x1A, I
@@ -911,6 +866,52 @@ BEQ :after_mag_mga
 DEC R0
 JMP :mag_mga_loop
 :after_mag_mga
+
+//////////////////////////////////// Op Code 0x0E - PUSH, 0x0F - POP
+//   
+//   
+
+.define 1, stack_test_length 0xE0
+OUT _O, A
+OUT _p, A
+OUT #0x0E, I
+OUT DASH, A
+OUT #0x0F, I
+OUT COLON, A
+OUT SPACE, A
+OUT _P, A
+OUT _U, A
+OUT _S, A
+OUT _H, A
+OUT DASH, A
+OUT _P, A
+OUT _O, A
+OUT _P, A
+OUT NEW_LINE, A
+
+LDA %DP, H, #0x45
+LDA %DP, L, #0x00
+LDA %SP, H, #0x45
+LDA %SP, L, #0x00
+
+LDR R1, stack_test_length
+
+// Push Loop 0x4500 -> 0x4410 
+:push_loop
+PUSH R1
+DEC R1 
+BNE :push_loop
+
+LDR R3, stack_test_length
+// Pop & Check loop
+:pop_loop
+INC R1
+POP R2
+TST R2, R1
+BNE :FAIL
+TST R1, R3
+BNE :pop_loop
+ 
 JMP :PASS
 ////////////////////////////////////////////
 
