@@ -159,6 +159,8 @@ byte disp_en = 2;
 byte disp_en_val;
 byte ascii_or_int = 10;  // D10 If 0: Print as ASCII; if 1: Print as integer (hex)
 byte data_bus_in[] = {14, 15, 16, 17, 18, 19, 8, 9}; // A0, A1, A2, A3, A4, A5, D8, D9
+byte kbd_data = d2;  // d2 = 13 
+byte kbd_clk = d3;   // d3 = 3
 
 // Edge detector vars
 bool was_low = true;    // For positive edge
@@ -263,8 +265,20 @@ void disp_write(unsigned char input)
 byte input_type;
 Character curr_char;
 int num_interrupts = 0;
-int num_low_interrupts = 0;
 
+void send_char_to_ByteFrost(byte inputChar)
+{
+  int i;
+  for (i = 0; i < 8; i++)
+  {
+    digitalWrite(kbd_clk, 0);
+    delayMicroseconds(1);
+    digitalWrite(kbd_data, (inputChar >> i) & 0x01);
+    delayMicroseconds(1);
+    digitalWrite(kbd_clk, 1);
+    delayMicroseconds(2);
+  }
+}
 void disp_en_handler()
 {
   // Read input and add to queue
@@ -273,7 +287,8 @@ void disp_en_handler()
   input_char = (PINC & 0x3f) | ((PINB & 0x03) << 6);  // PB1, PB0, PC5..PC0
 
   queue[queue_pos++] = {input_char, input_type};
-  num_low_interrupts++;
+  if(queue_pos >= QUEUE_SIZE)
+        queue_pos=0;
 }
 
 void setup() 
@@ -286,6 +301,9 @@ void setup()
   // Set data_bus_in pins
   pinMode(disp_en, INPUT);      //  Set D13 as "display_enable" input
   pinMode(ascii_or_int, INPUT); //  Set D8 as "ascii or integer" input
+  pinMode(kbd_data, OUTPUT);
+  pinMode(kbd_clk, OUTPUT);
+  
   int i;
   for (i = 0; i < sizeof(data_bus_in); i++)
   {
@@ -309,8 +327,23 @@ void setup()
 
   Serial.begin(57600); // open the serial port at 57600 bps:
 }
-
+byte inputChar;
 void loop() {
+  if (Serial.available() > 0) 
+  {
+      inputChar = Serial.read();
+      send_char_to_ByteFrost(inputChar);
+#if 0      
+      // Debug - echo the charecter on the display
+      // Read input and add to queue
+      input_type = 0; // ASCII     
+      input_char = inputChar;
+      queue[queue_pos++] = {input_char, input_type};
+      if(queue_pos >= QUEUE_SIZE)
+          queue_pos = 0;
+#endif        
+  }
+
   if (queue_pos != queue_base)
   {
     
@@ -337,5 +370,7 @@ void loop() {
       disp_write(low_digit);
     }
     queue_base++;
+    if(queue_base >= QUEUE_SIZE)
+        queue_base = 0;
   }
 }
