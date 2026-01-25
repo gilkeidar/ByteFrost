@@ -78,7 +78,9 @@ OUT _T, A
 OUT NEW_LINE, A
 
 //	2.	Copy first 8 pages from disk to pages 32 - 39
-LSP %HDP, sdcard[1]
+.define	2 sdcard 			0xE000
+LDA %DP, H, sdcard[1]
+LDA %DP, L, sdcard[0]
 
 //	Set SDCard command
 //	Byte 0: Page

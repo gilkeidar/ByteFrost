@@ -4,9 +4,12 @@
       a. Board "Arduino NANO"
       b. CPU "ATmega328p (old bootloader)"
 2. To program the Arduino - the RESET control signal (black) need to be disconnected!!.
-3. Currently the Tx is used by another signal. Need to free Tx and transmit the display data on it.
-4. To allow Serial printing through Rx/Tx (D1/D0) The Display is configured to use only 4 bit to the Display (D4-D7).
-This is achieved by using a constuctor with only 4 data bits, and using the write4bits()
+3. To enable Serial interface, the display is configured to use 4 bits.
+      a. This is achieved by using the Display constuctor with only 4 data bits, and localy using the write4bits()
+4. The 4 pins that were freed are used as follows
+      a. Pins 0, 1, are used by the UART for remote Keyboard and Display 
+      b. Pins 3, 13 deliver the keyboard input down to the bytefrost.
+
 
 
 
@@ -24,10 +27,10 @@ This is achieved by using a constuctor with only 4 data bits, and using the writ
   The circuit:
    LCD RS pin to digital pin 12
    LCD Enable pin to digital pin 11
-   LCD D4 pin to digital pin 5
-   LCD D5 pin to digital pin 4
-   LCD D6 pin to digital pin 3
-   LCD D7 pin to digital pin 2
+   LCD D4 pin to digital pin 4
+   LCD D5 pin to digital pin 5
+   LCD D6 pin to digital pin 6
+   LCD D7 pin to digital pin 7
    LCD R/W pin to ground
    LCD VSS pin to ground
    LCD VCC pin to 5V
@@ -268,7 +271,22 @@ int num_interrupts = 0;
 
 void send_char_to_ByteFrost(byte inputChar)
 {
+  /*
+  * The format is similar to the original UART with a leading 'Start' bit that is used by the HW
+  * to indicate the charecter is ready. 
+  * The main difference from directly connecting to the ByteFrost HW is that it avoids the need to have a local clock at 57,600 Hz.
+  */
   int i;
+
+    // Leading 1 Start bit
+    
+    digitalWrite(kbd_clk, 0);
+    delayMicroseconds(1);
+    digitalWrite(kbd_data, 1);
+    delayMicroseconds(1);
+    digitalWrite(kbd_clk, 1);
+    delayMicroseconds(2);
+
   for (i = 0; i < 8; i++)
   {
     digitalWrite(kbd_clk, 0);
