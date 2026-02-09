@@ -61,6 +61,7 @@
 .define 1 _v				0x76
 .define 1 _x				0x78
 .define 1 EQUALS			0x3d
+.define 1 DOT				0x2e
 
 //	Address constant definitions
 
@@ -72,6 +73,8 @@ OUT _B, A
 OUT _F, A
 OUT _S, A
 OUT _v, A
+OUT _1, A
+OUT DOT, A
 OUT _1, A
 OUT SPACE, A
 OUT _R, A

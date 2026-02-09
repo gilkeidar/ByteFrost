@@ -277,24 +277,26 @@ void send_char_to_ByteFrost(byte inputChar)
   * The main difference from directly connecting to the ByteFrost HW is that it avoids the need to have a local clock at 57,600 Hz.
   */
   int i;
+  /*
+  * Clock line should always be 0
+  */
+  digitalWrite(kbd_clk, 0);
 
-    // Leading 1 Start bit
+    // Leading 1 Start bit indicating "Ready" when it reaches the 9th position
     
-    digitalWrite(kbd_clk, 0);
-    delayMicroseconds(1);
     digitalWrite(kbd_data, 1);
     delayMicroseconds(1);
-    digitalWrite(kbd_clk, 1);
-    delayMicroseconds(2);
+    digitalWrite(kbd_clk, 1);  // Load data
+    delayMicroseconds(1);
+    digitalWrite(kbd_clk, 0);  // Finish at zero 
 
   for (i = 0; i < 8; i++)
   {
-    digitalWrite(kbd_clk, 0);
-    delayMicroseconds(1);
     digitalWrite(kbd_data, (inputChar >> i) & 0x01);
     delayMicroseconds(1);
     digitalWrite(kbd_clk, 1);
-    delayMicroseconds(2);
+    delayMicroseconds(1);
+    digitalWrite(kbd_clk, 0);  // Finish at zero
   }
 }
 void disp_en_handler()
