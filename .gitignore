@@ -471,3 +471,5 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+*.mlg
+*.bin
