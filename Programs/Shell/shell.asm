@@ -37,7 +37,7 @@ LDW R0, %DP, #0
 TST R0, #0 // Was there any character?
 
 BEQ  :shell_loop
-LDR R1, #0x13 // 'Return'
+LDR R1, #13 // 'Return'
 TST R0, R1 
 BEQ :dispatcher
 OUT R0, A
