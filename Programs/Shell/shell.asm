@@ -60,6 +60,7 @@ OUT '\n'
 //OUT _D, A
 //OUT COLON, A
 OUT PROMPT, A
+OUT ' '
 LDA %BP, L, command_line[0]		// Restore BP
 LDW R3, %BP, #0 				// Load Current Command length
 TST R3, #0
