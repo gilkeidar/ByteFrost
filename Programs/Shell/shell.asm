@@ -48,12 +48,12 @@ OUT R0, A
 LDW R3, %BP, #0 				// Current Command length
 LDR R1, max_command_length
 TST R3, R1 						// Has Command reached max_command_legth?    
-BEQ :shell_loop                 // Ignore the char after max length   
+BEQ :poll_character                 // Ignore the char after max length   
 INC R3							// Move pointer to next char
 SDW R3, %BP, #0					// Update Pointer value in memory
 MGA %BP, L, R3 					// Move BP to point next char
 SDW R0, %BP, #0					// store R0 as the next char
-JMP  :shell_loop
+JMP  :poll_character
 
 :dispatcher
 OUT '\n'

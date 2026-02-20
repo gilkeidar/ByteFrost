@@ -50,14 +50,14 @@
 0xf5, 0x00,	// 0x003e: LDW R3, %BP, #0 				// Current Command length
 0x43, 0x0a,	// 0x0040: LDR R1, max_command_length
 0x12, 0x77,	// 0x0042: TST R3, R1 						// Has Command reached max_command_legth?    
-0x3b, 0x00,	// 0x0044: BEQ :shell_loop                 // Ignore the char after max length   
-0x65, 0x10,	// 0x0046: (BEQ continued)
+0x3b, 0x00,	// 0x0044: BEQ :poll_character                 // Ignore the char after max length   
+0x65, 0x16,	// 0x0046: (BEQ continued)
 0xc6, 0x16,	// 0x0048: INC R3							// Move pointer to next char
 0xf7, 0x00,	// 0x004a: SDW R3, %BP, #0					// Update Pointer value in memory
 0xdc, 0x30,	// 0x004c: MGA %BP, L, R3 					// Move BP to point next char
 0x37, 0x00,	// 0x004e: SDW R0, %BP, #0					// store R0 as the next char
-0x3b, 0x00,	// 0x0050: JMP  :shell_loop
-0x05, 0x10,	// 0x0052: (JMP continued)
+0x3b, 0x00,	// 0x0050: JMP  :poll_character
+0x05, 0x16,	// 0x0052: (JMP continued)
 
 :dispatcher
 0x0d, 0x10,	// 0x0054: OUT '\n'
