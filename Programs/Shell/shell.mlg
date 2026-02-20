@@ -20,7 +20,7 @@
 
 .define 2 kbd_addr	0xE207
 .define 2 command_line 0xDF00
-.define 1 max_command_length 10
+.define 1 max_command_length 255
 
 :shell_loop
 0x0d, 0x5d,	// 0x001c: OUT PROMPT, A
@@ -51,7 +51,7 @@
 0x08, 0x00,	// 0x0040: OUT R0, A
 // Add character to the command line
 0xf5, 0x00,	// 0x0042: LDW R3, %BP, #0 				// Current Command length
-0x43, 0x0a,	// 0x0044: LDR R1, max_command_length
+0x43, 0xff,	// 0x0044: LDR R1, max_command_length
 0x12, 0x77,	// 0x0046: TST R3, R1 						// Has Command reached max_command_legth?    
 0x3b, 0x00,	// 0x0048: BEQ :poll_character                 // Ignore the char after max length   
 0x65, 0x14,	// 0x004a: (BEQ continued)

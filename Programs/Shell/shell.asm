@@ -20,7 +20,7 @@ OUT '\n'
 
 .define 2 kbd_addr	0xE207
 .define 2 command_line 0xDF00
-.define 1 max_command_length 10
+.define 1 max_command_length 255
 
 :shell_loop
 OUT PROMPT, A
