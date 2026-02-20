@@ -359,3 +359,11 @@ void throwWarningLine(unsigned int line_number, std::string warning_string);
  * @return x >> shift_amt, where >> is a logical shift right.
  */
 int logicalShiftRight(int x, int shift_amt);
+
+/**
+ * @brief Trims string s from the whitespace at the start and end of it.
+ * @param s string to trim
+ * @return u where s = xuy where x, y are strings made up of only whitespace
+ * characters.
+ */
+std::string trim(std::string s);

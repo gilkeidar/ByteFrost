@@ -1,0 +1,27 @@
+//	Test cases:
+//	Positive: (should work)
+//		1.	OUT 'a' 	- pass
+//		2.	OUT 'b' 	- pass
+//		3.	OUT '9' 	- pass
+//		4.	OUT ' ' 	- pass
+//		5.	OUT ',' 	- pass
+//		6.	OUT '\a' 	- pass
+//		7.	OUT '\t'	- pass
+//		8.	OUT '\n'	- pass
+//		9.	OUT '\\'	- pass
+//		10.	OUT '\''	- pass
+//		11.	OUT '\"'	- pass
+//	Negative: (should fail)
+//		1.	OUT'a'		- pass
+//		2.	OUT 'a		- pass
+//		3.	OUT a'		- pass
+//		4.	OUT '\\\'	- pass
+//		5.	OUT ' \'	- pass
+//		6.	OUT ',\'	- pass
+//		7.	OUT '\ '	- pass
+//		8.	OUT '\2'	- pass
+//		9.	OUT '''		- pass
+//		10.	OUT '	'	- pass
+
+0x0d, 0x61,	// 0x0000: OUT 'a' //
+

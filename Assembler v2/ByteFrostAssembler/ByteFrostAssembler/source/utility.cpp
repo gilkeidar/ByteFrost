@@ -654,3 +654,16 @@ int logicalShiftRight(int x, int shift_amt) {
 
 	return (x >> shift_amt) & mask;
 }
+
+std::string trim(std::string s) {
+	size_t leftStart, rightStart;
+	leftStart = 0, rightStart = s.length() - 1;
+	while (leftStart < s.length() && (s[leftStart] == ' ' || s[leftStart] == '\t')) {
+		leftStart++;
+	}
+	while (s[rightStart] >= 0 && (s[rightStart] == ' ' || s[rightStart] == '\t')) {
+		rightStart--;
+	}
+
+	return s.substr(leftStart, rightStart - leftStart + 1);
+}

@@ -76,14 +76,14 @@ void Parser::run(std::vector<Line *> & lines,
 
 		if (indexComments != std::string::npos) {
 			//	Comment found, remove it
-			line_string = s.substr(0, indexComments);
+			line_string = trim(s.substr(0, indexComments));
 		}
 		else {
 			//	No comment found; maintain s as is
 			line_string = s;
 		}
 
-		debug("s' = " + line_string);
+		debug("s' = " + line_string + "|END");
 
 		//	3.2	Generate a std::vector<string> token_strings vector.
 		std::vector<std::string> token_strings;
