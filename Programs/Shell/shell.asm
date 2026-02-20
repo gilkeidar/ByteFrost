@@ -15,7 +15,7 @@ OUT 'v'
 OUT '1'
 OUT '.'
 OUT '0'
-OUT '3'
+OUT '4'
 OUT '\n'
 
 .define 2 kbd_addr	0xE207
