@@ -26,16 +26,19 @@ OUT '\n'
 OUT PROMPT, A
 OUT ' '
 
+LDA %BP, H, command_line[1]
+LDA %BP, L, command_line[0]
+
+LDR R3, #0						// Empty command line
+SDW R3, %BP, #0					// Update Pointer value in memory
+
+:poll_character
 LDA %DP, H, kbd_addr[1]
 LDA %DP, L, kbd_addr[0]
 LDA %BP, H, command_line[1]
 LDA %BP, L, command_line[0]
 // The command line is: 1 byte length, 10 bytes command 
 
-LDR R3, #0						// Empty command line
-SDW R3, %BP, #0					// Update Pointer value in memory
-
-:poll_character
 LDW R0, %DP, #0  
 TST R0, #0 // Was there any character?
 
