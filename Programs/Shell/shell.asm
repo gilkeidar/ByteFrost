@@ -22,9 +22,6 @@ OUT '\n'
 .define 2 command_line 0xDF00
 .define 1 max_command_length 10
 
-LDR R3, #0						// Empty command line
-SDW R3, %BP, #0					// Update Pointer value in memory
-
 :shell_loop
 OUT PROMPT, A
 OUT ' '
@@ -34,6 +31,9 @@ LDA %DP, L, kbd_addr[0]
 LDA %BP, H, command_line[1]
 LDA %BP, L, command_line[0]
 // The command line is: 1 byte length, 10 bytes command 
+
+LDR R3, #0						// Empty command line
+SDW R3, %BP, #0					// Update Pointer value in memory
 
 :poll_character
 LDW R0, %DP, #0  
@@ -83,4 +83,3 @@ LDA %BP, L, command_line[0]		// Restore BP
 LDR R3, #0
 SDW R3, %BP, #0					// Update Pointer value in memory
 JMP  :shell_loop
-
