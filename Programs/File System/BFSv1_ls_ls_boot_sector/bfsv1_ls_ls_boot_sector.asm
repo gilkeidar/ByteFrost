@@ -69,49 +69,6 @@
 
 .start 0x2000
 
-.define	1 NEW_LINE	 	0x10
-.define 1 SPACE			0x20
-.define	1 _A				0x41
-.define	1 _B				0x42
-.define	1 _C				0x43
-.define	1 _D				0x44
-.define	1 _E				0x45
-.define	1 _F				0x46
-.define	1 _G				0x47
-.define	1 _H				0x48
-.define	1 _I				0x49
-.define	1 _J				0x4a
-.define	1 _K				0x4b
-.define	1 _L				0x4c
-.define	1 _M				0x4d
-.define	1 _N				0x4e
-.define	1 _O				0x4f
-.define	1 _P				0x50
-.define	1 _Q				0x51
-.define	1 _R				0x52
-.define	1 _S				0x53
-.define	1 _T				0x54
-.define	1 _U				0x55
-.define	1 _V				0x56
-.define	1 _W				0x57
-.define	1 _X				0x58
-.define	1 _Y				0x59
-.define	1 _Z				0x5a
-.define 1 COLON				0x3a
-.define 1 LEFT_PAR			0x28
-.define	1 RIGHT_PAR			0x29
-.define 1 COMMA				0x2c
-.define 1 ASTERISK			0x2a
-.define 1 _x				0x78
-.define 1 EQUALS			0x3d
-.define	1 dollar			0x24
-.define 1 _l				0x6c
-.define 1 _s				0x73
-.define 1 _t				0x74
-.define 1 _o				0x6f
-.define 1 _a				0x61
-.define 1 DASH				0x2d
-
 //	Offsets assuming base address is at 0xE000
 .define	1 DISK_MMIO_PAGE_OFFSET			0
 .define	1 DISK_MMIO_SECTOR_HI_OFFSET	1
@@ -148,15 +105,15 @@ LDA %SP, H, #0xDF
 LDA %SP, L, #0xFF
 
 //	1.	printf("$ ls -ls\n");
-OUT dollar, A
-OUT SPACE, A
-OUT _l, A
-OUT _s, A
-OUT SPACE, A
-OUT DASH, A
-OUT _l, A
-OUT _s, A
-OUT NEW_LINE, A
+OUT '$'
+OUT ' '
+OUT 'l'
+OUT 's'
+OUT ' '
+OUT '-'
+OUT 'l'
+OUT 's'
+OUT '\n'
 
 //	2.	Load block 8 that contains the disk root (and only) directory block into
 //		RAM at page 0x30.
@@ -287,12 +244,12 @@ JMP :loop_1
 :loop_1_done
 
 //	5.	printf("total %hu\n", total_blocks);
-OUT _t, A
-OUT _o, A
-OUT _t, A
-OUT _a, A
-OUT _l, A
-OUT SPACE, A
+OUT 't'
+OUT 'o'
+OUT 't'
+OUT 'a'
+OUT 'l'
+OUT ' '
 LDW R2, %SP, sp_total_blocks_hi
 //	Print high byte if not zero.
 TST R2, #0
@@ -302,7 +259,7 @@ OUT R2, I
 LDW R2, %SP, sp_total_blocks_lo
 OUT R2, I
 
-OUT NEW_LINE, A
+OUT '\n'
 
 //	6.	For each directory entry (0 through 15):
 //		R0: index of directory entry (i)
@@ -343,7 +300,7 @@ LDW R2, %BP, #2
 OUT R2, I
 
 //		3.	Print space.
-OUT SPACE, A
+OUT ' '
 
 //		4.	Read the file size field in bytes of this entry's inode
 
@@ -356,8 +313,7 @@ LDW R2, %BP, #1
 OUT R2, I
 
 //		5.	Print space.
-OUT SPACE, A
-
+OUT ' '
 
 //		6.	Print file type
 
@@ -372,34 +328,34 @@ LDW R2, %BP, #3
 //	4.	4 --> BIN
 TST R2, #0
 BNE :file_type_text_check
-OUT _U, A
+OUT 'U'
 JMP :file_type_check_done
 
 :file_type_text_check
 TST R2, #1
 BNE :file_type_asm_check
-OUT _T, A
+OUT 'T'
 JMP :file_type_check_done
 
 :file_type_asm_check
 TST R2, #2
 BNE :file_type_mlg_check
-OUT _A, A
+OUT 'A'
 JMP :file_type_check_done
 
 :file_type_mlg_check
 TST R2, #3
 BNE :file_type_bin_check
-OUT _M, A
+OUT 'M'
 JMP :file_type_check_done
 
 :file_type_bin_check
-OUT _B, A
+OUT 'B'
 
 :file_type_check_done
 
 //		7.	Print space.
-OUT SPACE, A
+OUT ' '
 
 //		8.	Print the filename.
 //			1.	for (R2 = 0; R2 < 14;):
@@ -439,7 +395,7 @@ JMP :move_dp_to_next_entry_loop
 :done_entry
 
 //		9.	Print newline.
-OUT NEW_LINE, A
+OUT '\n'
 
 :loop_2_update
 
@@ -451,7 +407,7 @@ JMP :loop_2
 :loop_2_done
 
 //	7.	Print "$ "
-OUT dollar, A
-OUT SPACE, A
+OUT '$'
+OUT ' '
 
 BRK

@@ -158,6 +158,15 @@ bool isOUT_PRINT_TYPEString(std::string s);
  */
 bool isARHorLString(std::string s);
 
+/**
+ * @brief Determines whether a given string is a character string (i.e., a
+ * string of the form 'x' where x is a single character or a string beginning
+ * with \ (for escape characters)).
+ * @param s string to check
+ * @return true if s is a Character string and false otherwise.
+ */
+bool isCharacterString(std::string s);
+
 //	String parsing
 
 /**
@@ -197,6 +206,16 @@ std::string getFlagName(std::string flag_string);
  * number.
  */
 long long getNumberValue(std::string number_string);
+
+/**
+ * @brief Given a string that represents a character, this function returns the
+ * represented character's ASCII value.
+ * @param char_string string that represents a character
+ * @return The ASCII value of the character represented by char_string.
+ * @note This function throws an error if the given string does not represent a
+ * character.
+ */
+int getCharValue(std::string char_string);
 
 /**
  * @brief Given a string that represents an immediate, this function returns

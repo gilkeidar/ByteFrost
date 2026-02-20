@@ -29,6 +29,54 @@ bool isHexDigit(char c) {
 	return result;
 }
 
+bool isASCII(char c) {
+	//	c is an ASCII character if it is a value in the range 0 to 127.
+	return (c & 0x80) == 0;
+}
+
+bool isASCII_SPECIAL(char c) {
+	//	c is an ASCII_SPECIAL character if it is a character in the set
+	//	{\, ', "}
+	
+	//	NOTE: This is a hardcoded list and needs to be kept in line with the
+	//	special_characters hashmap.
+	return (c == '\\') || (c == '\'') || (c == '\"');
+}
+
+bool isASCII_CONTROL(char c) {
+	//	c is an ASCII_CONTROL character if it is in the range 0 to 31.
+	return (c >= 0) && (c <= 31);
+}
+
+bool isASCII_REGULAR(char c) {
+	//	c is in ASCII_REGULAR if it is in ASCII but is not in ASCII_SPECIAL
+	//	nor in ASCII_CONTROL.
+	return isASCII(c) && !isASCII_SPECIAL(c) && !isASCII_CONTROL(c);
+}
+
+bool isSPECIAL_CHAR(std::string s) {
+	//	s is in SPECIAL_CHAR if:
+	//	1.	s.length() == 2.
+	//	2.	s[0] = '\\'
+	//	3.	s[1] is in ASCII_SPECIAL or ESC_CHAR. 
+
+	if (s.length() != 2)				return false;
+	if (s[0] != SPECIAL_CHAR_START)		return false;
+	return special_characters.find(s[1]) != special_characters.end();
+}
+
+bool isCHAR(std::string s) {
+	debug("isCHAR(" + s + ")");
+	//	s is in CHAR iff:
+	//	Its length is 1 and s[0] is in ASCII_REGULAR, or
+	//	It is in SPECIAL_CHAR.
+	if (s.length() == 1) {
+		return isASCII_REGULAR(s[0]);
+	}
+
+	return isSPECIAL_CHAR(s);
+}
+
 
 bool isTEXTString(std::string s) {
 	//	In order for s to be in TEXT:
@@ -219,6 +267,17 @@ bool isARHorLString(std::string s) {
 	return (s == ARHorL_LOW || s == ARHorL_HIGH);
 }
 
+bool isCharacterString(std::string s) {
+	//	In order for s to be a Character string:
+	//	1.	s.length() >= 3
+	//	2.	s = 'u' where u is in CHAR.
+	debug("isCharacterString(" + s + ")");
+	if (s.length() < 3)		return false;
+	if (s[0] != TOKEN_CHAR_START || s[s.length() - 1] != TOKEN_CHAR_END)	
+		return false;
+	return isCHAR(s.substr(1, s.length() - 2));
+}
+
 //	String parsing
 
 bool stringEndsWith(std::string s, std::string ending) {
@@ -310,6 +369,29 @@ long long getNumberValue(std::string number_string) {
 		//	Error - v is neither in ND or NH.
 		throwError("String '" + v + "' is in N but not in NH or ND.");
 	}
+}
+
+int getCharValue(std::string char_string) {
+	//	First, check that the given string represents a character. If it does
+	//	not, throw an error.
+	if (!isCharacterString(char_string)) {
+		throwError("Given string '" + char_string
+			+ "' does not represent a character.");
+	}
+
+	//	1.	The token string is 'x', get the string x.
+	//	2.	If the length of x is 1, return the character value of x.
+	//	3.	If the length of x is 2, map the escape character x[1] to its ASCII 
+	//		special character and return that special character's value.
+
+	std::string internal_char = char_string.substr(1,
+		char_string.length() - 2);
+
+	if (internal_char.length() == 1) {
+		return internal_char[0];
+	}
+
+	return special_characters.at(internal_char[1]);
 }
 
 int getImmediateValue(std::string immediate_string) {

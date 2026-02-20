@@ -7,12 +7,17 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <optional>
 
 Parser::Parser(Config & config) : config(config) {
 	//	Initialize delimiter set to {' ', '\t', ','}
 	this->delimiters.insert(TOKEN_DELIMITER_SPACE);
 	this->delimiters.insert(TOKEN_DELIMITER_TAB);
 	this->delimiters.insert(TOKEN_DELIMITER_COMMA);
+
+	//	Initialize special token string start and end character hashmap.
+	this->special_token_start_to_end[TOKEN_CHAR_START] = TOKEN_CHAR_END;
+	this->special_token_start_to_end[TOKEN_STRING_START] = TOKEN_STRING_END;
 }
 
 void Parser::run(std::vector<Line *> & lines,
@@ -83,24 +88,47 @@ void Parser::run(std::vector<Line *> & lines,
 		//	3.2	Generate a std::vector<string> token_strings vector.
 		std::vector<std::string> token_strings;
 		bool isTokenString = false;
+		std::optional<char> token_end;
 		std::string currTokenString = "";
 		for (int i = 0; i < line_string.length(); i++) {
 			char c = line_string[i];
-			if (this->delimiters.find(c) != this->delimiters.end()) {
+			//std::cout << "current character: " << c << std::endl;
+			if (this->special_token_start_to_end.count(c) > 0) {
+				//	c is a special token start character (a special token may
+				//	contain delimiters! A special token only ends once its
+				//	corresponding end token character is found).
+				//std::cout << "c is a special token start character!" << std::endl;
+				token_end = this->special_token_start_to_end[c];
+				isTokenString = true;
+			}
+			else if (!token_end.has_value() && this->delimiters.find(c) != this->delimiters.end()) {
 				//	c is a delimiter
+				//std::cout << "c is a delimiter." << std::endl;
 				isTokenString = false;
 			}
 			else {
+				//std::cout << "c is a regular character." << std::endl;
 				isTokenString = true;
 			}
 
 			if (isTokenString) {
+				//std::cout << "Adding c to current token string." << std::endl;
 				currTokenString.push_back(c);
+				//std::cout << "Current token string: " << currTokenString << std::endl;
 			}
-			else if (currTokenString.length() > 0) {
+			else if ((token_end.has_value() && c == token_end.value()) 
+				|| currTokenString.length() > 0) {
+				//std::cout << "Current token string complete: " 
+					//<< currTokenString << std::endl;
 				token_strings.push_back(currTokenString);
 				currTokenString = "";
 			}
+
+			//if (token_end.has_value() && c == token_end.value()) {
+			//	//	c is the end of this token.
+			//	std::cout << ""
+			//	isTokenString = false;
+			//}
 		}
 		if (isTokenString) {
 			token_strings.push_back(currTokenString);
@@ -137,7 +165,7 @@ void Parser::run(std::vector<Line *> & lines,
 
 		//	Check that line isn't invalid
 		if (line->type == LineType::INVALID) {
-			throwError("Line " + std::to_string(line_count + 1) 
+			throwError("Line " + std::to_string(line_count + 1)
 				+ " is invalid.");
 		}
 
@@ -145,8 +173,8 @@ void Parser::run(std::vector<Line *> & lines,
 	}
 }
 
-Token Parser::stringToToken(std::string w, 
-	std::unordered_map<std::string, std::vector<AssemblyInstruction>> & instructions) {
+Token Parser::stringToToken(std::string w,
+	std::unordered_map<std::string, std::vector<AssemblyInstruction>>& instructions) {
 	//	Given a string w, match it with a TokenType and return a Token 
 	//	containing w and the matched TokenType.
 
@@ -175,18 +203,6 @@ Token Parser::stringToToken(std::string w,
 			type = TokenType::TEXT;
 		}
 	}
-	//else if (w.length() >= 2 && w[0] == ADDRESS_REGISTER_PREFIX &&
-	//		special_register_bits.find(w.substr(1)) != special_register_bits.end()) {
-	//	//	TODO: Remove this when LSP is deprecated.
-	//	//	NOTE: This may cause bugs if any special register names conflict
-	//	//	with address register names. However, special registers and address
-	//	//	registers are not meant to coexist for long since address registers
-	//	//	replace special registers. Hence, all special register logic should
-	//	//	be removed when LSP is removed (relevant sections in the code that
-	//	//	mention special registers are marked with TODOs).
-	//	//	w is a special register
-	//	type = TokenType::SREGISTER;
-	//}
 	else if (w.length() >= 2 && w[0] == ADDRESS_REGISTER_PREFIX &&
 		address_register_bits.find(w.substr(1)) != address_register_bits.end()) {
 		//	w is an address register
@@ -216,6 +232,10 @@ Token Parser::stringToToken(std::string w,
 	else if (isBYTE_LABELString(w)) {
 		//	w is a byte selection of a label
 		type = TokenType::BYTE_LABEL;
+	}
+	else if (isCharacterString(w)) {
+		//	w is a character (e.g., 'a')
+		type = TokenType::CHARACTER;
 	}
 	else {
 		//	w is invalid
@@ -254,6 +274,8 @@ std::string TokenTypeToString(TokenType t) {
 		return "BYTE_CONSTANT";
 	case TokenType::BYTE_LABEL:
 		return "BYTE_LABEL";
+	case TokenType::CHARACTER:
+		return "CHARACTER";
 	case TokenType::INVALID:
 		return "INVALID";
 	default:

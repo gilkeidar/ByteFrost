@@ -45,9 +45,17 @@ private:
 	/**
 	 * @brief Parser's set of delimiter characters. These are used to separate
 	 * token strings in the input .asm file. Consequently, token strings
-	 * contain no characters in this set.
+	 * contain no characters in this set (unless they are special token strings
+	 * such as character tokens or string tokens; see 
+	 * special_token_start_to_end hashmap).
 	 */
 	std::unordered_set<char> delimiters;
+
+	/**
+	 * @brief Hashmap of special token start characters to the corresponding
+	 * special token's end character.
+	 */
+	std::unordered_map<char, char> special_token_start_to_end;
 
 	/**
 	 * @brief Given a token string w, this method maps the token string to a
