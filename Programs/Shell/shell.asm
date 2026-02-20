@@ -26,6 +26,8 @@ LDR R3, #0						// Empty command line
 SDW R3, %BP, #0					// Update Pointer value in memory
 
 :shell_loop
+OUT PROMPT, A
+OUT ' '
 
 LDA %DP, H, kbd_addr[1]
 LDA %DP, L, kbd_addr[0]
@@ -33,10 +35,11 @@ LDA %BP, H, command_line[1]
 LDA %BP, L, command_line[0]
 // The command line is: 1 byte length, 10 bytes command 
 
+:poll_character
 LDW R0, %DP, #0  
 TST R0, #0 // Was there any character?
 
-BEQ  :shell_loop
+BEQ  :poll_character
 LDR R1, #13 // 'Return'
 TST R0, R1 
 BEQ :dispatcher
@@ -55,11 +58,10 @@ JMP  :shell_loop
 :dispatcher
 OUT '\n'
 // Test - Echo command
-//OUT _C, A
-//OUT _M, A
-//OUT _D, A
-//OUT COLON, A
-OUT PROMPT, A
+OUT 'C'
+OUT 'M'
+OUT 'D'
+OUT ':'
 OUT ' '
 LDA %BP, L, command_line[0]		// Restore BP
 LDW R3, %BP, #0 				// Load Current Command length
