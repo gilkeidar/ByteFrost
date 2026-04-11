@@ -109,9 +109,11 @@ LDA %DP, L, UART[0]
 
 :init_uart
 // Reset
-LDR R1, #0x2A 	// Reset Rx, Disable Rx, Tx
+LDR R1, #0x1A 	// Reset MR index, Disable Rx, Tx
 SDW R1, %DP, CR_W
-LDR R1, #0x35 	// Reset Tx, Enable Rx, Tx
+LDR R1, #0x20 	// Reset Rx, 
+SDW R1, %DP, CR_W
+LDR R1, #0x30 	// Reset Tx
 SDW R1, %DP, CR_W
 
 // ACR Set MPO to show the clock

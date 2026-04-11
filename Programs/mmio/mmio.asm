@@ -193,7 +193,8 @@ LDW R3, %DP, #6  // 0xE206		Random Data
 OUT R3, I
 LDW R3, %DP, #6  // 0xE206		Random Data
 OUT R3, I
-LDW R3, %DP, #6  // 0xE206		Random Data
+veer
+
 OUT R3, I
 LDW R3, %DP, #6  // 0xE206		Random Data
 OUT R3, I
