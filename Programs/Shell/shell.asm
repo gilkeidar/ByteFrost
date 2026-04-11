@@ -15,7 +15,7 @@ OUT 'v'
 OUT '1'
 OUT '.'
 OUT '0'
-OUT '5'
+OUT '6'
 OUT '\n'
 
 .define 2 kbd_addr	0xE207
@@ -59,26 +59,36 @@ SDW R0, %BP, #0					// store R0 as the next char
 JMP  :poll_character
 
 :dispatcher
+
+LDA %BP, L, command_line[0]		// BP -> command_line.length
+LDW R3, %BP, #0 				// R3 = command_length
+TST R3, #0                      // if (length==0) break
+BEQ :end_echo					// Just <ENTER> without command
+LDR R0, command_line[0]			// i = *command_line
+INC R0							// i++  // 	command_line.data[0]
+MGA %BP, L, R0 					// BP -> *command_line.data[0]
+LDW R1, %BP, #0					// R1 = command_line.data[0]
+LDR R2, #0x4C                   // 'L' - List
+TST R1, R2
+BEQ :list_mem
+
+:unknown_command_section
 OUT '\n'
 // Test - Echo command
 OUT 'C'
 OUT 'M'
 OUT 'D'
-OUT ':'
+OUT '?'
 OUT ' '
-LDA %BP, L, command_line[0]		// Restore BP
-LDW R3, %BP, #0 				// Load Current Command length
-TST R3, #0
-BEQ :end_echo
-
-LDR R0, #1
-:echo_command
-MGA %BP, L, R0 	
-LDW R1, %BP, #0
-OUT R1, A
-INC R0
-TST R3, R0
-BPL :echo_command
+LDR R0, command_line[0]			// i = *command_line
+INC R0							// i++  // 	command_line.data[0]
+:unknown_command				// do {
+MGA %BP, L, R0 					// 		BP -> command_line[i]
+LDW R1, %BP, #0					// 		R1 = command_line[i]
+OUT R1, A						// 		Print R1
+INC R0							// 		i++	
+TST R3, R0						// } while (i < command_length)
+BPL :unknown_command
 
 :end_echo
 OUT '\n'
@@ -86,3 +96,25 @@ LDA %BP, L, command_line[0]		// Restore BP
 LDR R3, #0
 SDW R3, %BP, #0					// Update Pointer value in memory
 JMP  :shell_loop
+
+:list_mem
+OUT '\n'
+OUT 'L'
+OUT 'i'
+OUT 's'
+OUT 't'
+OUT ' '
+TST R3, #5                      // if (length!=5) break
+BNE :unknown_command_section					 
+LDR R0, command_line[0]			// i = *command_line
+INC R0							// i++  // 	command_line.data[0]
+INC R0							// i++  // 	command_line.data[1]
+:process_address				// do {
+MGA %BP, L, R0 					// 		BP -> command_line[i]
+LDW R1, %BP, #0					// 		R1 = command_line[i]
+OUT R1, A						// 		Print R1
+INC R0							// 		i++	
+TST R3, R0						// } while (i < command_length)
+BPL :process_address
+
+JMP :end_echo
