@@ -18,9 +18,13 @@ OUT '0'
 OUT '6'
 OUT '\n'
 
-.define 2 kbd_addr	0xE207
-.define 2 command_line 0xDF00
+.define 2 kbd_addr		0xE207
+.define 2 command_line 	0xDF00
+.define 2 stack_head	0x4000  
 .define 1 max_command_length 255
+
+LDA %SP, H, stack_head[1]
+LDA %SP, L, stack_head[0]
 
 :shell_loop
 OUT PROMPT, A
@@ -68,11 +72,16 @@ LDR R0, command_line[0]			// i = *command_line
 INC R0							// i++  // 	command_line.data[0]
 MGA %BP, L, R0 					// BP -> *command_line.data[0]
 LDW R1, %BP, #0					// R1 = command_line.data[0]
-LDR R2, #0x4C                   // 'L' - List
+                    // Start the dispach
+					// switch(R1 command) 
+LDR R2, #0x4C                   // Case 'L' - List
+TST R1, R2
+BEQ :list_mem
+LDR R2, #0x6C                   // Case 'l' - List
 TST R1, R2
 BEQ :list_mem
 
-:unknown_command_section
+:unknown_command_section        // default: 
 OUT '\n'
 // Test - Echo command
 OUT 'C'
@@ -113,8 +122,63 @@ INC R0							// i++  // 	command_line.data[1]
 MGA %BP, L, R0 					// 		BP -> command_line[i]
 LDW R1, %BP, #0					// 		R1 = command_line[i]
 OUT R1, A						// 		Print R1
+PUSH R1       					// Put ASCII on stack
 INC R0							// 		i++	
 TST R3, R0						// } while (i < command_length)
 BPL :process_address
+CALL :atoi_4                    // DP <- :atoi_4/2; --SP <- PC; PC = DP;
+POP R1    						// Empty stack
+POP R1
+POP R1
+POP R1
+
+LDA %DP, H, kbd_addr[1]
+LDA %DP, L, kbd_addr[0]
 
 JMP :end_echo
+
+
+:atoi_4
+OUT '\n'
+OUT 'A'
+OUT '2'
+OUT 'I'
+OUT '4'
+OUT ' '
+LDA %BP, H, stack_head[1]
+LDA %BP, L, stack_head[0]
+OUT '\n'
+LDW R1, %BP, #0
+OUT R1, I
+LDW R1, %BP, #-1
+OUT R1, I
+LDW R1, %BP, #-2
+OUT R1, I
+LDW R1, %BP, #-3
+OUT R1, I
+LDW R1, %BP, #-4
+OUT R1, I
+LDW R1, %BP, #-5
+OUT R1, I
+LDW R1, %BP, #-6
+OUT R1, I
+LDW R1, %BP, #-7
+OUT R1, I
+OUT '\n'
+MAG R1, %SP, H
+OUT R1, I
+MAG R1, %SP, L
+OUT R1, I
+RTS
+
+MAA %BP, %SP, #-6
+LDW R1, %BP, #0
+OUT R1, A
+LDW R1, %BP, #1
+OUT R1, A
+LDW R1, %BP, #2
+OUT R1, A
+LDW R1, %BP, #3
+OUT R1, A
+OUT '\n'
+RTS 
