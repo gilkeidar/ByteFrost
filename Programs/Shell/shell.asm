@@ -15,7 +15,7 @@ OUT 'v'
 OUT '1'
 OUT '.'
 OUT '0'
-OUT '6'
+OUT '7'
 OUT '\n'
 
 .define 2 kbd_addr		0xE207
@@ -81,6 +81,20 @@ LDR R2, #0x6C                   // Case 'l' - List
 TST R1, R2
 BEQ :list_mem
 
+LDR R2, #0x52                   // Case 'R' - Registers
+TST R1, R2
+BNE :test_r
+CALL :list_regs
+JMP :end_echo
+
+:test_r
+LDR R2, #0x72                   // Case 'r' - Registers
+TST R1, R2
+BNE :next_r
+CALL :list_regs
+JMP :end_echo
+:next_r
+
 :unknown_command_section        // default: 
 OUT '\n'
 // Test - Echo command
@@ -105,6 +119,89 @@ LDA %BP, L, command_line[0]		// Restore BP
 LDR R3, #0
 SDW R3, %BP, #0					// Update Pointer value in memory
 JMP  :shell_loop
+
+
+///////////////////////////////////////////////////////////
+// list_registers - shell command 'R' 
+// lists all registers
+//
+///////////////////////////////////////////////////////////
+
+:list_regs
+OUT '\n'
+OUT 'R'
+OUT 'e'
+OUT 'g'
+OUT 's'
+OUT '\n'
+OUT 'R'
+OUT '0'
+OUT ':'
+OUT R0, I
+OUT ' '
+OUT 'R'
+OUT '1'
+OUT ':'
+OUT R1, I
+OUT '\n'
+OUT 'R'
+OUT '2'
+OUT ':'
+OUT R2, I
+OUT ' '
+OUT 'R'
+OUT '3'
+OUT ':'
+OUT R3, I
+OUT '\n'
+OUT 'S'
+OUT 'P'
+OUT ':'
+MAG R0, %SP, H
+OUT R0, I
+MAG R0, %SP, L
+OUT R0, I
+OUT ' '
+OUT 'B'
+OUT 'P'
+OUT ':'
+MAG R0, %BP, H
+OUT R0, I
+MAG R0, %BP, L
+OUT R0, I
+OUT '\n'
+OUT 'D'
+OUT 'P'
+OUT ':'
+MAG R0, %DP, H
+OUT R0, I
+MAG R0, %DP, L
+OUT R0, I
+OUT ' '
+OUT 'P'
+OUT 'C'
+OUT ':'
+MAG R0, %PC, H
+OUT R0, I
+MAG R0, %PC, L
+OUT R0, I
+OUT '\n'
+OUT 'R'
+OUT 'T'
+OUT ':'
+LDW R0, %SP, #-1
+OUT R0, I
+LDW R0, %SP, #0
+OUT R0, I
+BRK
+RTS
+ 
+
+///////////////////////////////////////////////////////////
+// list_mem - shell command 'L1234' 
+// lists 16 bytes of memory starting from the given address
+//
+///////////////////////////////////////////////////////////
 
 :list_mem
 OUT '\n'
@@ -132,12 +229,14 @@ POP R1
 POP R1
 POP R1
 
-LDA %DP, H, kbd_addr[1]
-LDA %DP, L, kbd_addr[0]
 
 JMP :end_echo
 
-
+///////////////////////////////////////////////////////////
+// atoi_4 gets number of 4 ASCII in stack and returns  
+// 2 byte hexadecimal in stack (caller pop twice) 
+//
+///////////////////////////////////////////////////////////
 :atoi_4
 OUT '\n'
 OUT 'A'
@@ -145,8 +244,9 @@ OUT '2'
 OUT 'I'
 OUT '4'
 OUT ' '
-LDA %BP, H, stack_head[1]
-LDA %BP, L, stack_head[0]
+CALL :list_regs
+MAA %BP, %SP, #0
+CALL :list_regs
 OUT '\n'
 LDW R1, %BP, #0
 OUT R1, I
@@ -169,16 +269,6 @@ MAG R1, %SP, H
 OUT R1, I
 MAG R1, %SP, L
 OUT R1, I
+OUT '\n'
 RTS
 
-MAA %BP, %SP, #-6
-LDW R1, %BP, #0
-OUT R1, A
-LDW R1, %BP, #1
-OUT R1, A
-LDW R1, %BP, #2
-OUT R1, A
-LDW R1, %BP, #3
-OUT R1, A
-OUT '\n'
-RTS 

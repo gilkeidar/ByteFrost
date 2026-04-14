@@ -906,6 +906,7 @@ JMP :FAIL
 //   
 :push_pop
 .define 1, stack_test_length 0xE0
+.define 2 stack_head	0x4500
 OUT _O, A
 OUT _p, A
 OUT #0x0E, I
@@ -923,10 +924,8 @@ OUT _O, A
 OUT _P, A
 OUT NEW_LINE, A
 
-LDA %DP, H, #0x45
-LDA %DP, L, #0x00
-LDA %SP, H, #0x45
-LDA %SP, L, #0x00
+LDA %SP, H, stack_head[1]
+LDA %SP, L, stack_head[0]
 
 LDR R1, stack_test_length
 
@@ -946,7 +945,7 @@ BNE :local_fail
 TST R1, R3
 BNE :pop_loop
  
-JMP :PASS
+JMP :ldw_sdw
 :local_fail
 OUT _E, A
 OUT _X, A
@@ -959,6 +958,75 @@ OUT _O, A
 OUT _T, A
 OUT SPACE, A
 OUT R2, I
+OUT NEW_LINE, A
+JMP :FAIL
+///// Op Code 0x14,0x15 - LDW, 0x16, 0x17 - SDW
+//   
+//  This test relies on the test PUSH 
+:ldw_sdw
+
+LDA %SP, H, stack_head[1]
+LDA %SP, L, stack_head[0]
+LDA %DP, H, stack_head[1]
+LDA %DP, L, stack_head[0]
+LDA %BP, H, stack_head[1]
+LDA %BP, L, stack_head[0] 
+
+OUT _O, A
+OUT _p, A
+OUT #0x14, I
+OUT DASH, A
+OUT #0x17, I
+OUT COLON, A
+OUT SPACE, A
+OUT _L, A
+OUT _D, A
+OUT _W, A
+OUT DASH, A
+OUT _S, A
+OUT _D, A
+OUT _W, A
+OUT NEW_LINE, A
+
+
+LDR R0 stack_test_length
+:ldw_loop
+LDW R1, %DP, #-1 
+LDW R2, %BP, #-1  
+LDW R3, %SP, #-1
+TST R1, R2
+BNE :ldw_fail
+TST R3, R2
+BNE :ldw_fail
+TST R0, R2
+BNE :ldw_fail
+
+MAA %DP, %DP, #-1
+MAA %BP, %BP, #-1
+MAA %SP, %SP, #-1
+DEC R0
+BNE :ldw_loop
+JMP :PASS
+:ldw_fail
+OUT SPACE, A
+OUT '#'
+OUT SPACE, A
+OUT _D, A
+OUT _P, A
+OUT SPACE, A
+OUT _B, A
+OUT _P, A
+OUT SPACE, A
+OUT _S, A
+OUT _P, A
+OUT NEW_LINE, A
+OUT R0, I
+OUT SPACE, A
+OUT R1, I
+OUT SPACE, A
+OUT R2, I
+OUT SPACE, A
+OUT R3, I
 OUT NEW_LINE, A
 JMP :FAIL
 ////////////////////////////////////////////
