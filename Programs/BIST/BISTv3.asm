@@ -76,7 +76,7 @@ OUT SPACE, A
 OUT _v, A
 OUT #3, A
 OUT DOT, A
-OUT #0, A
+OUT #1, A
 OUT NEW_LINE, A
 
 
@@ -960,7 +960,7 @@ OUT SPACE, A
 OUT R2, I
 OUT NEW_LINE, A
 JMP :FAIL
-///// Op Code 0x14,0x15 - LDW, 0x16, 0x17 - SDW
+///// Op Code 0x14,0x15 - LDW
 //   
 //  This test relies on the test PUSH 
 :ldw_sdw
@@ -976,57 +976,74 @@ OUT _O, A
 OUT _p, A
 OUT #0x14, I
 OUT DASH, A
-OUT #0x17, I
+OUT #0x15, I
 OUT COLON, A
 OUT SPACE, A
 OUT _L, A
 OUT _D, A
 OUT _W, A
-OUT DASH, A
-OUT _S, A
-OUT _D, A
-OUT _W, A
+
 OUT NEW_LINE, A
 
+// The loop over the three pointers must be seperated incase 
+// the pointer selection does not work properly
+LDR R0 stack_test_length
+:ldw_loop_dp
+LDW R1, %DP, #-1 // Push decrease SP before inserting data
+                 // So the data start at -1 of the SP base 
+TST R1, R0
+BNE :ldw_fail
+MAA %DP, %DP, #-1
+DEC R0
+BNE :ldw_loop_dp
 
 LDR R0 stack_test_length
-:ldw_loop
-LDW R1, %DP, #-1 
-LDW R2, %BP, #-1  
-LDW R3, %SP, #-1
-TST R1, R2
-BNE :ldw_fail
-TST R3, R2
-BNE :ldw_fail
-TST R0, R2
-BNE :ldw_fail
-
-MAA %DP, %DP, #-1
+:ldw_loop_bp
+LDW R1, %BP, #-1 // Push decrease SP before inserting data
+                 // So the data start at -1 of the SP base 
+TST R1, R0
+BNE :ldw_fail_bp
 MAA %BP, %BP, #-1
+DEC R0
+BNE :ldw_loop_bp
+
+LDR R0 stack_test_length
+:ldw_loop_sp
+LDW R1, %SP, #-1 // Push decrease SP before inserting data
+                 // So the data start at -1 of the SP base 
+TST R1, R0
+BNE :ldw_fail_sp
 MAA %SP, %SP, #-1
 DEC R0
-BNE :ldw_loop
+BNE :ldw_loop_sp
+
 JMP :PASS
-:ldw_fail
+
+:ldw_fail_dp
 OUT SPACE, A
 OUT '#'
 OUT SPACE, A
 OUT _D, A
 OUT _P, A
+JMP :ldw_fail
+:ldw_fail_sp
 OUT SPACE, A
-OUT _B, A
-OUT _P, A
+OUT '#'
 OUT SPACE, A
 OUT _S, A
 OUT _P, A
+JMP :ldw_fail
+:ldw_fail_bp
+OUT SPACE, A
+OUT '#'
+OUT SPACE, A
+OUT _B, A
+OUT _P, A
+:ldw_fail
 OUT NEW_LINE, A
 OUT R0, I
 OUT SPACE, A
 OUT R1, I
-OUT SPACE, A
-OUT R2, I
-OUT SPACE, A
-OUT R3, I
 OUT NEW_LINE, A
 JMP :FAIL
 ////////////////////////////////////////////
