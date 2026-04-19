@@ -2,8 +2,6 @@
 // BISTv3:
 // Add Address Registers
 //////////////////////////////////
-//////////////////////////////////
-// BISTv2:
 // Enhance to 16bit address range
 // 0x0000 .. 0x1FFF  ROM 
 // 0x2000 .. 0xDFFF  RAM
@@ -100,10 +98,11 @@ OUT SPACE, A
 //	(Note that the counter value is accessed as a little-endian integer)
 .define 2 counter_base	0xE200
 
-
-LDA %DP, H, counter_base[1]
-LDA %DP, L, counter_base[0]
-SDW R0, %DP, #0     // Reset Counter
+// Work with BP instead of DP because DP is the default address and
+// It is hard to observe when the address is with "intent"
+LDA %BP, H, counter_base[1]
+LDA %BP, L, counter_base[0]
+SDW R0, %BP, #0     // Reset Counter
 
 NOP
 NOP
@@ -111,14 +110,14 @@ NOP
 NOP
 NOP   // Time 5 NOPS. Counter = 5 * 2 + 4 = 14 (0xE)
 
-SDW R0, %DP, #1  // Latch Counter
+SDW R0, %BP, #1  // Latch Counter
 // LDW R0, %DP, #5  // Print Byte4
 // OUT R0, I
-LDW R0, %DP, #4  // Print Byte3
+LDW R0, %BP, #4  // Print Byte3
 OUT R0, I
-LDW R1, %DP, #3  // Print Byte2
+LDW R1, %BP, #3  // Print Byte2
 OUT R1, I
-LDW R2, %DP, #2  // Print Byte1
+LDW R2, %BP, #2  // Print Byte1
 OUT R2, I
 LDR R3, #0xE
 TST R2, R3
@@ -126,7 +125,7 @@ BNE :FAIL
 
 OUT SPACE, A
 
-SDW R0, %DP, #0     // Reset Counter
+SDW R0, %BP, #0     // Reset Counter
 
 NOP
 NOP
@@ -140,14 +139,14 @@ NOP
 NOP   // Time 10 NOPS Counter = 10 * 2 + 4 = 24 (0x18)
 
 
-SDW R0, %DP, #1  // Latch Counter
+SDW R0, %BP, #1  // Latch Counter
 // LDW R0, %DP, #5  // Print Byte4
 // OUT R0, I
-LDW R0, %DP, #4  // Print Byte3
+LDW R0, %BP, #4  // Print Byte3
 OUT R0, I
-LDW R1, %DP, #3  // Print Byte2
+LDW R1, %BP, #3  // Print Byte2
 OUT R1, I
-LDW R2, %DP, #2  // Print Byte1
+LDW R2, %BP, #2  // Print Byte1
 OUT R2, I
 LDR R3, #0x18
 TST R2, R3
@@ -963,7 +962,14 @@ JMP :FAIL
 ///// Op Code 0x14,0x15 - LDW
 //   
 //  This test relies on the test PUSH 
+.define 2 ldw_sdw_result	0x5001
+
 :ldw_sdw
+//Set PASS/FAIL flag
+LDA %DP, H, ldw_sdw_result[1]
+LDA %DP, L, ldw_sdw_result[0]
+LDR R2, #0
+SDW R2, %DP, #0
 
 LDA %SP, H, stack_head[1]
 LDA %SP, L, stack_head[0]
@@ -989,10 +995,22 @@ OUT NEW_LINE, A
 // the pointer selection does not work properly
 LDR R0 stack_test_length
 :ldw_loop_dp
+BRK
 LDW R1, %DP, #-1 // Push decrease SP before inserting data
                  // So the data start at -1 of the SP base 
 TST R1, R0
-BNE :ldw_fail
+BEQ :ldw_cont_dp
+
+OUT R0, I
+OUT '#'
+OUT SPACE, A
+OUT _D, A
+OUT _P, A
+OUT '*'
+OUT R1, I
+OUT NEW_LINE, A
+LDR R2, #1
+:ldw_cont_dp
 MAA %DP, %DP, #-1
 DEC R0
 BNE :ldw_loop_dp
@@ -1002,7 +1020,19 @@ LDR R0 stack_test_length
 LDW R1, %BP, #-1 // Push decrease SP before inserting data
                  // So the data start at -1 of the SP base 
 TST R1, R0
-BNE :ldw_fail_bp
+BEQ :ldw_cont_bp
+
+OUT R0, I
+OUT '#'
+OUT SPACE, A
+OUT _B, A
+OUT _P, A
+OUT '*'
+OUT R1, I
+OUT NEW_LINE, A
+LDR R2, #1
+:ldw_cont_bp
+
 MAA %BP, %BP, #-1
 DEC R0
 BNE :ldw_loop_bp
@@ -1012,39 +1042,24 @@ LDR R0 stack_test_length
 LDW R1, %SP, #-1 // Push decrease SP before inserting data
                  // So the data start at -1 of the SP base 
 TST R1, R0
-BNE :ldw_fail_sp
-MAA %SP, %SP, #-1
-DEC R0
-BNE :ldw_loop_sp
 
-JMP :PASS
-
-:ldw_fail_dp
-OUT SPACE, A
-OUT '#'
-OUT SPACE, A
-OUT _D, A
-OUT _P, A
-JMP :ldw_fail
-:ldw_fail_sp
-OUT SPACE, A
+BEQ :ldw_cont_sp
+OUT R0, I
 OUT '#'
 OUT SPACE, A
 OUT _S, A
 OUT _P, A
-JMP :ldw_fail
-:ldw_fail_bp
-OUT SPACE, A
-OUT '#'
-OUT SPACE, A
-OUT _B, A
-OUT _P, A
-:ldw_fail
-OUT NEW_LINE, A
-OUT R0, I
-OUT SPACE, A
+OUT '*'
 OUT R1, I
 OUT NEW_LINE, A
+LDR R2, #1
+:ldw_cont_sp
+
+MAA %SP, %SP, #-1
+DEC R0
+BNE :ldw_loop_sp
+TST R2, #0
+BEQ :PASS
 JMP :FAIL
 ////////////////////////////////////////////
 
