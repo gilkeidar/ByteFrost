@@ -58,7 +58,7 @@ void OutputFileGenerator::run(std::vector<Line*> & lines) {
 			+ "' for writing.");
 	}
 
-	debug("file is opened for writing");
+	std::cout << "File " << output_file_name << " is opened for writing" << std::endl;
 
 	//	2.	Write to the output file
 
@@ -72,7 +72,7 @@ void OutputFileGenerator::run(std::vector<Line*> & lines) {
 	//	3.	Close the output file
 	output_file.close();
 
-	debug("Output file is closed.");
+	std::cout << "File " << output_file_name << " is closed." << std::endl;
 }
 
 void OutputFileGenerator::createBINFile(std::ofstream& output_file) {
