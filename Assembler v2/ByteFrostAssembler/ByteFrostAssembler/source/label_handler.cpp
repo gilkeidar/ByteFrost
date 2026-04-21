@@ -10,7 +10,9 @@ uint16_t Label::getPCAddress() {
 	//	precisely what should occur.
 	//throwWarning("getPCAddress() - ensure this implements logical shift right!");;
 	//return this->address >> 1;
-	return logicalShiftRight(this->address, 1);
+	// return logicalShiftRight(this->address, 1);
+	// RK: SW now sees Address as is and HW need to handle the shifted values.
+	return this->address;
 }
 
 LabelHandler::LabelHandler(Config & config) : config(config) {

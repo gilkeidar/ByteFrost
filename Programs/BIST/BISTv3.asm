@@ -74,7 +74,7 @@ OUT SPACE, A
 OUT _v, A
 OUT #3, A
 OUT DOT, A
-OUT #1, A
+OUT #2, A
 OUT NEW_LINE, A
 
 
@@ -962,14 +962,10 @@ JMP :FAIL
 ///// Op Code 0x14,0x15 - LDW
 //   
 //  This test relies on the test PUSH 
-.define 2 ldw_sdw_result	0x5001
 
 :ldw_sdw
 //Set PASS/FAIL flag
-LDA %DP, H, ldw_sdw_result[1]
-LDA %DP, L, ldw_sdw_result[0]
-LDR R2, #0
-SDW R2, %DP, #0
+LDR R2, #0   // FAIL flag
 
 LDA %SP, H, stack_head[1]
 LDA %SP, L, stack_head[0]
@@ -995,7 +991,6 @@ OUT NEW_LINE, A
 // the pointer selection does not work properly
 LDR R0 stack_test_length
 :ldw_loop_dp
-BRK
 LDW R1, %DP, #-1 // Push decrease SP before inserting data
                  // So the data start at -1 of the SP base 
 TST R1, R0
@@ -1058,6 +1053,76 @@ LDR R2, #1
 MAA %SP, %SP, #-1
 DEC R0
 BNE :ldw_loop_sp
+TST R2, #0
+BEQ :sdw_test
+JMP :FAIL
+////////////////////////////////////////////
+:sdw_test 
+LDR R2, #0   // FAIL flag
+.define 2 test_area 0x6666
+.define 1 loop_length 0x88
+LDA %SP, H, test_area[1]
+LDA %SP, L, test_area[0]
+LDA %DP, H, test_area[1]
+LDA %DP, L, test_area[0]
+LDA %BP, H, test_area[1]
+LDA %BP, L, test_area[0] 
+
+LDR R0, loop_length
+:sdw_loop
+SDW R0, %DP, #0 
+LDW R1, %DP, #0
+TST R1,R0
+BEQ :sdw_cont_1
+OUT 'S'
+OUT 'D'
+OUT 'W'
+OUT ' ' 
+OUT 'D'
+OUT 'P'
+OUT ' '
+OUT R0, I
+OUT ':'
+OUT R1, I
+OUT NEW_LINE, A
+LDR R2, #1 // Fail flag
+:sdw_cont_1
+SDW R0, %BP, #1 
+LDW R1, %BP, #1
+TST R1,R0
+BEQ :sdw_cont_2
+OUT 'S' 
+OUT 'D'
+OUT 'W'
+OUT ' '
+OUT 'B'
+OUT 'P'
+OUT ' '
+OUT R0, I
+OUT ':'
+OUT R1, I
+OUT NEW_LINE, A
+LDR R2, #1 // Fail flag
+:sdw_cont_2
+SDW R0, %SP, #2 
+LDW R1, %SP, #2
+TST R1,R0
+BEQ :sdw_cont_3
+OUT 'S' 
+OUT 'D'
+OUT 'W'
+OUT ' '
+OUT 'S'
+OUT 'P'
+OUT ' '
+OUT R0, I
+OUT ':'
+OUT R1, I
+OUT NEW_LINE, A
+LDR R2, #1 // Fail flag
+:sdw_cont_3
+DEC R0
+BNE :sdw_loop
 TST R2, #0
 BEQ :PASS
 JMP :FAIL

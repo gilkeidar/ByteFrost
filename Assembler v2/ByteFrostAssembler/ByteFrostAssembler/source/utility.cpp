@@ -6,8 +6,10 @@
 #include <sstream>
 #include <stdlib.h>
 
+bool debug_printouts = false; // Settings at the command line
+
 void debug(std::string debug_printout) {
-	if (DEBUG_PRINTOUTS)
+	if (debug_printouts /*DEBUG_PRINTOUTS*/)
 		std::cout << debug_printout << std::endl;
 }
 

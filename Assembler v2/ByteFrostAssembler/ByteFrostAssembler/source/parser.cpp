@@ -65,7 +65,7 @@ void Parser::run(std::vector<Line *> & lines,
 	uint16_t current_address = 0;
 
 	for (unsigned int line_count = 0; line_count < line_strings.size(); line_count++) {
-		std::string s = line_strings[line_count];
+		std::string s = trim(line_strings[line_count]);
 		debug("== CONVERTING s to Line * ==");
 		debug("s = " + s);
 

@@ -183,6 +183,15 @@ CommandLineArguments::CommandLineArguments() {
 	CLFlag binary_flag = { BINARY_FLAG_NAME, {}, {}, false };
 	this->flags.insert({ BINARY_FLAG_NAME, binary_flag });
 
+	//	Add Verbose Flag "-v"
+	CLFlag debug_printouts_flag = { VERBOSE_FLAG_NAME, {}, {}, false };
+	this->flags.insert({ VERBOSE_FLAG_NAME, debug_printouts_flag });
+	
+	//	Add Help Flag "-h"
+	CLFlag help_flag = { HELP_FLAG_NAME, {}, {}, false };
+	this->flags.insert({ HELP_FLAG_NAME, help_flag });
+
+
 	//	Add Output File Name Flag "-o"
 	CLFlag output_file_name_flag = { OUTPUT_FILE_FLAG_NAME, {CLTokenType::FILE_NAME}, {}, false };
 	this->flags.insert({ OUTPUT_FILE_FLAG_NAME, output_file_name_flag });
@@ -201,6 +210,19 @@ void CommandLineArguments::updateConfig(Config& config) {
 			else if (flagName.compare(OUTPUT_FILE_FLAG_NAME) == 0) {
 				//	Output file name flag is set.
 				config.output_file_name = flag.values[0].token_string;
+			}
+			else if (flagName.compare(VERBOSE_FLAG_NAME) == 0) {
+				//	Verbose flag is set.
+				debug_printouts = true;
+			}
+			else if (flagName.compare(HELP_FLAG_NAME) == 0) {
+				std::cout << "\n\n" <<
+					" ByteFrostAssembler input_filename.asm [-b] [-v] [-o] [-h] \n" <<
+					"       -b       Generate a bin file. Otherwise general a Machine Language *.mlg file\n" <<
+					"       -v       Verbose\n" <<
+					"       -h       This help \n\n ";
+				exit(0);
+				 
 			}
 		}
 	}

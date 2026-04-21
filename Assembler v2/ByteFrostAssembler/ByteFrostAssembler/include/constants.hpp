@@ -8,6 +8,7 @@
 //	Debug printouts must use the debug() function defined in utility.hpp to be
 //	affected by this debug toggle guard.
 #define	DEBUG_PRINTOUTS	false
+extern bool debug_printouts;
 
 //	TODO: Maybe add a void verbose(std::string) function in utility.hpp for
 //	printouts that are only printed when a -verbose flag is set.
@@ -23,6 +24,8 @@ const std::string ASSEMBLY_FILE_ENDING = "asm";
 
 #define	BINARY_FLAG_NAME		"b"
 #define OUTPUT_FILE_FLAG_NAME	"o"
+#define VERBOSE_FLAG_NAME       "v"
+#define HELP_FLAG_NAME          "h"
 
 /*	Stage 1: Parser Constants	*/
 
