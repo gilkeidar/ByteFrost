@@ -298,8 +298,8 @@ SUB  R2, R0, R1   // 41 + Borrow = 27 - E6
 BCS :FAIL         // Borrow is inverse of Carry. Borrow is needed so Carry is clear. Fail if Cary is not clear
 OUT DOT, A        // Pass 4 check 
 SBC  R3, R0, R0   // Test the Borrow (0xFF41 = 0x2727 - 0x27E6) 
-
-TST R3, #0xF
+INC R3            // Using Borrow, R3 should be 0xFF instead of 0x0    
+TST R3, #0x0
 BNE :FAIL
 OUT DOT, A        // Pass 5 check 
 LDR R3, #0x41
@@ -660,8 +660,8 @@ OUT _O, A
 OUT _R, A
 OUT COMMA, A
 LDR R0 #0x65
-OR  R0, #8 // 8 is extended to F8, so  FD = F8 OR 65   
-LDR R3, #0xFD
+OR  R0, #8    
+LDR R3, #0x6D
 TST R0, R3
 BNE :FAIL
 
@@ -681,14 +681,14 @@ OUT _D, A
 OUT COMMA, A
 
 LDR R2, #0x65
-AND  R2, #0xC  	// 0x64 = 0xFC AND 0x65  
-LDR R3, #0x64
+AND  R2, #0xC  	// 0x04 = 0x0C AND 0x65  
+LDR R3, #0x04
 TST R2, R3
 BNE :FAIL
 
-LDR R2, #0x65
-AND R2, #0x4 	// 0x04 = 0x04 AND 0x65  
-LDR R3, #0x04
+LDR R2, #0x6E
+AND R2, #0xF 	// 0x0E = 0x04 AND 0x65  
+LDR R3, #0x0E
 TST R2, R3
 BNE :FAIL
 
@@ -703,7 +703,7 @@ OUT COMMA, A
 
 LDR R2, #0x7B
 XOR R2, #0x9  
-LDR R1, #0x82  // 0x82 = 0xF9 XOR 0x7B  
+LDR R1, #0x72  // 0x82 = 0x09 XOR 0x7B  
 TST R2, R1
 BNE :FAIL
 
@@ -755,8 +755,8 @@ LDR R2, #0x03
 SUB R2, #0x05  		// FE = 03 - 05 
 BCS :FAIL         	// Borrow is inverse of Carry. Borrow is set, so Carry is not set. Fail if Carry is set
 LDR R3, #0x03 
-SBC R3, #0x0F   	// F is extended by HW to FF, so 03 = 03 - -1 -Borrow  
-TST R3, #0x03
+SBC R3, #0x02   	//  01 = 03 - 2 -Borrow  
+TST R3, #0x00
 BNE :FAIL
  
 // Substract without Borrow 
@@ -1058,6 +1058,18 @@ BEQ :sdw_test
 JMP :FAIL
 ////////////////////////////////////////////
 :sdw_test 
+OUT _O, A
+OUT _p, A
+OUT #0x16, I
+OUT DASH, A
+OUT #0x17, I
+OUT COLON, A
+OUT SPACE, A
+OUT 'S'
+OUT 'D'  
+OUT 'W'
+
+OUT NEW_LINE, A
 LDR R2, #0   // FAIL flag
 .define 2 test_area 0x6666
 .define 1 loop_length 0x88
@@ -1124,8 +1136,72 @@ LDR R2, #1 // Fail flag
 DEC R0
 BNE :sdw_loop
 TST R2, #0
-BEQ :PASS
+BEQ :tst_imm_test
 JMP :FAIL
+
+////////////////////////////////////////////
+:tst_imm_test 
+OUT _O, A
+OUT _p, A
+OUT #0x13, I
+OUT COLON, A
+OUT SPACE, A
+OUT 'T'
+OUT 'S'  
+OUT 'T'
+LDR R3 #0
+TST R3, #0
+BNE :FAIL
+LDR R3 #1
+TST R3, #1
+BNE :FAIL
+LDR R3 #2
+TST R3, #2
+BNE :FAIL
+LDR R3 #3
+TST R3, #3
+BNE :FAIL
+OUT '.'
+LDR R2 #4
+TST R2, #4
+BNE :FAIL
+LDR R2 #5
+TST R2, #5
+BNE :FAIL
+LDR R2 #6
+TST R2, #6
+BNE :FAIL
+LDR R2 #7
+TST R2, #7
+BNE :FAIL
+OUT '.'
+LDR R1 #8
+TST R1, #8
+BNE :FAIL
+LDR R1 #9
+TST R1, #9
+BNE :FAIL
+LDR R1 #10
+TST R1, #10
+BNE :FAIL
+LDR R1 #11
+TST R1, #11
+BNE :FAIL
+OUT '.'
+LDR R0 #12
+TST R0, #12
+BNE :FAIL
+LDR R0 #13
+TST R0, #13
+BNE :FAIL
+LDR R0 #14
+TST R0, #14
+BNE :FAIL
+LDR R0 #15
+TST R0, #15
+BNE :FAIL
+OUT '.'
+OUT NEW_LINE, A
 ////////////////////////////////////////////
 
 :PASS
@@ -1135,7 +1211,18 @@ OUT _A, A
 OUT _S, A
 OUT _S, A
 OUT SPACE, A
+JMP :Test_duration 
+///////////////////////////////////////////////
+:FAIL
+OUT NEW_LINE, A
+OUT _F, A
+OUT _A, A
+OUT _I, A
+OUT _L, A
+OUT SPACE, A
 
+///////////////////////////////////////////////
+:Test_duration
 LDA %DP, H, counter_base[1]
 LDA %DP, L, counter_base[0]
 
@@ -1148,12 +1235,4 @@ LDW R1, %DP, #3  // Print Byte2
 OUT R1, I
 LDW R2, %DP, #2  // Print Byte1
 OUT R2, I
-BRK
-///////////////////////////////////////////////
-:FAIL
-OUT NEW_LINE, A
-OUT _F, A
-OUT _A, A
-OUT _I, A
-OUT _L, A
 BRK
