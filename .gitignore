@@ -470,3 +470,5 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+Assembler v2/ByteFrostAssembler/ByteFrostAssembler/ByteFrostAssembler.vcxproj.user
+Assembler v2/ByteFrostAssembler/ByteFrostAssembler/x64/Release/ByteFrostAssembler.Build.CppClean.log
