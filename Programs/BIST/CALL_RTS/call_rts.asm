@@ -12,272 +12,90 @@ OUT 'T'
 OUT 'S'
 OUT '\n'
 
-.define 2 kbd_addr		0xE207
-.define 2 data_ptr   	0x4455
-.define 2 stack_head	0x4000  
+.define 2 kbd_addr			0xE207
 
+.define 2 stack_head		0xAAAA  
+
+.define 2 recursion_level 	0x6000
 
 LDA %SP, H, stack_head[1]
 LDA %SP, L, stack_head[0]
-LDA %DP, H, data_ptr[1]
-LDA %DP, L, data_ptr[0]
-LDA %BP, H, #0x66
-LDA %BP, L, #0x77
-LDR R1, #4             // Recursion Depth
-SDW R1, %DP, #0
-LDR R1, #0xE             // Recursion Depth
-SDW R1, %BP, #0
 
-LDR R0 #0x01
-PUSH R0
-LDR R0 #0x02
-PUSH R0
-LDR R0 #0x03
-PUSH R0
-LDR R0 #0x04
-PUSH R0
-LDR R0 #0x05
-PUSH R0
-LDR R0 #0x06
-PUSH R0
-LDR R0 #0x07
-PUSH R0
-LDR R0 #0x08
-PUSH R0 
-LDR R0 #0x09
-PUSH R0 
-LDR R0 #0x0a
-PUSH R0 
+LDA %DP, H, recursion_level[1]
+LDA %DP, L, recursion_level[0]
 
-OUT 'D'
+// Recursion level
+LDR R3, #6
+SDW R3, %DP, #0
 OUT 'P'
-OUT ':'
-MAG R0, %DP, H
-OUT R0, I
-MAG R0, %DP, L
-OUT R0, I
-
+OUT 'U'
+OUT 'S'
+OUT 'H'
 OUT ' '
-OUT 'B'
-OUT 'P'
-OUT ':'
-MAG R0, %BP, H
-OUT R0, I
-MAG R0, %BP, L
-OUT R0, I
-OUT '\n'
-
-OUT 'B'
-OUT 'P'
-OUT '*'
-BRK
-LDW R1, %DP, #0
-OUT R1, I
-LDW R1, %BP, #0
-OUT R1, I
-
-
-LDW R1, %BP, #-2
-OUT R1, I
-LDW R1, %BP, #-3
-OUT R1, I
-LDW R1, %BP, #-4
-OUT R1, I
-LDW R1, %BP, #-5
-OUT R1, I
-LDW R1, %BP, #-6
-OUT R1, I
-LDW R1, %BP, #-7
-OUT R1, I
-LDW R1, %BP, #-8
-OUT R1, I
-LDW R1, %BP, #-9
-OUT R1, I
-LDW R1, %BP, #-10
-OUT R1, I
-OUT '\n'
- 
-OUT 'D'
-OUT 'P'
-OUT ':'
-MAG R0, %DP, H
-OUT R0, I
-MAG R0, %DP, L
-OUT R0, I
-OUT '\n'
-
-OUT 'D'
-OUT 'P'
-OUT '*'
-LDW R1, %DP, #-1
-OUT R1, I
-LDW R1, %DP, #-2
-OUT R1, I
-LDW R1, %DP, #-3
-OUT R1, I
-LDW R1, %DP, #-4
-OUT R1, I
-LDW R1, %DP, #-5
-OUT R1, I
-LDW R1, %DP, #-6
-OUT R1, I
-LDW R1, %DP, #-7
-OUT R1, I
-LDW R1, %DP, #-8
-OUT R1, I
-LDW R1, %DP, #-9
-OUT R1, I
-LDW R1, %DP, #-10
-OUT R1, I
-OUT '\n'
-
-OUT 'S'
-OUT 'P'
-OUT ':'
-MAG R0, %SP, H
-OUT R0, I
-MAG R0, %SP, L
-OUT R0, I
-OUT '\n'
-
-OUT 'S'
-OUT 'P'
-OUT '*'
-LDW R1, %SP, #-1
-OUT R1, I
-LDW R1, %SP, #-2
-OUT R1, I
-LDW R1, %SP, #-3
-OUT R1, I
-LDW R1, %SP, #-4
-OUT R1, I
-LDW R1, %SP, #-5
-OUT R1, I
-LDW R1, %SP, #-6
-OUT R1, I
-LDW R1, %SP, #-7
-OUT R1, I
-LDW R1, %SP, #-8
-OUT R1, I
-LDW R1, %SP, #-9
-OUT R1, I
-LDW R1, %SP, #-10
-OUT R1, I
-OUT '\n'
-
-// LDA %SP, H, stack_head[1]
-// LDA %SP, L, stack_head[0]
-MAA %SP, %SP, #6
-LDA %DP, H, stack_head[1]
-LDA %DP, L, stack_head[0]
-MAA %DP, %DP, #-6
-LDA %BP, H, stack_head[1]
-LDA %BP, L, stack_head[0]
-
-
+CALL :recursion
 OUT '\n'
 OUT 'B'
-OUT 'P'
-OUT ':'
-MAG R0, %BP, H
-OUT R0, I
-MAG R0, %BP, L
-OUT R0, I
+OUT 'a'
+OUT 'c'
+OUT 'k'
+OUT '!'
 OUT '\n'
 
-OUT 'B'
-OUT 'P'
-OUT '*'
-LDW R1, %BP, #-1
-OUT R1, I
-LDW R1, %BP, #-2
-OUT R1, I
-LDW R1, %BP, #-3
-OUT R1, I
-LDW R1, %BP, #-4
-OUT R1, I
-LDW R1, %BP, #-5
-OUT R1, I
-LDW R1, %BP, #-6
-OUT R1, I
-LDW R1, %BP, #-7
-OUT R1, I
-LDW R1, %BP, #-8
-OUT R1, I
-LDW R1, %BP, #-9
-OUT R1, I
-LDW R1, %BP, #-10
-OUT R1, I
-OUT '\n'
- 
-OUT 'D'
-OUT 'P'
-OUT ':'
-MAG R0, %DP, H
-OUT R0, I
-MAG R0, %DP, L
-OUT R0, I
-OUT '\n'
+BRK  // End of Program
 
-OUT 'D'
-OUT 'P'
-OUT '*'
-LDW R1, %DP, #-1
-OUT R1, I
-LDW R1, %DP, #-2
-OUT R1, I
-LDW R1, %DP, #-3
-OUT R1, I
-LDW R1, %DP, #-4
-OUT R1, I
-LDW R1, %DP, #-5
-OUT R1, I
-LDW R1, %DP, #-6
-OUT R1, I
-LDW R1, %DP, #-7
-OUT R1, I
-LDW R1, %DP, #-8
-OUT R1, I
-LDW R1, %DP, #-9
-OUT R1, I
-LDW R1, %DP, #-10
-OUT R1, I
+:recursion
+LDA %DP, H, recursion_level[1]
+LDA %DP, L, recursion_level[0]
+LDW R3, %DP, #0
+
+OUT R3, I
+OUT ' '
+
+PUSH R3
+
+DEC R3
+BNE :keep_going
+POP R3
 OUT '\n'
-
-OUT 'S'
 OUT 'P'
-OUT ':'
-MAG R0, %SP, H
-OUT R0, I
-MAG R0, %SP, L
-OUT R0, I
-OUT '\n'
-
-OUT 'S'
+OUT 'O'
 OUT 'P'
-OUT '*'
-LDW R1, %SP, #-1
-OUT R1, I
-LDW R1, %SP, #-2
-OUT R1, I
-LDW R1, %SP, #-3
-OUT R1, I
-LDW R1, %SP, #-4
-OUT R1, I
-LDW R1, %SP, #-5
-OUT R1, I
-LDW R1, %SP, #-6
-OUT R1, I
-LDW R1, %SP, #-7
-OUT R1, I
-LDW R1, %SP, #-8
-OUT R1, I
-LDW R1, %SP, #-9
-OUT R1, I
-LDW R1, %SP, #-10
-OUT R1, I
-OUT '\n'
-BRK
+OUT ' '
+OUT R3, I
+OUT ' '
 
+// // Debug Print the stack
+// LDA %BP, H, stack_head[1]
+// LDA %BP, L, stack_head[0]
+// LDA %DP, H, stack_head[1]
+// LDA %DP, L, stack_head[0]
+// LDR R0 #0x10
+// :print_stack_bp
+// LDW R2, %BP, #0
+// OUT R2, I
+// MAA %BP, %BP, #-1
+// DEC R0
+// BNE :print_stack_bp 
+// OUT '\n'
+// LDR R0 #0x10
+// :print_stack_dp
+// LDW R2, %DP, #0
+// OUT R2, I
+// MAA %DP, %DP, #-1
+// DEC R0
+// BNE :print_stack_dp 
+// OUT '\n'
 
+RTS
+
+:keep_going
+SDW R3, %DP, #0
+CALL :recursion
+
+// Retrun
+POP R3
+
+OUT R3, I
+OUT ' '
+RTS
 
