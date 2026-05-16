@@ -74,7 +74,7 @@ OUT SPACE, A
 OUT _v, A
 OUT #3, A
 OUT DOT, A
-OUT #2, A
+OUT #3, A
 OUT NEW_LINE, A
 
 
@@ -1202,6 +1202,94 @@ TST R0, #15
 BNE :FAIL
 OUT '.'
 OUT NEW_LINE, A
+////////////////////////////////////////////
+:tst_call_jsr_rst 
+OUT _O, A
+OUT _p, A
+OUT #0x10, I
+OUT DASH, A
+OUT #0x11, I
+OUT COLON, A
+OUT SPACE, A
+
+OUT 'J'
+OUT 'S'
+OUT 'R'
+OUT ' '
+OUT 'R'
+OUT 'T'
+OUT 'S'
+OUT '\n'
+
+.define 2 stack_head2		0xAAAA  
+
+.define 2 recursion_level 	0x6000
+
+LDA %SP, H, stack_head2[1]
+LDA %SP, L, stack_head2[0]
+
+LDA %DP, H, recursion_level[1]
+LDA %DP, L, recursion_level[0]
+
+// Recursion level
+LDR R3, #6
+SDW R3, %DP, #0
+
+OUT 'P'
+OUT 'U'
+OUT 'S'
+OUT 'H'
+OUT ' '
+CALL :recursion
+OUT '\n'
+OUT 'B'
+OUT 'a'
+OUT 'c'
+OUT 'k'
+OUT '!'
+OUT '\n'
+JMP :PASS
+
+:recursion
+LDA %DP, H, recursion_level[1]
+LDA %DP, L, recursion_level[0]
+LDW R3, %DP, #0
+
+OUT R3, I
+OUT ' '
+
+PUSH R3
+
+DEC R3
+BNE :keep_going
+// Stop condition met
+LDR R2 , #1
+POP R3
+OUT '\n'
+OUT 'P'
+OUT 'O'
+OUT 'P'
+OUT ' '
+OUT R3, I
+OUT ' '
+TST R2, R3
+BNE :FAIL
+RTS   // Rolling out of deepest recursion
+
+:keep_going
+SDW R3, %DP, #0
+CALL :recursion
+
+// Retrun
+POP R3
+
+OUT R3, I
+OUT ' '
+INC R2
+TST R2, R3
+BNE :FAIL
+RTS  // Rolling out of intemediate recursion step
+
 ////////////////////////////////////////////
 
 :PASS
