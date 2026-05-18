@@ -77,8 +77,190 @@ OUT DOT, A
 OUT #3, A
 OUT NEW_LINE, A
 
+/////////////////////////////////// Op Code 0x1B - LDA
+// LDA is used in conditional /unconditional jumps, hence it is a foundational
+// Op code that should be tested first
 
+:lda_test
+
+.define 2 address_1	0x1234
+.define 2 address_2	0xFEDC
+
+OUT _O, A
+OUT _p, A
+OUT #0x1B, I
+OUT COLON, A
+OUT SPACE, A
+OUT _L, A
+OUT _D, A
+OUT _A, A
+OUT NEW_LINE, A
+
+// Test Addr 1
+LDR R1, address_1[1]
+LDR R0, address_1[0]
+
+// DP
+LDA %DP, H, address_1[1]
+LDA %DP, L, address_1[0]
+MAG R3, %DP, H
+MAG R2, %DP, L
+
+TST R3, R1
+BNE :print_bad_pointer
+TST R2, R0
+BNE :print_bad_pointer
+
+// BP
+LDA %BP, H, address_1[1]
+LDA %BP, L, address_1[0]
+MAG R3, %BP, H
+MAG R2, %BP, L
+
+TST R3, R1
+BNE :print_bad_pointer
+TST R2, R0
+BNE :print_bad_pointer
+
+// SP
+LDA %SP, H, address_1[1]
+LDA %SP, L, address_1[0]
+MAG R3, %SP, H
+MAG R2, %SP, L
+
+TST R3, R1
+BNE :print_bad_pointer
+TST R2, R0
+BNE :print_bad_pointer
+
+// Test Addr 2
+LDR R1, address_2[1]
+LDR R0, address_2[0]
+
+// DP
+LDA %DP, H, address_2[1]
+LDA %DP, L, address_2[0]
+MAG R3, %DP, H
+MAG R2, %DP, L
+
+TST R3, R1
+BNE :print_bad_pointer
+TST R2, R0
+BNE :print_bad_pointer
+
+// BP
+LDA %BP, H, address_2[1]
+LDA %BP, L, address_2[0]
+MAG R3, %BP, H
+MAG R2, %BP, L
+
+TST R3, R1
+BNE :print_bad_pointer
+TST R2, R0
+BNE :print_bad_pointer
+
+// SP
+LDA %SP, H, address_2[1]
+LDA %SP, L, address_2[0]
+MAG R3, %SP, H
+MAG R2, %SP, L
+
+TST R3, R1
+BNE :print_bad_pointer
+TST R2, R0
+BNE :print_bad_pointer
+
+JMP :maa_test
+
+:print_bad_pointer
+OUT 'E'
+OUT 'x'
+OUT 'p'
+OUT ':'
+OUT ' '
+OUT R1, I
+OUT R0, I
+OUT '\n'
+OUT 'G'
+OUT 'o'
+OUT 't'
+OUT ':'
+OUT ' '
+OUT R3, I
+OUT R2, I
+OUT '\n'
+BRK
+
+/////////////////////////////////// Op Code 0x18-0x19 - MAA
+// MAA is tested similarly to LDA
+:maa_test
+
+OUT _O, A
+OUT _p, A
+OUT #0x18, I
+OUT DASH, A
+OUT #0x19, I
+OUT COLON, A
+OUT SPACE, A
+OUT _M, A
+OUT _A, A
+OUT _A, A
+OUT NEW_LINE, A
+
+.define 2 address_3	0x4567
+
+LDR R1, address_3[1]
+LDR R0, address_3[0]
+
+// All transitions without PC: DP->BP->SP->DP->SP->SP->BP->BP->DP->DP
+LDA %DP, H, address_3[1]
+LDA %DP, L, address_3[0]
+MAA %BP, %DP, #1   //address_3 + 1
+MAA %SP, %BP, #2   //address_3 + 3
+MAA %DP, %SP, #3   //address_3 + 6
+MAA %SP, %DP, #4   //address_3 + 10
+MAA %SP, %SP, #5   //address_3 + 15
+MAA %BP, %SP, #6   //address_3 + 21
+MAA %BP, %BP, #7   //address_3 + 28
+MAA %DP, %BP, #8   //address_3 + 36
+MAA %DP, %DP, #9   //address_3 + 45
+
+// Now check: 
+//    SP = address_3 + 15
+ADD R0, #0xF
+MAG R3, %SP, H
+MAG R2, %SP, L
+
+TST R3, R1
+BNE :print_bad_pointer
+TST R2, R0
+BNE :print_bad_pointer
+
+//    BP = address_3 + 28
+ADD R0, #0xD
+MAG R3, %BP, H
+MAG R2, %BP, L
+
+TST R3, R1
+BNE :print_bad_pointer
+TST R2, R0
+BNE :print_bad_pointer
+
+//    DP = address_3 + 45
+ADD R0, #0xA
+ADD R0, #0x7
+MAG R3, %DP, H
+MAG R2, %DP, L
+
+TST R3, R1
+BNE :print_bad_pointer
+TST R2, R0
+BNE :print_bad_pointer
+
+JMP :nop_test
 //////////////////////////////////// Op Code 0x00 - NOP
+:nop_test
+
 OUT _O, A
 OUT _p, A
 OUT #0, I
