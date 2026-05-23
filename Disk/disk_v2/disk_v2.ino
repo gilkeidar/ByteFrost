@@ -1,10 +1,17 @@
+/*
+*  ByteFrost Notes:
+*   IDE Setup
+*      a. Board "Arduino SMAD boards"
+*      b. CPU "Arduino MKR Zero"
+*/
+
 #include <SD.h>
 #include <sam.h>
 
 //  ===== CONSTANTS =====
 
 //  === CODE MODIFICATION ===
-#define DEBUG 1
+#define DEBUG 0
 
 #define SECTOR_SIZE 256
 
@@ -323,19 +330,15 @@ uint8_t readFromBus() {
  */
 uint16_t readSector2Buffer(uint16_t sectorID)
 {
-  #if DEBUG
     Serial.print("Reading sector ");
     Serial.print(sectorID);
     Serial.println(" from disk...");
-  #endif
 
   //  Open ByteFrost disk file. (Assuming the disk file is not currently open (based on
   //  the SD card library's documentation for SD.open(), only one file may be open at
   //  one time)).
   if (!SD.exists("disk")) {
-    #if DEBUG
       Serial.println("Error! No file 'disk' exists on the SD card!");
-    #endif
 
     //  Stop working (ByteFrost will be stuck since the SD card driver won't send
     //  a bus release signal to the bus arbiter)
@@ -346,12 +349,11 @@ uint16_t readSector2Buffer(uint16_t sectorID)
   File disk = SD.open("disk");
 
   //  Move to the correct sector. (Assuming an 11-bit sector ID!)
-  if (!disk.seek(sectorID * SECTOR_SIZE)) {
-    #if DEBUG
+  if (!disk.seek(sectorID * SECTOR_SIZE)) 
+  {
       Serial.print("Error! Couldn't seek disk file to sector ");
       Serial.print(sectorID);
       Serial.println("!");
-    #endif
 
     //  Stop working (ByteFrost will be stuck since the SD card driver won't send
     //  a bus release signal to the bus arbiter)
@@ -380,19 +382,16 @@ uint16_t readSector2Buffer(uint16_t sectorID)
  */
 uint16_t writeBuffer2Sector(uint16_t sectorID)
 {
-  #if DEBUG
     Serial.print("Writing to sector ");
     Serial.print(sectorID);
     Serial.println("...");
-  #endif
 
   //  Open ByteFrost disk file. (Assuming the disk file is not currently open (based on
   //  the SD card library's documentation for SD.open(), only one file may be open at
   //  one time)).
-  if (!SD.exists("disk")) {
-    #if DEBUG
+  if (!SD.exists("disk")) 
+  {
       Serial.println("Error! No file 'disk' exists on the SD card!");
-    #endif
 
     //  Stop working (ByteFrost will be stuck since the SD card driver won't send
     //  a bus release signal to the bus arbiter)
@@ -403,12 +402,11 @@ uint16_t writeBuffer2Sector(uint16_t sectorID)
   File disk = SD.open("disk", O_WRITE);
 
   //  Move to the correct sector. (Assuming an 11-bit sector ID!)
-  if (!disk.seek(sectorID * SECTOR_SIZE)) {
-    #if DEBUG
+  if (!disk.seek(sectorID * SECTOR_SIZE)) 
+  {
       Serial.print("Error! Couldn't seek disk file to sector ");
       Serial.print(sectorID);
       Serial.println("!");
-    #endif
 
     //  Stop working (ByteFrost will be stuck since the SD card driver won't send
     //  a bus release signal to the bus arbiter)
