@@ -88,7 +88,6 @@ BNE :for_loop
 //	then
 //	JMP :hardcodedLabelAddress
 .define 2	RAM_START	0x2000
-BRK
 JMP :__RAM_START__
 
 
