@@ -3,6 +3,18 @@
 #include "constants.hpp"
 #include "utility.hpp"
 
+void usageError(std::string error_string) {
+	if(error_string.length() > 0)
+	std::cerr << std::endl << "Error: " << error_string << std::endl;
+	std::cout << std::endl <<
+		"ByteFrostAssembler input_filename.asm [-b] [-v] [-o] [-h] \n" <<
+		"       -b       Generate a bin file. Otherwise general a Machine Language *.mlg file\n" <<
+		"       -v       Verbose\n" <<
+		"       -h       This help \n\n ";
+
+	exit(1);
+}
+
 void CLAP::run() {
 	debug("=== Stage 0: CLAP.run() ===");
 	
@@ -19,7 +31,7 @@ void CLAP::run() {
 
 		//	Check for invalid token type
 		if (token.type == CLTokenType::INVALID) {
-			throwError("Invalid token '" + token.token_string + "' detected.");
+			usageError("Invalid token '" + token.token_string + "' detected.");
 		}
 
 		tokens.push_back(token);
@@ -55,7 +67,7 @@ void CLAP::run() {
 
 			if ((arguments.flags.find(flag_name)) == arguments.flags.end()) {
 				//	Flag is not recognized by the assembler
-				throwError("'" + flag_name + "' is not a recognized command-line flag.");
+				usageError("'" + flag_name + "' is not a recognized command-line flag.");
 			}
 
 			//	Flag is recognized by the assembler; set current_flag field
@@ -74,7 +86,7 @@ void CLAP::run() {
 			//	Check that the current token's type matches the expected flag
 			//	argument type
 			if (token.type != current_flag->expected_pattern[currentFlagArgument]) {
-				throwError("Argument " + std::to_string(currentFlagArgument)
+				usageError("Argument " + std::to_string(currentFlagArgument)
 					+ " of flag -" + current_flag->flag_name + " must be a "
 					+ CLTokenTypeToString(current_flag->expected_pattern[currentFlagArgument]) 
 					+ ".");
@@ -92,14 +104,14 @@ void CLAP::run() {
 		}
 		else {
 			//	Invalid argument
-			throwError("Invalid argument detected: '" + token.token_string + "'.");
+			usageError("Invalid argument detected: '" + token.token_string + "'.");
 		}
 	}
 
 	//	Check that the last flag, if any, received all of its expected
 	//	arguments
 	if (flagArguments && currentFlagArgument < current_flag->expected_pattern.size()) {
-		throwError("Expected "
+		usageError("Expected "
 			+ std::to_string(current_flag->expected_pattern.size())
 			+ " arguments for -" + current_flag->flag_name
 			+ " flag, but received " + std::to_string(currentFlagArgument) 
@@ -108,7 +120,7 @@ void CLAP::run() {
 
 	//	Check that the required input file name was set
 	if (arguments.input_file_name == UNSET_FILE_NAME) {
-		throwError("Must pass a '.asm' input file.");
+		usageError("Must pass a '.asm' input file.");
 	}
 
 	//	Now that the CommandLineArguments object has been created, update the
@@ -216,13 +228,8 @@ void CommandLineArguments::updateConfig(Config& config) {
 				debug_printouts = true;
 			}
 			else if (flagName.compare(HELP_FLAG_NAME) == 0) {
-				std::cout << "\n\n" <<
-					" ByteFrostAssembler input_filename.asm [-b] [-v] [-o] [-h] \n" <<
-					"       -b       Generate a bin file. Otherwise general a Machine Language *.mlg file\n" <<
-					"       -v       Verbose\n" <<
-					"       -h       This help \n\n ";
-				exit(0);
-				 
+				usageError("");
+						 
 			}
 		}
 	}

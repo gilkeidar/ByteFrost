@@ -5,13 +5,13 @@
 #include <sstream>
 
 uint16_t Label::getPCAddress() {
-	//	NOTE - this assumes that the C++ compiler will implement this as a
-	//	logical shift right. Since the shifted type is unsigned though, this is
-	//	precisely what should occur.
-	//throwWarning("getPCAddress() - ensure this implements logical shift right!");;
-	//return this->address >> 1;
-	// return logicalShiftRight(this->address, 1);
-	// RK: SW now sees Address as is and HW need to handle the shifted values.
+	// RK: 
+	// SW should treat PC normally and not shift it.
+	// Details:
+	// The HW Program Counter is Instruction counter.
+	// When HW Program Counter output to the address bus, it is shifted left and become byte address
+	// When set by (branch, MGA, LDA, MAA), value is shifted right by HW and become insturction counter
+
 	return this->address;
 }
 

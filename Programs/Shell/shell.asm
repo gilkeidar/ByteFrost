@@ -1,5 +1,7 @@
 // ByteFrostSHELL
 
+.start 0x2000
+
 //.define 1 PROMPT 0x24   //  '$'
 .define 1 PROMPT 0x5d     // ']'
 
