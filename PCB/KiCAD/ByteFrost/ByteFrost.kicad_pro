@@ -657,16 +657,21 @@
       },
       {
         "filename": "top_level.kicad_sch",
-        "name": "egister Out Select",
+        "name": "Register Out Select",
         "uuid": "b61aa640-932d-4c0e-bcd2-15be6d06df10"
       },
       {
         "filename": "clock.kicad_sch",
         "name": "Clock",
         "uuid": "1b18289e-7f85-4d73-b4e7-6ea20df3a73b"
+      },
+      {
+        "filename": "reset.kicad_sch",
+        "name": "Reset",
+        "uuid": "8f77c34c-cff2-4605-9fbe-f83fec9a3d9b"
       }
     ],
-    "used_designators": "U7,U101-103,#PWR101-106,#PWR301-304,R101-106,#FLG101-102,C101-104,SW101-103",
+    "used_designators": "U104-105,U401-402,#PWR107-115,#PWR401-406,D101-103,D401,L101,C401-404,R107-111,R401-404,SW401",
     "variants": []
   },
   "sheets": [
@@ -680,7 +685,11 @@
     ],
     [
       "b61aa640-932d-4c0e-bcd2-15be6d06df10",
-      "egister Out Select"
+      "Register Out Select"
+    ],
+    [
+      "8f77c34c-cff2-4605-9fbe-f83fec9a3d9b",
+      "Reset"
     ]
   ],
   "text_variables": {},

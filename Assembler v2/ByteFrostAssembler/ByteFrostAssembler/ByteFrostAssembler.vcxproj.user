@@ -7,5 +7,6 @@
     <LocalDebuggerCommandArguments>bfsv1_ls_ls_boot_sector.asm</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>C:\Users\keida\GitHub\ByteFrost\Programs\BFSv1_ls_ls_boot_sector</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerCommandArgumentsHistory>bfsv1_ls_ls_boot_sector.asm|</LocalDebuggerCommandArgumentsHistory>
   </PropertyGroup>
 </Project>
