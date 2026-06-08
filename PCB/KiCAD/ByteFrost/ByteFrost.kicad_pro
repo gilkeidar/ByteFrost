@@ -642,7 +642,7 @@
         "version": 0
       },
       "model_mode": 4,
-      "workbook_filename": ""
+      "workbook_filename": "ByteFrost.wbk"
     },
     "page_layout_descr_file": "",
     "plot_directory": "",
@@ -671,7 +671,7 @@
         "uuid": "8f77c34c-cff2-4605-9fbe-f83fec9a3d9b"
       }
     ],
-    "used_designators": "U104-105,U401-402,#PWR107-115,#PWR401-406,D101-103,D401,L101,C401-404,R107-111,R401-404,SW401",
+    "used_designators": "",
     "variants": []
   },
   "sheets": [

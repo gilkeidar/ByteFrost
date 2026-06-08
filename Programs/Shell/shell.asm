@@ -1,5 +1,14 @@
 // ByteFrostSHELL
 
+// Address Map
+// 0x1FFF .. 0x0000     ROM
+// 0x2FFF .. 0x2000     Shell / DOS
+//      0x27FF .. 0x2000    Code from SD card
+//      0x2CFF .. 0x2800    Parameters
+//      0x2FFF .. 0x2D00    Stack
+// 0xDFFF .. 0x3000     User Space
+// 0xFFFF .. 0xE000     MMIO
+   
 .start 0x2000
 
 //.define 1 PROMPT 0x24   //  '$'
@@ -21,8 +30,8 @@ OUT '7'
 OUT '\n'
 
 .define 2 kbd_addr		0xE207
-.define 2 command_line 	0xDF00
-.define 2 stack_head	0x4000  
+.define 2 command_line 	0x2800   // Reserve 0x2800 .. 0x28FF 
+.define 2 stack_head	0x2FFE   // Stack is growing down. In case SP need to switch, it can be presereved at Stack head (2FFF,2FFE) which are not part of the stack   
 .define 1 max_command_length 255
 
 LDA %SP, H, stack_head[1]
@@ -190,12 +199,13 @@ OUT R0, I
 OUT '\n'
 OUT 'R'
 OUT 'T'
+OUT 'R'
+OUT 'N'
 OUT ':'
 LDW R0, %SP, #-1
 OUT R0, I
 LDW R0, %SP, #0
 OUT R0, I
-BRK
 RTS
  
 

@@ -1,0 +1,305 @@
+.define	1 NEW_LINE	 		0x10
+.define 1 SPACE				0x20
+.define 1 LEFT_PAR			0x28
+.define	1 RIGHT_PAR			0x29
+.define 1 COMMA				0x2c
+.define 1 ASTERISK			0x2a
+.define 1 DASH				0x2d
+.define 1 DOT				0x2e
+.define 1 COLON				0x3a
+.define 1 EQUALS			0x3d
+
+.define	1 _A				0x41
+.define	1 _B				0x42
+.define	1 _C				0x43
+.define	1 _D				0x44
+.define	1 _E				0x45
+.define	1 _F				0x46
+.define	1 _G				0x47
+.define	1 _H				0x48
+.define	1 _I				0x49
+.define	1 _J				0x4a
+.define	1 _K				0x4b
+.define	1 _L				0x4c
+.define	1 _M				0x4d
+.define	1 _N				0x4e
+.define	1 _O				0x4f
+.define	1 _P				0x50
+.define	1 _Q				0x51
+.define	1 _R				0x52
+.define	1 _S				0x53
+.define	1 _T				0x54
+.define	1 _U				0x55
+.define	1 _V				0x56
+.define	1 _W				0x57
+.define	1 _X				0x58
+.define	1 _Y				0x59
+.define	1 _Z				0x5a
+
+.define 1 _l				0x6c
+.define 1 _m				0x6d
+.define 1 _n				0x6e
+.define 1 _o				0x6f
+.define 1 _p				0x70
+.define 1 _q				0x71
+.define 1 _r				0x72
+.define 1 _s				0x73
+.define 1 _t				0x74
+.define 1 _u				0x75
+.define 1 _v				0x76
+.define 1 _w				0x77
+.define 1 _x				0x78
+.define 1 _y				0x79
+.define 1 _z				0x7a
+
+//////////////////////////////////
+// Enhance to 16bit address range
+// 0x0000 .. 0x1FFF  ROM
+// 0x2000 .. 0xDFFF  RAM
+// 0xE000 .. 0xFFFF  Registers (MMIO)
+// Data Pointer:  0x4000 Fixed
+// Stack Pointer: 0x4000 Variale (Stack is not used. )
+// Variables:
+//		4000..4007 Address represents Row i; Value represents the column
+//		4009 - Solution counter
+//      R0 - current row [0..7]
+//////////////////////////////////
+
+//                                            +----------+
+//                                            |  Setup   |
+//                                            +----------+
+//                                                 |
+//                                                 |
+//                      +-----------------------+  |  +------------------------+
+//                      |                       |  |  |                        |
+//                      |                       V  V  V                        |
+//                      |                +-------------------+                 |
+//                      |                | Check if current  |                 |
+//                      |                | setting is valid  |                 |
+//                      |                | :for_loop_start   |                 |
+//                      |                +-------------------+                 |
+//                      |                  |               |                   |
+//                      |     :not_valid   V               V  :valid           |
+//                      |    +---------------+          +--------------+       |
+//             +--------|--->| Move Queen up |          | Add Queen    |       |
+//             |        |    | to next column|          | to next Row  |       |
+//             |        |    +---------------+          +--------------+       |
+//             |        |            |                         |               |
+//             |        |    +---------------+          +---------------+      |
+//             |        | No | Queen outside?|          |Went out board?|  No  |
+//             |        +----+ (Column > 7)  |          | (Row>7)       +------+
+//             |             +---------------+          +---------------+
+//             |                     |  Yes                    | Yes
+//             |                     |                         |
+//             |                     V :go_back_one_row        V  :print_solution
+//             |             +---------------+          +----------------+
+//             |             | Go row back   |<---------+ Print Solution |
+//             |             +---------------+          +----------------+
+//             |                     |
+//     :move_up_one_column           V
+//             |             +---------------+
+//             |   No        |Went out board?|
+//             +-------------+  (Row<0)      |
+//                           +---------------+
+//                                   |
+//                                   V   Yes
+//                           +---------------+
+//                           |   THE END     |
+//                           +---------------+
+//
+.start 0x3000 // Start as am SD program
+.define 2 counter_base	0xE200
+
+0x7b, 0xe2,	// 0x3000: LDA %DP, H, counter_base[1]
+0x5b, 0x00,	// 0x3002: LDA %DP, L, counter_base[0]
+0x17, 0x00,	// 0x3004: SDW R0, %DP, #0     // Reset Counter
+
+
+// Set Stack Pointer to 0x4000
+0xbb, 0x40,	// 0x3006: LDA %SP, H, #0x40
+0x9b, 0x00,	// 0x3008: LDA %SP, L, #0x00
+
+
+// Set Data Pointer to  0x4000
+0x7b, 0x40,	// 0x300a: LDA %DP, H, #0x40
+0x5b, 0x00,	// 0x300c: LDA %DP, L, #0x00
+
+// Variables Initalization
+// Prepare the board with a single queen at 0,0
+// Last Row:
+//        L_Row index is R0
+//        L_Row_pointer is DP
+//        L_Column is *DP
+
+0x03, 0x00,	// 0x300e: LDR R0, #0			// L_Row R0 = 0
+0x17, 0x00,	// 0x3010: SDW R0, %DP, #0		// SMR R0, R0	// *L_Row_pointer = 0 // board[0] = 0
+0x17, 0x09,	// 0x3012: SDW R0, %DP, #9		// SMA R0, #9  // num_solutions = 0
+
+
+:for_loop_start // (DP,R0 point to the last row)
+///////////////
+// Input Params:
+//			DP - Last Column
+//			R0 - Last Column Index
+//
+// Internal varaibles:
+// Scan Row:
+//        S_Row index is R1
+//        S_Row_pointer is SP
+//        S_Column is *SP
+
+0x44, 0x00,	// 0x3014: MOV R1, R0			// S_Row R1 = L_Row R0
+0x95, 0x00,	// 0x3016: LDW R2, %DP, #0		// LMR R2, R0	// L_Column R2 = L_Row_pointer *DP
+
+0x99, 0xff,	// 0x3018: MAA %SP, %DP, #-1	// S_Row_pointer = L_Row_pointer - 1
+0x46, 0x17,	// 0x301a: DEC R1				// S_Row = L_Row - 1
+
+// Check current queen backward with all existing queens
+
+:for_loop_check
+///////////////
+0x3b, 0x30,	// 0x301c: BMI :valid 	// if out of board (S_Row = -1), all columns checked ok. Branch to :valid
+0x25, 0x44,	// 0x301e: (BMI continued)
+
+// for_loop_body
+
+0xf4, 0x00,	// 0x3020: LDW R3, %SP, #0		// LMR R3, R1	// S_Column R3 = S_Row_pointer *SP
+
+// Horizontal check
+
+0xc2, 0xb7,	// 0x3022: SUB R3, R3, R2	// R3 = board[i] - col  S_Column = S_Column - L_Column
+0x3b, 0x30,	// 0x3024: BEQ :not_valid		//Both Queens are on the same Column
+0x65, 0x5e,	// 0x3026: (BEQ continued)
+
+// Diagonal check 1
+
+0xc2, 0x37,	// 0x3028: SUB R3, R3, R0		// R3 = S_Column - L_Column - L_Row
+0xc2, 0x76,	// 0x302a: ADD R3, R3, R1		// R3 = (S_Column - L_Column) + (S_Row - L_Row)
+0x3b, 0x30,	// 0x302c: BEQ :not_valid		// if (R3==0) Scan_Queen and Last_Queen are on the same diagonal
+0x65, 0x5e,	// 0x302e: (BEQ continued)
+
+// Diagonal check 2
+
+0xf4, 0x00,	// 0x3030: LDW R3, %SP, #0		// Restore S_Column R3 = S_Row_pointer *SP
+
+0xc2, 0xb7,	// 0x3032: SUB R3, R3, R2		// S_Column = S_Column - L_Column
+0xc2, 0x36,	// 0x3034: ADD R3, R3, R0		// R3 = S_Column - L_Column + L_Row
+0xc2, 0x77,	// 0x3036: SUB R3, R3, R1		// R3 = (S_Column - L_Column) - (S_Row - L_Row)
+0x3b, 0x30,	// 0x3038: BEQ :not_valid		// if (R3==0) Scan_Queen and Last_Queen are on the same diagonal
+0x65, 0x5e,	// 0x303a: (BEQ continued)
+
+// for_loop_update
+0x46, 0x17,	// 0x303c: DEC R1              // S_Row--
+0xb8, 0xff,	// 0x303e: MAA %SP, %SP, #-1	// S_Row_pointer--
+0x3b, 0x30,	// 0x3040: JMP :for_loop_check // goto :for_loop_check
+0x05, 0x1c,	// 0x3042: (JMP continued)
+
+////////////////////////////////////////////////////////////////
+
+:valid
+////// Move to the next row
+
+0x06, 0x16,	// 0x3044: INC R0				// L_Row++
+0x59, 0x01,	// 0x3046: MAA %DP, %DP, #1	// L_Row_pointer++
+0x83, 0x00,	// 0x3048: LDR R2, #0
+0x97, 0x00,	// 0x304a: SDW R2, %DP, #0		// *L_Row_pointer = 0
+0x13, 0x77,	// 0x304c: TST R0, #7
+0x3b, 0x30,	// 0x304e: BMI :for_loop_start   // Covers rows 0..6
+0x25, 0x14,	// 0x3050: (BMI continued)
+0x3b, 0x30,	// 0x3052: BEQ :for_loop_start   // Covers row 7
+0x65, 0x14,	// 0x3054: (BEQ continued)
+
+// If passed las row, a solution is found
+
+0x3b, 0x30,	// 0x3056: JMP :print_solution
+0x05, 0x7a,	// 0x3058: (JMP continued)
+
+// return_from_print
+
+0x3b, 0x30,	// 0x305a: JMP :go_back_one_row
+0x05, 0x6e,	// 0x305c: (JMP continued)
+
+///////////////////////////////////////////////////////
+
+:not_valid
+:move_up_one_column
+
+// Move to next column
+
+0x95, 0x00,	// 0x305e: LDW R2, %DP, #0		// R2 = board[row]
+0x86, 0x16,	// 0x3060: INC R2
+0x97, 0x00,	// 0x3062: SDW R2, %DP, #0		// board[row] = board[row]  + 1
+
+// Check if column went outside the board
+0x93, 0x77,	// 0x3064: TST R2, #7
+0x3b, 0x30,	// 0x3066: BMI :for_loop_start		// if board[row] < 7, go to :for_loop_start
+0x25, 0x14,	// 0x3068: (BMI continued)
+0x3b, 0x30,	// 0x306a: BEQ :for_loop_start		// if board[row] = 7, go to :for_loop_start
+0x65, 0x14,	// 0x306c: (BEQ continued)
+
+// Go Back one Row
+:go_back_one_row
+
+0x59, 0xff,	// 0x306e: MAA %DP, %DP, #-1	// L_Row_pointer--
+0x06, 0x17,	// 0x3070: DEC R0				// L_Row--
+0x3b, 0x30,	// 0x3072: BMI :end			// If L_Row < 0, goto end
+0x25, 0xa6,	// 0x3074: (BMI continued)
+0x3b, 0x30,	// 0x3076: JMP :move_up_one_column
+0x05, 0x5e,	// 0x3078: (JMP continued)
+
+////////////////////////////////
+:print_solution
+
+0xbb, 0x40,	// 0x307a: LDA %SP, H, #0x40
+0x9b, 0x00,	// 0x307c: LDA %SP, L, #0x00
+0xf4, 0x09,	// 0x307e: LDW R3, %SP, #9 // LMA R3, #9  // R3 = num_solutions
+0xc6, 0x16,	// 0x3080: INC R3			// R3 = num_solutions + 1
+0xf6, 0x09,	// 0x3082: SDW R3, %SP, #9	// SMA R3, #9  // num_solutions = num_solutions + 1
+0x28, 0x30,	// 0x3084: OUT R3, I       // Print solution number
+
+0x0d, 0x3a,	// 0x3086: OUT COLON, A    // Print ':'
+0x0d, 0x20,	// 0x3088: OUT SPACE, A    // Print ' '
+0x43, 0x41,	// 0x308a: LDR R1, #65	// R1 = 'A'
+0x83, 0x07,	// 0x308c: LDR R2, #7 // Loop counter
+
+:print_loop
+
+0x08, 0x10,	// 0x308e: OUT R1, A	// Print rank (letter)
+0xf4, 0x00,	// 0x3090: LDW R3, %SP, #0
+0xc6, 0x16,	// 0x3092: INC R3      // Increment the number (print 1-indexed)
+0x08, 0x30,	// 0x3094: OUT R3, A	// Print number (row)
+
+0xb8, 0x01,	// 0x3096: MAA %SP, %SP, #1
+0x46, 0x16,	// 0x3098: INC R1		// R1++
+0x86, 0x17,	// 0x309a: DEC R2
+0x3b, 0x30,	// 0x309c: BPL :print_loop		// if R2 > 0, go to print_solution
+0xa5, 0x8e,	// 0x309e: (BPL continued)
+0x0d, 0x10,	// 0x30a0: OUT NEW_LINE, A	// Print '\n'
+0x3b, 0x30,	// 0x30a2: JMP :go_back_one_row
+0x05, 0x6e,	// 0x30a4: (JMP continued)
+
+///////////////////////////////
+
+
+:end
+0x7b, 0xe2,	// 0x30a6: LDA %DP, H, counter_base[1]
+0x5b, 0x00,	// 0x30a8: LDA %DP, L, counter_base[0]
+0x17, 0x01,	// 0x30aa: SDW R0, %DP, #1  // Latch Counter
+
+0x0d, 0x43,	// 0x30ac: OUT _C, A
+0x0d, 0x4c,	// 0x30ae: OUT _L, A
+0x0d, 0x4b,	// 0x30b0: OUT _K, A
+0x0d, 0x3a,	// 0x30b2: OUT COLON, A
+0x0d, 0x20,	// 0x30b4: OUT SPACE, A
+
+0x15, 0x05,	// 0x30b6: LDW R0, %DP, #5  // Print Byte4
+0x28, 0x00,	// 0x30b8: OUT R0, I
+0x15, 0x04,	// 0x30ba: LDW R0, %DP, #4  // Print Byte3
+0x28, 0x00,	// 0x30bc: OUT R0, I
+0x55, 0x03,	// 0x30be: LDW R1, %DP, #3  // Print Byte2
+0x28, 0x10,	// 0x30c0: OUT R1, I
+0x95, 0x02,	// 0x30c2: LDW R2, %DP, #2  // Print Byte1
+0x28, 0x20,	// 0x30c4: OUT R2, I
+0x0d, 0x2e,	// 0x30c6: OUT DOT, A	// Print '.'
+0x01, 0x00,	// 0x30c8: BRK
+

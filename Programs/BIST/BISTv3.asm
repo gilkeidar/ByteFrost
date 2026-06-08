@@ -64,6 +64,10 @@
 .define 1 _y				0x79
 .define 1 _z				0x7a
 
+
+.start 0x3000 // Start as an SD program
+
+
 OUT NEW_LINE, A   // Space from previous run on the minicom
 OUT NEW_LINE, A
 OUT _B, A

@@ -107,7 +107,7 @@
 //                           |   THE END     |
 //                           +---------------+ 
 //                      
-
+.start 0x3000 // Start as am SD program
 .define 2 counter_base	0xE200
 
 LDA %DP, H, counter_base[1]
