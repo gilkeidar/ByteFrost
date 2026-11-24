@@ -1,0 +1,7 @@
+How to recover online project backup：
+
+1、Via folder "online_projects_backup" find out the project as you want
+2、Copy to desktop
+3、Open the EasyEDA editor, via: Top meun - Open - EasyEDA
+4、Select the 'sch' and 'pcb' folder's 'json' files to open, and then save to a new project
+5、Saved and finish

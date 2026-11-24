@@ -1,24 +1,9 @@
 /*  Used Ben Eater's eeprom-programmer.ino file as a basis to write to this code; find the original here: https://github.com/beneater/eeprom-programmer/tree/master/eeprom-programmer */
-/*  Ben Eater's code is MIT licensed, so we include the following copyright notice:
-  Copyright (c) 2017 Ben Eater
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-  SOFTWARE.
+/*  Instructions:
+** set #PROG_NAME to the one chip to be programmed, and compile. 
+** Set Board to AVR -> Arduino NANO 
+** Set provessor to ATmega168
+**
 */
 
 
@@ -36,15 +21,15 @@
 
 //*************************************************************************************************************
 
-#define PAGE_SIZE 512
+#define PAGE_SIZE 256
 // #define ERASE_EEPROM
-// #define SW_PROTECTION_REMOVAL
+#define SW_PROTECTION_REMOVAL
 
 #define PROGRAMMING_DATA
 
-// #define  PROG_NAME        Micro0_7
- #define  PROG_NAME        micro8_15
-// #define  PROG_NAME        Micro16_23
+// define  PROG_NAME           micro0_7
+#define  PROG_NAME        micro8_15
+// #define  PROG_NAME        micro16_23
 // #define  BASE_PAGE        0
 
 //#define  PROG_NAME        TwoLoops
@@ -97,6 +82,8 @@ byte readEEPROM(unsigned int address)
   for (unsigned int pin = EEPROM_D7; pin >= EEPROM_D0; pin -= 1) {
     data = (data << 1) + digitalRead(pin);
   }
+  sprintf(buf, "Read address 0x%x  with data 0x%x", address, data);
+  Serial.println(buf);
   return data;
 }
 
@@ -121,9 +108,9 @@ void writeEEPROM(unsigned int address, byte data) {
     data = data >> 1;
   }
   digitalWrite(WRITE_EN, LOW);
-  delayMicroseconds(10);
+  delayMicroseconds(1);
   digitalWrite(WRITE_EN, HIGH);
-  delay(10);
+  delayMicroseconds(1);
 }
 
 
@@ -133,9 +120,11 @@ void writeEEPROM(unsigned int address, byte data) {
  */
 void printContents(unsigned int page_addr = 0) 
 {
-  for (unsigned int base = page_addr; base < PAGE_SIZE+page_addr; base += 16) {
+  for (unsigned int base = page_addr; base < PAGE_SIZE+page_addr; base += 16) 
+  {
     byte data[16];
-    for (unsigned int offset = 0; offset <= 15; offset += 1) {
+    for (unsigned int offset = 0; offset <= 15; offset += 1) 
+    {
       data[offset] = readEEPROM(base + offset);
     }
 
@@ -147,6 +136,34 @@ void printContents(unsigned int page_addr = 0)
   }
 }
 
+/****************************************************
+ *   verifyContents
+ *   Read the contents of one page (256 bytes) from the EEPROM and print them to the serial monitor.
+ */
+void verifyContents(byte *Program, unsigned int page_addr = 0) 
+{
+  int mismatch_error = 0;
+  byte data;
+  for (unsigned int address = page_addr; address < PAGE_SIZE+page_addr; address ++)
+   {
+
+      data = readEEPROM(address );
+
+      if(Program[address] != data) 
+      {
+        sprintf(buf, "Addr %d: Should be %d, Was %d", address, Program[address],  data  );
+        Serial.println(buf);
+        mismatch_error++;
+      }
+   }
+   if(mismatch_error==0)
+       Serial.print("No Errors Found");
+   else
+   {
+       sprintf(buf, "%d errors found.", mismatch_error );
+       Serial.println(buf);
+   }
+}
 
 /****************************************************
  *   checkContents
@@ -206,7 +223,7 @@ void testEEPROM()
 
 // Micro-instruction LOW EEPROM
 
-byte Micro0_7[] = {
+byte micro0_7[] = {
     0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //  00000 - NOP
     0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //  00001 - BRK
     0x12, 0x19, 0x24, 0x80, 0x00, 0x00, 0x00, 0x00, //  00010 - ALU
@@ -277,7 +294,7 @@ byte micro8_15[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  //  11111 - NOP
   };
 // Micro-instruction High EEPROM
-byte Micro16_23[] = {
+byte micro16_23[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //  00000 - NOP
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //  00001 - NOP
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //  00010 - NOP
@@ -573,6 +590,7 @@ void setup() {
   Serial.println(" done");
 
   printContents(PAGE_SIZE * BASE_PAGE);
+  verifyContents(PROG_NAME, PAGE_SIZE * BASE_PAGE);
 #else
   Serial.println("Skipping Programming Data");
 #endif

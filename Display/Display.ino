@@ -53,6 +53,29 @@
 
   http://www.arduino.cc/en/Tutorial/LiquidCrystalHelloWorld
 
+  Programmer log:
+  ===============
+  System wide configuration file is C:\Users\ronke\AppData\Local\Arduino15\packages\arduino\tools\avrdude\8.0.0-arduino1\etc\avrdude.conf
+
+Using port            : COM3
+Using programmer      : arduino
+Setting baud rate     : 115200
+AVR part              : ATmega328P
+Programming modes     : SPM, ISP, HVPP, debugWIRE
+Programmer type       : Arduino
+Description           : Arduino bootloader using STK500 v1 protocol
+HW Version            : 3
+FW Version            : 4.4
+
+AVR device initialized and ready to accept instructions
+Device signature = 1E 95 0F (ATmega328P, ATA6614Q, LGT8F328P)
+Reading 3696 bytes for flash from input file Display.ino.hex
+in 1 section [0, 0xe6f]: 29 pages and 16 pad bytes
+Writing 3696 bytes to flash
+Writing | ################################################## | 100% 0.49s
+3696 bytes of flash written
+Avrdude done.  Thank you.
+
 */
 #define TEST_INPUT
 
